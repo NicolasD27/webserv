@@ -45,18 +45,24 @@ https://www.tutorialspoint.com/cplusplus/cpp_web_programming.htm
 
 ### Class: ???
 
-- server    : implémente sa configuration et son execution:
-            <ins>fonctions membres</ins> :(hors coplien)
-                ->setup()
-                ->run()
-                ->shutdown()
-                ->reload() 
-                ->etc...
+- server    : implémente sa configuration et son execution:  
+*fonctions membres publics* :(hors coplien)  
 
-            <ins>attributs</ins> :
-                -class config
-                -class socket
+            ->setup(chaine = default.conf) : configuration du server par fichier.conf ou default.conf  
+            ->run() : lance l'écoute et la réponse du serveur  
+            ->shutdown() : coupe l'écoute   
+            ->reload() : reload le fichier de config  
+            ->etc...  
+*attributs* :
 
-- socket    : stocké dans server ? (regroupant les infos du ou des sockets )
+            -class config      : infos (port, adress, directory du site, directory logs, du cgi etc...)
+            -class socket       :
+
+- socket    : stocké dans server ? (regroupant les infos du ou des sockets ):  
+*fonctions membres publics* :(hors coplien)  
+
+            ->init() : initialisation  
+            ->send() :   
+            ->recev():
 
 ... to continue...
