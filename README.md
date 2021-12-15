@@ -10,6 +10,7 @@ https://ncona.com/2019/04/building-a-simple-server-with-cpp/
 
 https://www.tutorialspoint.com/cplusplus/cpp_web_programming.htm
 
+tuto select : http://manpagesfr.free.fr/man/man2/select_tut.2.html
 
 ### CGI
 
