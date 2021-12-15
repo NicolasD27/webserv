@@ -45,16 +45,15 @@ https://www.tutorialspoint.com/cplusplus/cpp_web_programming.htm
 
 ### Class: ???
 
-- server    : implémente sa configuration et son execution:  
-*fonctions membres publics* :(hors coplien)  
+-webserv    : class générale ayant :
 
-            ->setup(chaine = default.conf) : configuration du server par fichier.conf ou default.conf  
-            ->run() : lance l'écoute et la réponse du serveur  
-            ->shutdown() : coupe l'écoute   
-            ->reload() : reload le fichier de config  
-            ->etc...  
+            1. une liste de server (voir en dessous)
+            2. des fonctions permetant de run, reload, shutdown les serveurs 
+
+- server    : implémente la configuration d'un serveur:  
+
 *attributs* :
-
+            
             -class config      : infos (port, adress, directory du site, directory logs, du cgi etc...)
             -class socket       :
 
