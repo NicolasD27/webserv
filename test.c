@@ -141,11 +141,11 @@ main(int argc, char **argv)
         //     FD_SET(fd1, &wr);
         //     nfds = max(nfds, fd1);
         // }
-        // if (fd2 > 0
-        //     && strlen(hello) - buf1_written > 0) {
-        //     FD_SET(fd2, &wr);
-        //     nfds = max(nfds, fd2);
-        // }
+        if (fd2 > 0
+            && strlen(hello) - buf1_written > 0) {
+            FD_SET(fd2, &wr);
+            nfds = max(nfds, fd2);
+        }
         // if (fd1 > 0) {
         //     FD_SET(fd1, &er);
         //     nfds = max(nfds, fd1);
