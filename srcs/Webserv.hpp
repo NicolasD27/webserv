@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   webserv.hpp                                        :+:      :+:    :+:   */
+/*   Webserv.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/15 14:46:42 by clorin            #+#    #+#             */
-/*   Updated: 2021/12/15 15:00:40 by clorin           ###   ########.fr       */
+/*   Updated: 2021/12/17 16:47:01 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,22 +15,28 @@
 
 #include <iostream>
 #include <map>
+#include "Server.hpp"
 
-class server;
+# define PATH_CONF  "./srcs/default.conf"
 
-class webserv
+class Webserv
 {
 private:
-    std::map<int, server>   _server;
+    std::map<int, Server>   _server;
+    std::string             _conf_path;
     
 public:
-    webserv(void);
-    webserv(std::string &); //Si on a un fichier par default dans ce constructeur on peut supprimer le constructeurr(void)
-    webserv(webserv const &);
-    virtual ~webserv();
-    webserv &operator=(webserv const &);
+    Webserv(); 
+    Webserv(Webserv const &);
+    virtual ~Webserv();
+    Webserv &operator=(Webserv const &);
 
+    void    config(std::string defaultPath = PATH_CONF);
     bool    run();
+
+    class	BadConfiguration: public std::exception{
+			virtual const char	*what() const throw();
+		};
 
 };
 

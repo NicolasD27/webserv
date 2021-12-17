@@ -1,32 +1,33 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   server.hpp                                         :+:      :+:    :+:   */
+/*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/12/15 11:27:16 by clorin            #+#    #+#             */
-/*   Updated: 2021/12/15 14:49:54 by clorin           ###   ########.fr       */
+/*   Created: 2021/12/17 14:44:21 by clorin            #+#    #+#             */
+/*   Updated: 2021/12/17 16:45:45 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef SERVER_HPP
-# define SERVER_HPP
-
 #include <iostream>
+#include "Webserv.hpp"
 
-class server
+int		main(int ac, char **av)
 {
-private:
-    
-public:
-    server();
-    server(server const &);
-    virtual ~server();
-    server &operator=(server const &);
+    Webserv		webserv;
 
-    int     setup(std::string &);
-    
-};
-
-#endif
+    try
+    {
+        if (ac == 2)
+            webserv.config(av[1]);
+        else if (ac == 1)
+             webserv.config();
+        webserv.run();
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+	return (EXIT_SUCCESS);
+}
