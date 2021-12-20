@@ -14,7 +14,10 @@
 # define WEBSERV_HPP
 
 #include <iostream>
-#include <map>
+#include <fstream>
+#include <sstream>
+#include <utility> 
+#include <vector>
 #include "Server.hpp"
 
 # define PATH_CONF  "./srcs/default.conf"
@@ -22,7 +25,7 @@
 class Webserv
 {
 private:
-    std::map<int, Server>   _server;
+    std::vector<Server>   _servers;
     std::string             _conf_path;
     
 public:
@@ -32,7 +35,11 @@ public:
     Webserv &operator=(Webserv const &);
 
     void    config(std::string defaultPath = PATH_CONF);
+    bool    readConf(std::stringstream & buff);
+    bool    parseConf(std::stringstream & buff);
+    bool    checkServer(Server const & server) const ;
     bool    run();
+    void    printServers() const;
 
     class	BadConfiguration: public std::exception{
 			virtual const char	*what() const throw();

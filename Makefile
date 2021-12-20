@@ -20,7 +20,7 @@ SRCS_DIR = srcs/
 
 OBJS_DIR = objs/
 
-SRCS	= main.cpp Webserv.cpp Server.cpp
+SRCS	= main.cpp Webserv.cpp Server.cpp Client.cpp
 
 OBJS	= $(SRCS:.cpp=.o)
 
