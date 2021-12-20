@@ -14,19 +14,41 @@
 # define SERVER_HPP
 
 #include <iostream>
+#include <fstream>
+#include <sstream>
+#include <map>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+#include "Client.hpp"
+
+#define SERVER_IPV4_ADDR "127.0.0.1" // à load depuis la config ?
 
 class Server
 {
 private:
-    int     port;
+    int                     _port;
+    std::string             _host;
+    std::string             _server_name;  
+    int                     _listen_socket;
+    std::map<int, Client>   _clients;
+    int                     _max_body_size;
     
 public:
     Server(void);
+    Server(int port, std::string server_name, int max_body_size);
     Server(Server const &);
-    virtual ~Server();
+    ~Server();
     Server &operator=(Server const &);
 
-    int     setup(std::string &);
+    int getPort() const;
+    std::string getHost() const;
+    std::string getServerName() const;
+
+    bool setup();
+    void storeLine(std::string & key, std::string & value);
+    Client const & handleNewConnection(void);
     
 };
 

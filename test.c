@@ -101,7 +101,9 @@ main(int argc, char **argv)
     int h;
     int fd1 = -1, fd2 = -1;
     char buf1[BUF_SIZE], buf2[BUF_SIZE];
-    char *hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
+    char *hello;
+    hello = malloc(30000);
+    strcpy(hello, "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: ");
     int buf1_avail, buf1_written;
     int buf2_avail, buf2_written;
 
@@ -142,7 +144,7 @@ main(int argc, char **argv)
         //     nfds = max(nfds, fd1);
         // }
         if (fd2 > 0
-            && strlen(hello) - buf1_written > 0) {
+            && strlen(buf1) + strlen(hello) - buf1_written > 0) {
             FD_SET(fd2, &wr);
             nfds = max(nfds, fd2);
         }
@@ -234,10 +236,17 @@ main(int argc, char **argv)
         //             buf2_written += r;
         //     }
         
+        
         if (fd2 > 0)
             if (FD_ISSET(fd2, &wr)) {
-                r = write(fd2, hello + buf1_written,
-                          strlen(hello) - buf1_written);
+                char *out;
+                out = malloc(strlen(hello) + strlen(buf1) + 1);
+                strcat(hello, itoa(strlen(buf1)));
+                strcat(hello, "\n\n");
+                strcat(hello, buf1);
+                 r = write(fd2, hello ,
+                          strlen(hello));
+                
                 if (r < 1) {
                     SHUT_FD2;
                 } else
@@ -250,13 +259,13 @@ main(int argc, char **argv)
         //     buf2_written = buf2_avail = 0;
 /* une extrémité a fermé la connexion, continue
    d'écrire vers l'autre extrémité jusqu'à ce que ce soit vide */
-        // if (fd1 < 0 && strlen(hello) - buf1_written == 0) {
-        //     SHUT_FD2;
-        // }
-        // if (fd2 < 0 && buf2_avail - buf2_written == 0) {
-        //     SHUT_FD1;
-        // }
-        printf("fd1 %d\n%s\n", fd1, buf1);
+        if (fd1 < 0 && strlen(hello) - buf1_written == 0) {
+            SHUT_FD2;
+        }
+        if (fd2 < 0 && buf2_avail - buf2_written == 0) {
+            SHUT_FD1;
+        }
+        printf("fd1 %d %ld\n%s\n", fd1, strlen(hello), hello);
     }
     exit(EXIT_SUCCESS);
 }

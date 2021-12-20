@@ -22,7 +22,8 @@ int		main(int ac, char **av)
         if (ac == 2)
             webserv.config(av[1]);
         else if (ac == 1)
-             webserv.config();
+            webserv.config();
+        webserv.printServers();
         webserv.run();
     }
     catch(const std::exception& e)
