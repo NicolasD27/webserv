@@ -17,26 +17,41 @@
 #include <queue>
 #include <netinet/in.h>
 #include <string.h>
+#include <fstream>
+#include <unistd.h>
 
+class Client;
+
+#include "Server.hpp"
+
+#define NO_SOCKET -1
 #define MAX_SIZE 30000
 class Client
 {
 private:
     int     _socket;
     struct sockaddr_in _address;
-    std::queue<char[MAX_SIZE]> _message_queue;
+    std::queue<std::string> _message_queue;
     char _sending_buff[MAX_SIZE];
     int _current_sending_byte;
     char _receiving_buff[MAX_SIZE];
     int _current_receiving_byte;
     
 public:
-    Client(int listen_socket);
+    Client();
     Client(Client const &);
-    ~Client();
+    virtual ~Client();
     Client &operator=(Client const &);
 
-    int     setup(std::string &);
+    int getSocket() const;
+    std::string const & getCurrentMessage() const;
+    bool hasMessages() const;
+
+    bool receiveFromClient();
+    bool sendToClient();
+
+
+    bool     setup(int listen_socket);
     
 };
 

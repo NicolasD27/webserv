@@ -12,20 +12,10 @@
 
 #include "Client.hpp"
 
-Client::Client(int listen_socket)
+Client::Client()
 {
-    struct sockaddr_in address;
-    memset(&address, 0, sizeof(address));
-    socklen_t client_len = sizeof(address);
-    int new_client_sock = accept(listen_socket, (struct sockaddr *)&address, &client_len);
-    if (new_client_sock < 0) {
-        perror("accept()");
-        return ;
-    }
-    _socket = new_client_sock;
-    address = address;
-    _current_sending_byte   = -1;
-    _current_receiving_byte = 0;
+    _socket = NO_SOCKET;
+    std::queue<std::string> _message_queue; 
 
 }
 
@@ -49,4 +39,56 @@ Client      &Client::operator=(Client const &cpy)
 
     }
     return *this;
+}
+
+int Client::getSocket() const { return _socket; }
+
+std::string const & Client::getCurrentMessage() const { return _message_queue.front();}
+
+bool Client::hasMessages() const { return _message_queue.size() != 0; }
+
+bool Client::setup(int listen_socket)
+{
+    struct sockaddr_in address;
+    memset(&address, 0, sizeof(address));
+    socklen_t client_len = sizeof(address);
+    int new_client_sock = accept(listen_socket, (struct sockaddr *)&address, &client_len);
+    if (new_client_sock < 0)
+        return false;
+    char client_ipv4_str[INET_ADDRSTRLEN];
+    inet_ntop(AF_INET, &address.sin_addr, client_ipv4_str, INET_ADDRSTRLEN);
+    
+    printf("Incoming connection from %s:%d.\n", client_ipv4_str, address.sin_port);
+    _socket = new_client_sock;
+    address = address;
+    _current_sending_byte   = -1;
+    _current_receiving_byte = 0;
+    return true;
+}
+
+bool Client::receiveFromClient()
+{
+    char buff[MAX_SIZE];
+    int r = read(_socket, buff, MAX_SIZE);
+    buff[r] = 0;
+    if (r >= 0)
+    {
+
+        std::string request(buff);
+        _message_queue.push(request);
+        std::cout << "message received" << std::endl;
+    }
+    else
+        std::cout << "nothing received" << std::endl;
+    return true;
+} 
+
+bool Client::sendToClient()
+{
+    std::string response = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world\n";
+    int r = write(_socket, response.c_str(), response.length());
+    if (r == response.length())
+        _message_queue.pop();
+    std::cout << "response send" << std::endl;
+    return true;
 }
