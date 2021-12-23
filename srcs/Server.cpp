@@ -13,7 +13,6 @@
 #include "Server.hpp"
 
 Server::Server() : _port(-1), _server_name("") {
-    std::cout << "construct server" << std::endl;
 }
 
 Server::Server(int port, std::string server_name, int max_body_size) : _port(port), _server_name(server_name), _max_body_size(max_body_size)
@@ -27,7 +26,11 @@ Server::Server(Server const &cpy)
 	}
 }
 
-Server::~Server(){}
+Server::~Server()
+{
+    for (iterator it = _clients.begin(); it != _clients.end(); ++it)
+        delete (*it);
+}
 
 Server      &Server::operator=(Server const &cpy)
 {
@@ -40,9 +43,17 @@ Server      &Server::operator=(Server const &cpy)
 
 int Server::getPort() const { return _port; }
 
+int Server::getSocket() const { return _listen_socket; }
+
 std::string Server::getHost() const { return _host; }
 
 std::string Server::getServerName() const { return _server_name; }
+
+Client* Server::getClient(int i) const { return _clients[i]; }
+
+std::vector<Client*>::const_iterator Server::getBeginClients() const { return _clients.cbegin(); }
+
+std::vector<Client*>::const_iterator Server::getEndClients() const { return _clients.cend(); }
 
 void Server::storeLine(std::string & key, std::string & value)
 {
@@ -73,16 +84,12 @@ void Server::storeLine(std::string & key, std::string & value)
 bool Server::setup()
 {
     _listen_socket = socket(AF_INET, SOCK_STREAM, 0);
-    if (_listen_socket < 0) {
-        perror("socket");
+    if (_listen_socket < 0)
         return false;
-    }
     
     int reuse = 1;
-    if (setsockopt(_listen_socket, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) != 0) {
-        perror("setsockopt");
+    if (setsockopt(_listen_socket, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) != 0)
         return false;
-    }
     
     struct sockaddr_in my_addr;
     memset(&my_addr, 0, sizeof(my_addr));
@@ -90,16 +97,25 @@ bool Server::setup()
     my_addr.sin_addr.s_addr = inet_addr(_host.c_str());
     my_addr.sin_port = htons(_port);
     
-    if (bind(_listen_socket, (struct sockaddr*)&my_addr, sizeof(struct sockaddr)) != 0) {
-        perror("bind");
+    if (bind(_listen_socket, (struct sockaddr*)&my_addr, sizeof(struct sockaddr)) != 0)
         return false;
-    }
-    
     // start accept client connections
-    if (listen(_listen_socket, 10) != 0) {
-        perror("listen");
+    if (listen(_listen_socket, 10) != 0)
         return false;
-    }
     printf("Accepting connections on port %d.\n", _port);
     return true;
 }
+
+void Server::handleNewConnection()
+{
+    Client *new_client = new Client();
+    new_client->setup(_listen_socket);
+    _clients.push_back(new_client);
+}
+
+
+
+const char	*Server::FailedSetup::what() const throw(){
+	return "Failed to setup server";
+}
+

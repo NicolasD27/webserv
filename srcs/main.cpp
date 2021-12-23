@@ -24,7 +24,8 @@ int		main(int ac, char **av)
         else if (ac == 1)
             webserv.config();
         webserv.printServers();
-        webserv.run();
+        if (!webserv.run())
+            webserv.shutdownServers();
     }
     catch(const std::exception& e)
     {

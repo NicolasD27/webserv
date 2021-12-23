@@ -13,7 +13,7 @@
 #include "Webserv.hpp"
 
 Webserv::Webserv(void):_conf_path(PATH_CONF){
-    
+    std::vector<Server*> _servers;
 }
 
 Webserv::~Webserv(void){}
@@ -37,13 +37,8 @@ Webserv     &Webserv::operator=(Webserv const &cpy)
 
 void        Webserv::config(std::string conf_path)
 {
-    this->_conf_path = conf_path;
-    /*chargement du fichier
-        Parsing
-        verification
-        remplissage de _server
-    */
     std::stringstream buff;
+    _conf_path = conf_path;
     if (!readConf(buff))
         throw BadConfiguration();
     if (!parseConf(buff))
@@ -55,7 +50,6 @@ bool Webserv::readConf(std::stringstream & buff)
     std::string str;
 	
     std::ifstream ifs(_conf_path);
-
     if (ifs.fail())
     {
         std::cout << "File does not exist" << std::endl;
@@ -70,20 +64,19 @@ bool Webserv::readConf(std::stringstream & buff)
 
 bool Webserv::parseConf(std::stringstream & buff)
 {
-    std::vector<Server> _servers;
-    Server new_server;
+    
+    Server *new_server;
     std::string line;
     int open = 0;
     while(std::getline(buff, line))
     {
         std::string::size_type begin = line.find_first_not_of(" ");
         std::string::size_type end   = line.find_last_not_of(" ");
-
         line = line.substr(begin, end-begin + 1);
         std::string key;
         std::istringstream is_line(line);
         if (line == "server")
-            new_server = Server();  
+            new_server = new Server();  
         else if (line == "{")
             open++;
         else if (line == "}")
@@ -91,28 +84,16 @@ bool Webserv::parseConf(std::stringstream & buff)
             if (open <= 0)
                 return false;
             open--;
-            if (!checkServer(new_server))
+            if (!checkServer(*new_server))
                 return false;
-            _servers.push_back(new_server);
-            std::cout << "host : " << new_server.getHost() << ":" << new_server.getPort() << std::endl;
-            std::cout << "server_name : " << new_server.getServerName() << std::endl;
-            std::cout << "end" << std::endl;
-            std::cout << "server name : " << _servers.front().getServerName() << std::endl;
-            printServers();
+            _servers.push_back(new_server);            
         }
         else if( std::getline(is_line, key, '=') )
         {
             key = key.substr(1, key.length() - 1); // je considère qu'il y a un seul \t au début
             std::string value;
-            std::cout << "key : " << key << " length : " << key.length() << std::endl;
             if( std::getline(is_line, value) )
-            {
-                std::cout << "value : " << value << std::endl;
-                new_server.storeLine(key, value);
-            }
-            std::cout << "after store" << std::endl;
-            std::cout << "host : " << new_server.getHost() << ":" << new_server.getPort() << std::endl;
-            std::cout << "server_name : " << new_server.getServerName() << std::endl;
+                new_server->storeLine(key, value);
         }
 
     //     //ajouter parser pour les location { ...}
@@ -131,18 +112,110 @@ bool Webserv::checkServer(Server const & server) const
 
 bool        Webserv::run()
 {
-    /* running*/
+    fd_set read_fds;
+    fd_set write_fds;
+    fd_set except_fds;
+    int highest_socket;
+
+    for (iterator it = _servers.begin(); it != _servers.end(); ++it)
+        if (!(*it)->setup())
+            throw Server::FailedSetup();
+    
+
+    while (1)
+    {
+        highest_socket = 0;
+        initFDSets(&read_fds, &write_fds, &except_fds);
+        for (iterator it = _servers.begin(); it != _servers.end(); ++it)
+            buildFDSets(**it, &read_fds, &write_fds, &except_fds, &highest_socket);
+        std::cout << "before select" << std::endl;
+        int select_res = select(highest_socket + 1, &read_fds, &write_fds, &except_fds, NULL);
+        std::cout << "select_res : " << select_res << std::endl;
+        if (select_res <= 0)
+            return false;
+        else
+        {
+            for (iterator server_it = _servers.begin(); server_it != _servers.end(); ++server_it)
+            {
+                if (FD_ISSET((*server_it)->getSocket(), &read_fds)) {
+                    std::cout << "new connection "  << std::endl;
+                    (*server_it)->handleNewConnection();
+                }
+            
+                for (std::vector<Client*>::const_iterator client_it = (*server_it)->getBeginClients(); client_it != (*server_it)->getEndClients(); ++client_it)
+                {
+                    if ((*client_it)->getSocket() != NO_SOCKET && FD_ISSET((*client_it)->getSocket(), &read_fds))
+                    {
+
+                        (*client_it)->receiveFromClient();
+
+                        
+                    }
+                    if ((*client_it)->getSocket() != NO_SOCKET && FD_ISSET((*client_it)->getSocket(), &write_fds))
+                    {
+                        (*client_it)->sendToClient();
+                        
+                    }
+
+                }
+                
+            }
+            std::cout << "end" << std::endl;
+        }
+    }
     return true;
 }
 
-void Webserv::printServers() const 
+
+
+
+void Webserv::initFDSets(fd_set *read_fds, fd_set *write_fds, fd_set *except_fds)
+{
+    FD_ZERO(read_fds);
+    FD_ZERO(write_fds);
+    FD_ZERO(except_fds);
+    FD_SET(0, read_fds);
+}
+
+void Webserv::buildFDSets(Server const & server, fd_set *read_fds, fd_set *write_fds, fd_set *except_fds, int *highest_socket)
+{
+    if (server.getSocket() > *highest_socket)
+        *highest_socket = server.getSocket();
+    FD_SET(server.getSocket(), read_fds);
+    FD_SET(server.getSocket(), except_fds);
+    for (std::vector<Client*>::const_iterator it = server.getBeginClients(); it != server.getEndClients(); ++it)
+    {
+        if ((*it)->getSocket() != NO_SOCKET)
+        {
+            if ((*it)->getSocket() > *highest_socket)
+                *highest_socket = (*it)->getSocket();
+            FD_SET((*it)->getSocket(), read_fds);
+            FD_SET((*it)->getSocket(), except_fds);
+            if ((*it)->hasMessages() && (*it)->getCurrentMessage().length() > 0)
+            {
+                std::cout << "message is : " << (*it)->getCurrentMessage() << std::endl;
+                FD_SET((*it)->getSocket(), write_fds);
+            }
+        }
+    }
+}
+
+void Webserv::shutdownServers()
+{
+    for (iterator it = _servers.begin(); it != _servers.end(); ++it)
+        delete *it;
+    exit(EXIT_FAILURE);
+}
+
+
+void Webserv::printServers() 
 {
     std::cout << "servers : " << std::endl;
-    for (std::vector<Server>::const_iterator it = _servers.begin(); it != _servers.end(); it++)
+    for (iterator it = _servers.begin(); it != _servers.end(); ++it)
     {
         
-        std::cout << "host : " << it->getHost() << ":" << it->getPort() << std::endl;
-        std::cout << "server_name : " << it->getServerName() << std::endl << std::endl;
+        std::cout << "host : " << (*it)->getHost() << ":" << (*it)->getPort() << std::endl;
+        std::cout << "server_name : " << (*it)->getServerName() << std::endl << std::endl;
         
     }
 
@@ -151,6 +224,7 @@ void Webserv::printServers() const
 const char	*Webserv::BadConfiguration::what() const throw(){
 	return "Bad configuration";
 }
+
 
     
     

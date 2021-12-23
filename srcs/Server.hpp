@@ -16,12 +16,17 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <map>
+#include <vector>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
 #include "Client.hpp"
+
+class Server;
+#include "Webserv.hpp"
+
+#define MAX_CLIENTS 10
 
 #define SERVER_IPV4_ADDR "127.0.0.1" // à load depuis la config ?
 
@@ -32,23 +37,36 @@ private:
     std::string             _host;
     std::string             _server_name;  
     int                     _listen_socket;
-    std::map<int, Client>   _clients;
+    std::vector<Client*>    _clients;
     int                     _max_body_size;
     
 public:
+    typedef typename std::vector<Client*>::iterator             iterator;
+    typedef typename std::vector<Client*>::const_iterator       const_iterator;
+
     Server(void);
     Server(int port, std::string server_name, int max_body_size);
     Server(Server const &);
-    ~Server();
+    virtual ~Server();
     Server &operator=(Server const &);
 
     int getPort() const;
+    int getSocket() const;
     std::string getHost() const;
     std::string getServerName() const;
+    Client* getClient(int index) const;
+    const_iterator getBeginClients() const;
+    const_iterator getEndClients() const;
 
     bool setup();
+    
     void storeLine(std::string & key, std::string & value);
-    Client const & handleNewConnection(void);
+    void handleNewConnection(void);
+
+
+    class	FailedSetup: public std::exception{
+			virtual const char	*what() const throw();
+		};
     
 };
 
