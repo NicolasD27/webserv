@@ -34,7 +34,7 @@ http://www.mnuwer.dbasedeveloper.co.uk/dlearn/web/session01.htm
 
 ### HTTP Header Syntax
 
-[NGINX Headers struct] http://lxr.nginx.org/source/xref/nginx/src/http/ngx_http_request.h?r=7914%3A9cf043a5d9ca
+[NGINX Headers struct](http://lxr.nginx.org/source/xref/nginx/src/http/ngx_http_request.h?r=7914%3A9cf043a5d9ca)
 
 [HTTP Request Methods](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Request_methods)
 
