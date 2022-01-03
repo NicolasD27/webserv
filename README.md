@@ -12,14 +12,14 @@ https://www.tutorialspoint.com/cplusplus/cpp_web_programming.htm
 
 ### HTTP 1.1 :
 
-<<<<<<< HEAD
+
 http://manpagesfr.free.fr/man/man2/select_tut.2.html
 
 
 ### CGI
 
 http://www.mnuwer.dbasedeveloper.co.uk/dlearn/web/session01.htm
-=======
+
 [HTTP/1.1 : Message Syntax and Routing (RFC 7230)](https://www.rfc-editor.org/rfc/rfc7230.html)
 
 [HTTP/1.1 : Semantics and Content (RFC 7231)](https://www.rfc-editor.org/rfc/rfc7231.html)
@@ -33,6 +33,8 @@ http://www.mnuwer.dbasedeveloper.co.uk/dlearn/web/session01.htm
 [HTTP/1.1 : Authentication (RFC 7235)](https://www.rfc-editor.org/rfc/rfc7235.html)
 
 ### HTTP Header Syntax
+
+[NGINX Headers struct] http://lxr.nginx.org/source/xref/nginx/src/http/ngx_http_request.h?r=7914%3A9cf043a5d9ca
 
 [HTTP Request Methods](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Request_methods)
 
@@ -73,4 +75,4 @@ https://www.tutorialspoint.com/cplusplus/cpp_web_programming.htm
             ->recev():
 
 ... to continue...
->>>>>>> cyril
+
