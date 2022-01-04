@@ -1,6 +1,6 @@
 #include "Request.hpp"
 
-std::vector<std::string> HEADERS = {"Accept-Language", "Accept", "Keep-Alive", "Authorization", "Via", "Accept-Encoding", "Upgrade", "Expect", "TE", "If-Range", "Range", "Transfer-Encoding", "Content-Type", "Content-Range", "Content-Length", "Referer", "User-Agent", "If-None-Match", "If-Match", "If-Unmodified-Since", "If-Modified-Since", "Connection", "Host"};
+std::vector<std::string> HEADERS_IN = {"Accept-Language", "Accept", "Keep-Alive", "Authorization", "Via", "Accept-Encoding", "Upgrade", "Expect", "TE", "If-Range", "Range", "Transfer-Encoding", "Content-Type", "Content-Range", "Content-Length", "Referer", "User-Agent", "If-None-Match", "If-Match", "If-Unmodified-Since", "If-Modified-Since", "Connection", "Host"};
 
 
 Request::Request(std::string request_string) : _request_string(request_string)
@@ -54,7 +54,7 @@ void Request::getMethod(std::string line)
 
 void Request::storeHeader(std::string key, std::string value)
 {
-    for (std::vector<std::string>::iterator it = HEADERS.begin(); it != HEADERS.end(); ++it)
+    for (std::vector<std::string>::iterator it = HEADERS_IN.begin(); it != HEADERS_IN.end(); ++it)
     {
         if (key == *it)
         {
@@ -67,6 +67,7 @@ void Request::storeHeader(std::string key, std::string value)
 void Request::printHeaders()
 {
     std::cout << "Headers :" << std::endl;
+    std::cout << _http_method << " " << _location << std::endl;
     for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); ++it)
     {
         std::cout << it->first << ": " << it->second << std::endl;

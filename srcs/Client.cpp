@@ -78,7 +78,8 @@ bool Client::receiveFromClient()
         Request request(request_string);
         request.parseHeaders();
         request.printHeaders();
-        _message_queue.push(" ");
+        Response response(request);
+        _message_queue.push(response.getResponseString());
         std::cout << "message received" << std::endl;
     }
     else
@@ -88,7 +89,8 @@ bool Client::receiveFromClient()
 
 bool Client::sendToClient()
 {
-    std::string response = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world\n";
+    std::cout << "begin send" << std::endl;
+    std::string response = _message_queue.front();
     int r = write(_socket, response.c_str(), response.length());
     if (r == response.length())
         _message_queue.pop();

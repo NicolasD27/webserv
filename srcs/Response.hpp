@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Request.hpp                                         :+:      :+:    :+:   */
+/*   Response.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -10,8 +10,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef REQUEST_HPP
-# define REQUEST_HPP
+#ifndef RESPONSE_HPP
+# define RESPONSE_HPP
 
 #include <iostream>
 #include <fstream>
@@ -22,41 +22,33 @@
 #include <unistd.h>
 #include <map>
 #include <vector>
-#include <utility> 
+#include <utility>
+#include <ctime>
 
-class Request;
+#include "utility.hpp"
+#include "Request.hpp"
 
-
-#define HTTP_UNKNOWN    0
-#define HTTP_GET        1
-#define HTTP_POST       2
-#define HTTP_DELETE     3
-
-
-
-class Request
+class Response
 {
 
 private:
-    std::string                         _request_string;
-    unsigned int                        _http_method;
-    std::string                         _location;
-    time_t                              _keep_alive_n;
     std::map<std::string, std::string>  _headers;
-    std::vector<std::string>            _x_forwarded_for;
+    unsigned int                        _status;
+    std::string                         _status_string;
+    std::string                         _response_string;
     std::string                         _body;
     
     
 public:
-    Request(std::string request_string);
-    Request(Request const &);
-    virtual ~Request();
-    Request &operator=(Request const &);
+    Response(Request const & request);
+    Response(Response const &);
+    virtual ~Response();
+    Response &operator=(Response const &);
 
-    void parseHeaders();
-    void storeHeader(std::string key, std::string value);
-    void getMethod(std::string line);
-    void printHeaders();
+    void addDate();
+    std::string & getResponseString();
+
+    
 
     
     
