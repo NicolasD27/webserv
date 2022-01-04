@@ -27,6 +27,7 @@
 
 #include "utility.hpp"
 #include "Request.hpp"
+#include "Server.hpp"
 
 class Response
 {
@@ -34,19 +35,22 @@ class Response
 private:
     std::map<std::string, std::string>  _headers;
     unsigned int                        _status;
-    std::string                         _status_string;
+    // std::string                         _status_string;
     std::string                         _response_string;
+    std::string                         _ressource_path;
     std::string                         _body;
     
     
 public:
-    Response(Request const & request);
+    Response(Request const & request, Server const & server);
     Response(Response const &);
     virtual ~Response();
     Response &operator=(Response const &);
 
     void addDate();
     std::string & getResponseString();
+    void readRessource(std::stringstream & buff);
+    void buildRessourcePath(Request const & request, Server const & server);
 
     
 

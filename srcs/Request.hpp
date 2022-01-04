@@ -60,13 +60,13 @@ public:
 
     void parseHeaders();
     void storeHeader(std::string key, std::string value);
-    void getMethod(std::string line);
+    void parseMethod(std::string line);
     void printHeaders(std::ostream &);
 
-    unsigned    get_http_methode(void) const;
-    std::string get_location(void) const;
-    time_t      get_keep_alive_n() const;
-    std::string get_body() const;
+    unsigned    getHttpMethod(void) const;
+    std::string getLocation(void) const;
+    time_t      getKeepAliveN() const;
+    std::string getBody() const;
 };
 
 std::ostream &operator <<(std::ostream &, Request &);

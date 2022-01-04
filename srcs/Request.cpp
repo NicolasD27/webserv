@@ -12,7 +12,7 @@ void Request::parseHeaders()
     std::stringstream buff(_request_string);
     std::string line;
     std::getline(buff, line);
-    getMethod(line);
+    parseMethod(line);
     while(std::getline(buff, line))
     {
         if (line.length() == 0)
@@ -32,7 +32,7 @@ void Request::parseHeaders()
     }
 }
 
-void Request::getMethod(std::string line)
+void Request::parseMethod(std::string line)
 {
     std::string method;
     std::istringstream iss_line(line);        
@@ -74,22 +74,22 @@ void Request::printHeaders(std::ostream & o)
 }
 
 
-unsigned int        Request::get_http_methode() const
+unsigned int        Request::getHttpMethod() const
 {
     return this->_http_method;
 }
 
-std::string         Request::get_location() const
+std::string         Request::getLocation() const
 {
     return this->_location;
 }
 
-time_t              Request::get_keep_alive_n() const
+time_t              Request::getKeepAliveN() const
 {
     return this->_keep_alive_n;
 }
 
-std::string         Request::get_body() const
+std::string         Request::getBody() const
 {
     return this->_body;
 }
@@ -102,10 +102,10 @@ std::ostream &operator<<(std::ostream & o, Request & request)
 {
     const char *Methode[4] = {"Unknown","GET", "POST","DELETE"};
     
-    o << C_GREEN << "Request:\t"<<C_RED<<Methode[request.get_http_methode()]<<C_RESET<<"\n";
-    o << C_YELLOW << "\tLocation "<< C_RESET << ": " << request.get_location() << "\n";
+    o << C_GREEN << "Request:\t"<<C_RED<<Methode[request.getHttpMethod()]<<C_RESET<<"\n";
+    o << C_YELLOW << "\tLocation "<< C_RESET << ": " << request.getLocation() << "\n";
     request.printHeaders(o);
-    o << C_YELLOW << "\tKeep alive " << C_RESET << ": " << request.get_keep_alive_n()<<"\n";
-    o << C_YELLOW << "\tbody " << C_RESET << ": <"<< C_GRAY << request.get_body() << C_RESET <<">\n";
+    o << C_YELLOW << "\tKeep alive " << C_RESET << ": " << request.getKeepAliveN()<<"\n";
+    o << C_YELLOW << "\tbody " << C_RESET << ": <"<< C_GRAY << request.getBody() << C_RESET <<">\n";
     return o;
 }

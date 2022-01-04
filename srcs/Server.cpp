@@ -36,7 +36,13 @@ Server      &Server::operator=(Server const &cpy)
 {
     if(this != &cpy)
     {
-        //
+        _port = cpy._port;
+        _host = cpy._host;
+        _server_name = cpy._server_name;
+        _root = cpy._root;
+        _listen_socket = cpy._listen_socket;
+        _clients = cpy._clients;
+        _max_body_size = cpy._max_body_size;
     }
     return *this;
 }
@@ -46,6 +52,10 @@ int Server::getPort() const { return _port; }
 int Server::getSocket() const { return _listen_socket; }
 
 std::string Server::getHost() const { return _host; }
+
+std::string Server::getRoot() const { return _root; }
+
+std::string Server::getIndex() const { return _index; }
 
 std::string Server::getServerName() const { return _server_name; }
 
@@ -57,6 +67,8 @@ std::vector<Client*>::const_iterator Server::getEndClients() const { return _cli
 
 void Server::storeLine(std::string & key, std::string & value)
 {
+    _root = "";
+    _index = "index.html";
     if (key == "listen")
     {
         if (value.find(':') != std::string::npos)
@@ -74,6 +86,10 @@ void Server::storeLine(std::string & key, std::string & value)
     }
     else if (key == "server_name")
         _server_name = value;
+    else if (key == "root")
+        _root = value;
+    else if (key == "index")
+        _index = value;
     else if (key == "max_body_name")
     {
         std::istringstream ss(value);
@@ -108,7 +124,7 @@ bool Server::setup()
 void Server::handleNewConnection()
 {
     Client *new_client = new Client();
-    new_client->setup(_listen_socket);
+    new_client->setup(*this);
     _clients.push_back(new_client);
 }
 
