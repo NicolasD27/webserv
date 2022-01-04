@@ -23,6 +23,7 @@
 class Client;
 
 #include "Server.hpp"
+#include "Request.hpp"
 
 #define NO_SOCKET -1
 #define MAX_SIZE 30000

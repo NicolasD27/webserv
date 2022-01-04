@@ -70,11 +70,13 @@ bool Webserv::parseConf(std::stringstream & buff)
     int open = 0;
     while(std::getline(buff, line))
     {
+        if (line.length() == 0)
+            continue;
         std::string::size_type begin = line.find_first_not_of(" ");
         std::string::size_type end   = line.find_last_not_of(" ");
         line = line.substr(begin, end-begin + 1);
         std::string key;
-        std::istringstream is_line(line);
+        std::istringstream is_line(line);        
         if (line == "server")
             new_server = new Server();  
         else if (line == "{")
@@ -174,7 +176,7 @@ void Webserv::initFDSets(fd_set *read_fds, fd_set *write_fds, fd_set *except_fds
     FD_ZERO(read_fds);
     FD_ZERO(write_fds);
     FD_ZERO(except_fds);
-    FD_SET(0, read_fds);
+    // FD_SET(0, read_fds);
 }
 
 void Webserv::buildFDSets(Server const & server, fd_set *read_fds, fd_set *write_fds, fd_set *except_fds, int *highest_socket)
