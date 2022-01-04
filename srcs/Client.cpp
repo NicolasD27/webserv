@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 16:33:58 by clorin            #+#    #+#             */
-/*   Updated: 2021/12/17 16:37:53 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/04 15:52:52 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,10 +77,11 @@ bool Client::receiveFromClient()
         std::string request_string(buff);
         Request request(request_string);
         request.parseHeaders();
-        request.printHeaders();
         Response response(request);
         _message_queue.push(response.getResponseString());
+        std::cout << request << std::endl;
         std::cout << "message received" << std::endl;
+        
     }
     else
         std::cout << "nothing received" << std::endl;
