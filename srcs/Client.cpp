@@ -74,8 +74,11 @@ bool Client::receiveFromClient()
     if (r >= 0)
     {
 
-        std::string request(buff);
-        _message_queue.push(request);
+        std::string request_string(buff);
+        Request request(request_string);
+        request.parseHeaders();
+        request.printHeaders();
+        _message_queue.push(" ");
         std::cout << "message received" << std::endl;
     }
     else

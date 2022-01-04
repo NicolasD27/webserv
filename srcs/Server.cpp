@@ -84,22 +84,21 @@ void Server::storeLine(std::string & key, std::string & value)
 bool Server::setup()
 {
     _listen_socket = socket(AF_INET, SOCK_STREAM, 0);
+
     if (_listen_socket < 0)
         return false;
-    
-    int reuse = 1;
+     int reuse = 1;
     if (setsockopt(_listen_socket, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) != 0)
         return false;
-    
-    struct sockaddr_in my_addr;
+     struct sockaddr_in my_addr;
     memset(&my_addr, 0, sizeof(my_addr));
     my_addr.sin_family = AF_INET;
     my_addr.sin_addr.s_addr = inet_addr(_host.c_str());
     my_addr.sin_port = htons(_port);
-    
+    std::cout << my_addr.sin_port << std::endl;
     if (bind(_listen_socket, (struct sockaddr*)&my_addr, sizeof(struct sockaddr)) != 0)
         return false;
-    // start accept client connections
+         // start accept client connections
     if (listen(_listen_socket, 10) != 0)
         return false;
     printf("Accepting connections on port %d.\n", _port);
