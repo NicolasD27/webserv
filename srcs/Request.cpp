@@ -64,17 +64,48 @@ void Request::storeHeader(std::string key, std::string value)
     }
 }
 
-void Request::printHeaders()
+void Request::printHeaders(std::ostream & o)
 {
-    std::cout << "Headers :" << std::endl;
-    for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); ++it)
+    o << C_GREEN << "  Headers" << C_RESET <<" :" << std::endl;
+    for (std::map<std::string, std::string>::iterator it = this->_headers.begin(); it != _headers.end(); ++it)
     {
-        std::cout << it->first << ": " << it->second << std::endl;
+        o << "\t"<< C_YELLOW << it->first << C_RESET<<": "<< C_CYAN << it->second << C_RESET<< std::endl;
     }
 }
 
 
+unsigned int        Request::get_http_methode() const
+{
+    return this->_http_method;
+}
+
+std::string         Request::get_location() const
+{
+    return this->_location;
+}
+
+time_t              Request::get_keep_alive_n() const
+{
+    return this->_keep_alive_n;
+}
+
+std::string         Request::get_body() const
+{
+    return this->_body;
+}
 
 Request::~Request()
 {
+}
+
+std::ostream &operator<<(std::ostream & o, Request & request)
+{
+    const char *Methode[4] = {"Unknown","GET", "POST","DELETE"};
+    
+    o << C_GREEN << "Request:\t"<<C_RED<<Methode[request.get_http_methode()]<<C_RESET<<"\n";
+    o << C_YELLOW << "\tLocation "<< C_RESET << ": " << request.get_location() << "\n";
+    o << C_YELLOW << "\tKeep alive " << C_RESET << ": " << request.get_keep_alive_n()<<"\n";
+    request.printHeaders(o);
+    o << C_YELLOW << "\tbody " << C_RESET << ": <"<< C_GRAY << request.get_body() << C_RESET <<">\n";
+    return o;
 }

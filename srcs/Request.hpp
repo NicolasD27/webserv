@@ -34,7 +34,12 @@ class Request;
 #define HTTP_POST       2
 #define HTTP_DELETE     3
 
-
+# define C_GREEN 	"\e[32m"
+# define C_RED		"\e[31m"
+# define C_YELLOW	"\e[33m"
+# define C_CYAN		"\e[34m"
+# define C_GRAY		"\e[37m"
+# define C_RESET	"\e[0m"
 
 class Request
 {
@@ -59,10 +64,14 @@ public:
     void parseHeaders();
     void storeHeader(std::string key, std::string value);
     void getMethod(std::string line);
-    void printHeaders();
+    void printHeaders(std::ostream &);
 
-    
-    
+    unsigned    get_http_methode(void) const;
+    std::string get_location(void) const;
+    time_t      get_keep_alive_n() const;
+    std::string get_body() const;
 };
+
+std::ostream &operator <<(std::ostream &, Request &);
 
 #endif
