@@ -39,7 +39,7 @@ private:
     std::string                         _response_string;
     std::string                         _ressource_path;
     std::string                         _body;
-    
+    Server    const                      *_pt_server;
     
 public:
     Response(Request const & request, Server const & server);
@@ -51,11 +51,14 @@ public:
     std::string & getResponseString();
     void readRessource(std::stringstream & buff);
     void buildRessourcePath(Request const & request, Server const & server);
+    std::string & getRessourcePath(void);
 
-    
+    unsigned int    getStatus(void) const;
 
-    
-    
+    void printHeaders(std::ostream &);
+
 };
+
+std::ostream &operator <<(std::ostream &, Response &);
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 15:32:25 by clorin            #+#    #+#             */
-/*   Updated: 2021/12/17 16:49:04 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/05 11:09:58 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -216,8 +216,8 @@ void Webserv::printServers()
     {
         
         std::cout << "host : " << (*it)->getHost() << ":" << (*it)->getPort() << std::endl;
-        std::cout << "server_name : " << (*it)->getServerName() << std::endl << std::endl;
-        
+        std::cout << "server_name : " << (*it)->getServerName() << std::endl;
+        std::cout << "root : " << (*it)->getRoot() << std::endl << std::endl;
     }
 
 }
