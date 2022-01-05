@@ -53,6 +53,7 @@ public:
     void readRessource();
     void buildRessourcePath(Request const & request, Server const & server);
     void buildAutoIndex();
+    void parseExtension();
     std::string & getRessourcePath(void);
 
     unsigned int    getStatus(void) const;

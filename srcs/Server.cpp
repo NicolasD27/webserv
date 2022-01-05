@@ -15,7 +15,7 @@
 Server::Server() : _port(-1), _server_name("") {
 }
 
-Server::Server(int port, std::string server_name, int max_body_size) : _port(port), _server_name(server_name), _max_body_size(max_body_size)
+Server::Server(int port, std::string server_name, int max_body_size) : _port(port), _server_name(server_name), _max_body_size(max_body_size), _root("/")
 {   
 }
 
@@ -65,7 +65,9 @@ std::vector<Client*>::const_iterator Server::getBeginClients() const { return _c
 
 std::vector<Client*>::const_iterator Server::getEndClients() const { return _clients.cend(); }
 
-bool        Server::getAuto_index() const { return _auto_index; }
+std::map<std::vector<unsigned int>, std::string> Server::getErrorPages() const { return _error_pages;}
+
+bool        Server::getAutoIndex() const { return _auto_index; }
 
 void Server::storeLine(std::string & key, std::string & value)
 {
@@ -94,13 +96,34 @@ void Server::storeLine(std::string & key, std::string & value)
         _index = value;
     else if (key == "autoindex")
         _auto_index = (value == "on");
+    else if (key == "error_page")
+        parseErrorPages(value);
     else if (key == "max_body_name")
     {
         std::istringstream ss(value);
         ss >> _max_body_size;
     }
 }
-
+void Server::parseErrorPages(std::string & value)
+{
+    unsigned int page_number;
+    std::vector<unsigned int> pages_numbers;
+    std::stringstream iss_line(value);
+    std::string pages_numbers_string =value.substr(0, value.find(":"));
+    std::string error_page = std::string(value.substr(value.find(":") + 1, value.length() - value.find(":") - 1));
+    
+    while (std::getline(iss_line, pages_numbers_string, ','))
+    {
+        std::stringstream ss(pages_numbers_string.substr(0, pages_numbers_string.find(",")));
+        ss >> page_number; 
+        pages_numbers.push_back(page_number);
+        pages_numbers_string = pages_numbers_string.substr(pages_numbers_string.find(",") + 1, pages_numbers_string.length() - pages_numbers_string.find(",") - 1);
+    }
+    _error_pages.insert(std::make_pair(pages_numbers, error_page));
+    // for (std::map<std::vector<unsigned int>, std::string>::iterator it = _error_pages.begin(); it != _error_pages.end(); ++it)
+    //     for (std::vector<unsigned int>::const_iterator ite = it->first.begin(); ite != it->first.end(); ++ite)
+    //         std::cout << *ite << " : " << it->second << std::endl;
+}
 bool Server::setup()
 {
     _listen_socket = socket(AF_INET, SOCK_STREAM, 0);

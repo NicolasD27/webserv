@@ -357,10 +357,27 @@ std::map<std::string, std::string> MIMES_TYPES = {
 Response::Response(Request const & request, Server const & server):_pt_server(&server), _pt_request(&request)
 {
     buildRessourcePath(request, server);    
-    if (server.getAuto_index() && request.getLocation().back() == '/')
+    if (server.getAutoIndex() && request.getLocation().back() == '/')
         buildAutoIndex();
     else
         readRessource();
+    if (_status != 200)
+    {
+        std::map<std::vector<unsigned int>, std::string> error_pages = server.getErrorPages();
+        for (std::map<std::vector<unsigned int>, std::string>::iterator it = error_pages.begin(); it != error_pages.end(); ++it)
+            for (std::vector<unsigned int>::const_iterator ite = it->first.begin(); ite != it->first.end(); ++ite)
+            {
+                if (*ite == _status)
+                {
+                    _ressource_path = server.getRoot() + it->second;
+                    _headers.insert(std::make_pair("Content-type", "text/html"));
+                    readRessource();
+                }
+                break;
+            }
+    }
+    else
+        parseExtension();
     addDate();
     _headers.insert(std::make_pair("Server", "webserv"));
     _headers.insert(std::make_pair("Content-Length", NumberToString(_body.length())));
@@ -378,22 +395,24 @@ void Response::buildRessourcePath(Request const & request, Server const & server
     if (request.getLocation().back() == '/')
     {
         _headers.insert(std::make_pair("Content-type", "text/html; charset=utf-8"));
-        if (server.getAuto_index())
+        if (server.getAutoIndex())
             _ressource_path = server.getRoot() + request.getLocation();
         else    // pas d'autoindex
             _ressource_path = server.getRoot() + request.getLocation() + server.getIndex();
     }
     else
-    {
-        std::cout << server.getRoot() << std::endl;
         _ressource_path = server.getRoot() + request.getLocation();
-        point_pos = _ressource_path.find_last_of('.');
-        if (point_pos == std::string::npos || point_pos + 1 == _ressource_path.length())
-            extension = "application/octet-stream"; // type MIME par défaut dans tous les autres cas. Un fichier de type inconnu doit être associé à ce type MIME.
-        else 
-            extension = MIMES_TYPES[_ressource_path.substr(point_pos + 1, _ressource_path.length() - point_pos - 1)];
-        _headers.insert(std::make_pair("Content-type", extension));        
-    }
+}
+
+void Response::parseExtension()
+{
+    size_t point_pos = _ressource_path.find_last_of('.');
+    std::string extension;
+    if (point_pos == std::string::npos || point_pos + 1 == _ressource_path.length())
+        extension = "application/octet-stream"; // type MIME par défaut dans tous les autres cas. Un fichier de type inconnu doit être associé à ce type MIME.
+    else 
+        extension = MIMES_TYPES[_ressource_path.substr(point_pos + 1, _ressource_path.length() - point_pos - 1)];
+    _headers.insert(std::make_pair("Content-type", extension));        
 }
 
 void Response::buildAutoIndex()
