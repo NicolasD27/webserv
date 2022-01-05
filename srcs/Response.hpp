@@ -39,7 +39,8 @@ private:
     std::string                         _response_string;
     std::string                         _ressource_path;
     std::string                         _body;
-    Server    const                      *_pt_server;
+    Request const                       *_pt_request;
+    Server    const                     *_pt_server;
     
 public:
     Response(Request const & request, Server const & server);
@@ -49,8 +50,9 @@ public:
 
     void addDate();
     std::string & getResponseString();
-    void readRessource(std::stringstream & buff);
+    void readRessource();
     void buildRessourcePath(Request const & request, Server const & server);
+    void buildAutoIndex();
     std::string & getRessourcePath(void);
 
     unsigned int    getStatus(void) const;
