@@ -1,4 +1,5 @@
 #include "Response.hpp"
+#include <dirent.h>
 
 
 std::vector<std::string> HEADERS_OUT = {"Trailers", "Content-Range", "WWW-Authenticate", "Server", "Date", "Content-Length", "Content-Encoding", "Location", "Last-Modified", "Accept-Ranges", "Expires", "Cache-Control", "ETag", "Content-Type"};
@@ -353,7 +354,7 @@ std::map<std::string, std::string> MIMES_TYPES = {
   {"zip", "application/zip"},
 };
 
-Response::Response(Request const & request, Server const & server)
+Response::Response(Request const & request, Server const & server):_pt_server(&server)
 {
     std::stringstream buff;
     std::cout << request.getLocation();
@@ -383,7 +384,30 @@ void Response::buildRessourcePath(Request const & request, Server const & server
     if (request.getLocation().back() == '/')
     {
         _headers.insert(std::make_pair("Content-type", "text/html; charset=utf-8"));
-        _ressource_path = server.getRoot() + request.getLocation() + "/" + server.getIndex();
+        if (server.getAuto_index())
+        {
+            _ressource_path = server.getRoot() + request.getLocation();
+           
+            DIR *dir;
+            struct dirent *ent;
+            std::string current_directory = get_current_dir_name();
+            current_directory += "/" + server.getRoot() + "/"+ request.getLocation();
+            
+            if ((dir = opendir (current_directory.c_str())) != NULL)
+            {
+                 /* print all the files and directories within directory */
+                while ((ent = readdir (dir)) != NULL)
+                    printf ("%s\n", ent->d_name);
+            closedir (dir);
+            }
+            else 
+            {
+            /* could not open directory */
+                perror (current_directory.c_str());
+            }
+        }
+        else    // pas d'autoindex
+            _ressource_path = server.getRoot() + request.getLocation() + server.getIndex();
     }
     else
     {
@@ -445,4 +469,32 @@ Response      &Response::operator=(Response const &cpy)
 std::string & Response::getResponseString()
 {
     return _response_string;
+}
+
+std::string & Response::getRessourcePath()
+{
+    return _ressource_path;
+}
+
+unsigned int            Response::getStatus() const
+{
+    return this->_status;
+}
+
+void                    Response::printHeaders(std::ostream & o)
+{
+    o << C_GREEN << "  Headers" << C_RESET <<" :" << std::endl;
+    for (std::map<std::string, std::string>::iterator it = this->_headers.begin(); it != _headers.end(); ++it)
+    {
+        o << "\t"<< C_YELLOW << it->first << C_RESET<<": "<< C_CYAN << it->second << C_RESET<< std::endl;
+    }
+}
+
+std::ostream &operator<<(std::ostream & o, Response & response)
+{
+   
+    o << C_GREEN << "Response:\tStatus = "<<C_RED<< STATUS_CODES[response.getStatus()] << C_RESET<<"\n";
+    o << C_YELLOW << "\tResource path : "<< C_RESET << ": " << response.getRessourcePath() << "\n";
+    response.printHeaders(o);
+    return o;
 }

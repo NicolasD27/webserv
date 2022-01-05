@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/15 11:27:16 by clorin            #+#    #+#             */
-/*   Updated: 2021/12/17 16:48:28 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/05 10:30:31 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ private:
     int                     _listen_socket;
     std::vector<Client*>    _clients;
     int                     _max_body_size;
+    bool                    _auto_index;
     
 public:
     typedef typename std::vector<Client*>::iterator             iterator;
@@ -61,6 +62,7 @@ public:
     Client* getClient(int index) const;
     const_iterator getBeginClients() const;
     const_iterator getEndClients() const;
+    bool           getAuto_index() const;
 
     bool setup();
     

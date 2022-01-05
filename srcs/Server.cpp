@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 16:33:58 by clorin            #+#    #+#             */
-/*   Updated: 2021/12/17 16:37:53 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/05 11:21:24 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,9 +65,11 @@ std::vector<Client*>::const_iterator Server::getBeginClients() const { return _c
 
 std::vector<Client*>::const_iterator Server::getEndClients() const { return _clients.cend(); }
 
+bool        Server::getAuto_index() const { return _auto_index; }
+
 void Server::storeLine(std::string & key, std::string & value)
 {
-    _root = "";
+    //_root = "";
     _index = "index.html";
     if (key == "listen")
     {
@@ -90,6 +92,8 @@ void Server::storeLine(std::string & key, std::string & value)
         _root = value;
     else if (key == "index")
         _index = value;
+    else if (key == "autoindex")
+        _auto_index = (value == "on");
     else if (key == "max_body_name")
     {
         std::istringstream ss(value);
