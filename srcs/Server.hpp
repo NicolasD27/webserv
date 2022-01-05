@@ -21,9 +21,9 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+class Server;
 #include "Client.hpp"
 
-class Server;
 #include "Webserv.hpp"
 
 #define MAX_CLIENTS 10
@@ -35,7 +35,9 @@ class Server
 private:
     int                     _port;
     std::string             _host;
-    std::string             _server_name;  
+    std::string             _server_name;
+    std::string             _root;
+    std::string             _index;
     int                     _listen_socket;
     std::vector<Client*>    _clients;
     int                     _max_body_size;
@@ -53,6 +55,8 @@ public:
     int getPort() const;
     int getSocket() const;
     std::string getHost() const;
+    std::string getRoot() const;
+    std::string getIndex() const;
     std::string getServerName() const;
     Client* getClient(int index) const;
     const_iterator getBeginClients() const;

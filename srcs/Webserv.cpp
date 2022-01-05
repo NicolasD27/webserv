@@ -195,7 +195,7 @@ void Webserv::buildFDSets(Server const & server, fd_set *read_fds, fd_set *write
             FD_SET((*it)->getSocket(), except_fds);
             if ((*it)->hasMessages() && (*it)->getCurrentMessage().length() > 0)
             {
-                std::cout << "message is : " << (*it)->getCurrentMessage() << std::endl;
+                // std::cout << "message is : " << (*it)->getCurrentMessage() << std::endl;
                 FD_SET((*it)->getSocket(), write_fds);
             }
         }
@@ -208,7 +208,6 @@ void Webserv::shutdownServers()
         delete *it;
     exit(EXIT_FAILURE);
 }
-
 
 void Webserv::printServers() 
 {

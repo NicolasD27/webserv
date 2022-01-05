@@ -26,8 +26,6 @@
 
 class Request;
 
-#include "Server.hpp"
-
 
 #define HTTP_UNKNOWN    0
 #define HTTP_GET        1
@@ -48,7 +46,6 @@ private:
     std::string                         _request_string;
     unsigned int                        _http_method;
     std::string                         _location;
-    // long                                _content_length;
     time_t                              _keep_alive_n;
     std::map<std::string, std::string>  _headers;
     std::vector<std::string>            _x_forwarded_for;
@@ -63,13 +60,13 @@ public:
 
     void parseHeaders();
     void storeHeader(std::string key, std::string value);
-    void getMethod(std::string line);
+    void parseMethod(std::string line);
     void printHeaders(std::ostream &);
 
-    unsigned    get_http_methode(void) const;
-    std::string get_location(void) const;
-    time_t      get_keep_alive_n() const;
-    std::string get_body() const;
+    unsigned    getHttpMethod(void) const;
+    std::string getLocation(void) const;
+    time_t      getKeepAliveN() const;
+    std::string getBody() const;
 };
 
 std::ostream &operator <<(std::ostream &, Request &);

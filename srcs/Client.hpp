@@ -20,10 +20,12 @@
 #include <fstream>
 #include <unistd.h>
 
+
 class Client;
 
 #include "Server.hpp"
 #include "Request.hpp"
+#include "Response.hpp"
 
 #define NO_SOCKET -1
 #define MAX_SIZE 30000
@@ -37,6 +39,7 @@ private:
     int _current_sending_byte;
     char _receiving_buff[MAX_SIZE];
     int _current_receiving_byte;
+    Server const *_server;
     
 public:
     Client();
@@ -45,6 +48,7 @@ public:
     Client &operator=(Client const &);
 
     int getSocket() const;
+    Server const & getServer() const;
     std::string const & getCurrentMessage() const;
     bool hasMessages() const;
 
@@ -52,7 +56,7 @@ public:
     bool sendToClient();
 
 
-    bool     setup(int listen_socket);
+    bool     setup(Server const & server);
     
 };
 

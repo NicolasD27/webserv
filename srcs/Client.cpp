@@ -43,16 +43,20 @@ Client      &Client::operator=(Client const &cpy)
 
 int Client::getSocket() const { return _socket; }
 
+Server const & Client::getServer() const { return *_server; }
+
+
 std::string const & Client::getCurrentMessage() const { return _message_queue.front();}
 
 bool Client::hasMessages() const { return _message_queue.size() != 0; }
 
-bool Client::setup(int listen_socket)
+bool Client::setup(Server const & server)
 {
+    _server = &server;
     struct sockaddr_in address;
     memset(&address, 0, sizeof(address));
     socklen_t client_len = sizeof(address);
-    int new_client_sock = accept(listen_socket, (struct sockaddr *)&address, &client_len);
+    int new_client_sock = accept(_server->getSocket(), (struct sockaddr *)&address, &client_len);
     if (new_client_sock < 0)
         return false;
     char client_ipv4_str[INET_ADDRSTRLEN];
@@ -77,8 +81,9 @@ bool Client::receiveFromClient()
         std::string request_string(buff);
         Request request(request_string);
         request.parseHeaders();
+        Response response(request, *_server);
+        _message_queue.push(response.getResponseString());
         std::cout << request << std::endl;
-        _message_queue.push(" ");
         std::cout << "message received" << std::endl;
         
     }
@@ -89,7 +94,8 @@ bool Client::receiveFromClient()
 
 bool Client::sendToClient()
 {
-    std::string response = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world\n";
+    std::cout << "begin send" << std::endl;
+    std::string response = _message_queue.front();
     int r = write(_socket, response.c_str(), response.length());
     if (r == response.length())
         _message_queue.pop();
