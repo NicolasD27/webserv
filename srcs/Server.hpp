@@ -17,6 +17,7 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <map>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -42,6 +43,7 @@ private:
     std::vector<Client*>    _clients;
     int                     _max_body_size;
     bool                    _auto_index;
+    std::map<std::vector<unsigned int>, std::string>    _error_pages;
     
 public:
     typedef typename std::vector<Client*>::iterator             iterator;
@@ -62,12 +64,14 @@ public:
     Client* getClient(int index) const;
     const_iterator getBeginClients() const;
     const_iterator getEndClients() const;
-    bool           getAuto_index() const;
+    bool           getAutoIndex() const;
 
     bool setup();
     
     void storeLine(std::string & key, std::string & value);
     void handleNewConnection(void);
+    void parseErrorPages(std::string & value);
+    std::map<std::vector<unsigned int>, std::string> getErrorPages() const;
 
 
     class	FailedSetup: public std::exception{

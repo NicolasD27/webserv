@@ -76,7 +76,7 @@ bool Webserv::parseConf(std::stringstream & buff)
         std::string::size_type end   = line.find_last_not_of(" ");
         line = line.substr(begin, end-begin + 1);
         std::string key;
-        std::istringstream is_line(line);        
+        std::istringstream iss_line(line);        
         if (line == "server")
             new_server = new Server();  
         else if (line == "{")
@@ -90,11 +90,11 @@ bool Webserv::parseConf(std::stringstream & buff)
                 return false;
             _servers.push_back(new_server);            
         }
-        else if( std::getline(is_line, key, '=') )
+        else if( std::getline(iss_line, key, '=') )
         {
             key = key.substr(1, key.length() - 1); // je considère qu'il y a un seul \t au début
             std::string value;
-            if( std::getline(is_line, value) )
+            if( std::getline(iss_line, value) )
                 new_server->storeLine(key, value);
         }
 
