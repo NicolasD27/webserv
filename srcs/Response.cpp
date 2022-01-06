@@ -453,7 +453,7 @@ unsigned int Response::readRessource(bool isErrorPage)
 {
     std::string str;
     std::stringstream buff;
-    unsigned status = 200;
+    unsigned int status = 200;
 	
     if(isErrorPage)
         status = _status;
