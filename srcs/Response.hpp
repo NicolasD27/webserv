@@ -52,7 +52,7 @@ public:
 
     void addDate();
     std::string & getResponseString();
-    void readRessource();
+    void readRessource(bool isErrorPage = false);
     void buildRessourcePath(Request const & request, Server const & server);
     void buildAutoIndex();
     void parseExtension();

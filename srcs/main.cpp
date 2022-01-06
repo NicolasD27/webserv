@@ -6,16 +6,19 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 14:44:21 by clorin            #+#    #+#             */
-/*   Updated: 2021/12/17 16:45:45 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/06 11:31:35 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <iostream>
 #include "Webserv.hpp"
+#include <signal.h>
 
 int		main(int ac, char **av)
 {
     Webserv		webserv;
+
+    signal(SIGPIPE, SIG_IGN);
 
     try
     {
