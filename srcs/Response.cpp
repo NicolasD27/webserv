@@ -369,7 +369,7 @@ Response::Response(Request const & request, Server const & server):_pt_server(&s
                 {
                     _ressource_path = server.getRoot() + it->second;
                     _headers.insert(std::make_pair("Content-type", "text/html"));
-                    readRessource();
+                    readRessource(true);
                 }
                 break;
             }
@@ -443,7 +443,7 @@ void Response::buildAutoIndex()
     }
 }
 
-void Response::readRessource()
+void Response::readRessource(bool isErrorPage)
 {
     std::string str;
     std::stringstream buff;
@@ -451,24 +451,29 @@ void Response::readRessource()
     std::ifstream ifs(_ressource_path);
     if(ifs.good())
     {
-        _status = 200;
+        if(! isErrorPage)
+            _status = 200;
         while (std::getline(ifs, str))
             buff << str << std::endl;
 	    ifs.close();
         _body = buff.str();
     }
+    else if(isErrorPage)
+    {
+        _status = 500;
+    }
     else
     {
+        
         if (pathIsFile(_ressource_path))
         {
             _status = 403;
-            std::cout << "Forbidden\n";
+            // std::cout << "Forbidden\n";
         }
         else if (pathIsDir(_ressource_path))
             std::cout << "Repertoire\n";
         else
             _status = 404;
-
     }
 }
 
