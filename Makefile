@@ -6,7 +6,7 @@
 #    By: clorin <clorin@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/12/17 16:20:01 by clorin            #+#    #+#              #
-#    Updated: 2021/12/17 16:35:59 by clorin           ###   ########.fr        #
+#    Updated: 2022/01/06 09:37:20 by clorin           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,7 +20,7 @@ SRCS_DIR = srcs/
 
 OBJS_DIR = objs/
 
-SRCS	= main.cpp Webserv.cpp Server.cpp Client.cpp Request.cpp Response.cpp
+SRCS	= main.cpp Webserv.cpp Server.cpp Client.cpp Request.cpp Response.cpp file_utils.cpp
 
 OBJS	= $(SRCS:.cpp=.o) 
 

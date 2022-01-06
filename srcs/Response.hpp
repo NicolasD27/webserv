@@ -24,8 +24,10 @@
 #include <vector>
 #include <utility>
 #include <ctime>
+#include <dirent.h>
 
 #include "utility.hpp"
+#include "file_utils.hpp"
 #include "Request.hpp"
 #include "Server.hpp"
 
