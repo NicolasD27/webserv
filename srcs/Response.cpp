@@ -361,9 +361,9 @@ Response::Response(Request const & request, Server const & server):_pt_server(&s
 {
     buildRessourcePath(request, server);    
     if (server.getAutoIndex() && request.getLocation().back() == '/')
-        buildAutoIndex();
+        _status = buildAutoIndex();
     else
-        readRessource();
+        _status = readRessource();
     if (_status != 200)
     {
         std::map<std::vector<unsigned int>, std::string> error_pages = server.getErrorPages();
@@ -418,7 +418,7 @@ void Response::parseExtension()
     _headers.insert(std::make_pair("Content-type", extension));        
 }
 
-void Response::buildAutoIndex()
+unsigned int Response::buildAutoIndex()
 {
     DIR *dir;
     struct dirent *ent;
@@ -436,28 +436,30 @@ void Response::buildAutoIndex()
             _body += "<a href=\"" + dir_name + "\" >"+ dir_name + "</a></br>\n" ;
         }
         _body += "<hr>";
-        _status = 200;
+        // _status = 200;
         closedir (dir);
+        return 200;
     }
     else 
     {
         if (pathIsDir(current_directory.c_str()))
-            _status = 403;
+            return 403; //_status = 403;
         else
-            _status = 500;
+            return 500; //_status = 500;
     }
 }
 
-void Response::readRessource(bool isErrorPage)
+unsigned int Response::readRessource(bool isErrorPage)
 {
     std::string str;
     std::stringstream buff;
+    unsigned status = 200;
 	
+    if(isErrorPage)
+        status = _status;
     std::ifstream ifs(_ressource_path);
     if(ifs.good())
     {
-        if(! isErrorPage)
-            _status = 200;
         while (std::getline(ifs, str))
             buff << str << std::endl;
 	    ifs.close();
@@ -465,21 +467,16 @@ void Response::readRessource(bool isErrorPage)
     }
     else if(isErrorPage)
     {
-        _body = ERROR_PAGES[_status];
+        _body = ERROR_PAGES[status];
     }
     else
     {
-        
         if (pathIsFile(_ressource_path))
-        {
-            _status = 403;
-            // std::cout << "Forbidden\n";
-        }
-        else if (pathIsDir(_ressource_path))
-            std::cout << "Repertoire\n";
+            status = 403;
         else
-            _status = 404;
+            status = 404;
     }
+    return (status);
 }
 
 void Response::addDate()
