@@ -12,6 +12,7 @@ int main()
     std::cout << htons(8000) << std::endl;
     std::cout << htons(3000) << std::endl;
     std::cout << htons(443) << std::endl;
+    std::cout << ntohs(1668) << std::endl;
 }
 // static int forward_port;
 
