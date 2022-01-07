@@ -19,7 +19,6 @@ int		main(int ac, char **av)
     Webserv		webserv;
 
     signal(SIGPIPE, SIG_IGN);
-
     try
     {
         if (ac == 2)
