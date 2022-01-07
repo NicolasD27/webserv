@@ -53,9 +53,9 @@ public:
 
     void addDate();
     std::string & getResponseString();
-    unsigned int readRessource(bool isErrorPage = false);
+    void readRessource(bool isErrorPage = false);
     void buildRessourcePath(Request const & request, Server const & server);
-    unsigned int buildAutoIndex();
+    void buildAutoIndex();
     void parseExtension();
     std::string & getRessourcePath(void);
 
