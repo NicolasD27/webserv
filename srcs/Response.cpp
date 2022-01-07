@@ -19,9 +19,9 @@ Response::Response(Request const & request, Server const & server):_pt_server(&s
     if (request.getLocation().length() == 0)
         _status = 404;
     else if (server.getAutoIndex() && request.getLocation().back() == '/')
-        buildAutoIndex();
+        _status = buildAutoIndex();
     else
-        readRessource();
+        _status = readRessource();
     if (_status == 301)
     {
         _headers.insert(std::make_pair("Content-type", "text/html"));
