@@ -1,0 +1,177 @@
+servers : 
+host : 127.0.0.1:3000
+server_name : webserv
+root : www
+
+host : 127.0.0.1:8000
+server_name : webserv
+root : www
+
+47115
+Accepting connections on port 3000.
+16415
+Accepting connections on port 8000.
+before select
+select_res : 1
+new connection 
+Incoming connection from 127.0.0.1:26760.
+end
+before select
+select_res : 1
+[32mRequest:	[31mGET[0m
+[33m	Location [0m: /html/
+[32m  Headers[0m :
+	[33mAccept[0m: [34mtext/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9[0m
+	[33mAccept-Encoding[0m: [34mgzip, deflate, br[0m
+	[33mAccept-Language[0m: [34mfr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7[0m
+	[33mConnection[0m: [34mkeep-alive[0m
+	[33mHost[0m: [34m127.0.0.1:8000[0m
+	[33mUser-Agent[0m: [34mMozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36[0m
+[33m	Keep alive [0m: 0
+[33m	body [0m: <[37m[0m>
+
+message received
+[32mResponse:	Status = [31mOK[0m
+[33m	Resource path[0m: www/html/index.html
+[32m  Headers[0m :
+	[33mCache-Control[0m: [34mno-store[0m
+	[33mContent-Length[0m: [34m651[0m
+	[33mContent-type[0m: [34mtext/html; charset=utf-8[0m
+	[33mDate[0m: [34mFri, 07 Jan 2022 17:09:18 CET[0m
+	[33mServer[0m: [34mwebserv[0m
+
+end
+before select
+select_res : 1
+begin send
+response send
+end
+before select
+select_res : 1
+new connection 
+Incoming connection from 127.0.0.1:27272.
+end
+before select
+select_res : 1
+[32mRequest:	[31mGET[0m
+[33m	Location [0m: /html/index.css
+[32m  Headers[0m :
+	[33mAccept[0m: [34mtext/css,*/*;q=0.1[0m
+	[33mAccept-Encoding[0m: [34mgzip, deflate, br[0m
+	[33mAccept-Language[0m: [34mfr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7[0m
+	[33mConnection[0m: [34mkeep-alive[0m
+	[33mHost[0m: [34m127.0.0.1:8000[0m
+	[33mReferer[0m: [34mhttp://127.0.0.1:8000/html/[0m
+	[33mUser-Agent[0m: [34mMozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36[0m
+[33m	Keep alive [0m: 0
+[33m	body [0m: <[37m[0m>
+
+message received
+[32mResponse:	Status = [31mOK[0m
+[33m	Resource path[0m: www/html/index.css
+[32m  Headers[0m :
+	[33mCache-Control[0m: [34mno-store[0m
+	[33mContent-Length[0m: [34m174089[0m
+	[33mContent-type[0m: [34mtext/css[0m
+	[33mDate[0m: [34mFri, 07 Jan 2022 17:09:18 CET[0m
+	[33mServer[0m: [34mwebserv[0m
+
+end
+before select
+select_res : 1
+begin send
+response send
+end
+before select
+select_res : 1
+[32mRequest:	[31mGET[0m
+[33m	Location [0m: /html
+[32m  Headers[0m :
+	[33mAccept[0m: [34mtext/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9[0m
+	[33mAccept-Encoding[0m: [34mgzip, deflate, br[0m
+	[33mAccept-Language[0m: [34mfr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7[0m
+	[33mConnection[0m: [34mkeep-alive[0m
+	[33mHost[0m: [34m127.0.0.1:8000[0m
+	[33mUser-Agent[0m: [34mMozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36[0m
+[33m	Keep alive [0m: 0
+[33m	body [0m: <[37m[0m>
+
+message received
+[32mResponse:	Status = [31mMoved Permanently[0m
+[33m	Resource path[0m: www/html
+[32m  Headers[0m :
+	[33mCache-Control[0m: [34mno-store[0m
+	[33mContent-Length[0m: [34m0[0m
+	[33mContent-type[0m: [34mtext/html[0m
+	[33mDate[0m: [34mFri, 07 Jan 2022 17:09:20 CET[0m
+	[33mLocation[0m: [34mhttp://127.0.0.1:8000/html/[0m
+	[33mServer[0m: [34mwebserv[0m
+
+end
+before select
+select_res : 1
+begin send
+response send
+end
+before select
+select_res : 1
+[32mRequest:	[31mGET[0m
+[33m	Location [0m: /html/
+[32m  Headers[0m :
+	[33mAccept[0m: [34mtext/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9[0m
+	[33mAccept-Encoding[0m: [34mgzip, deflate, br[0m
+	[33mAccept-Language[0m: [34mfr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7[0m
+	[33mConnection[0m: [34mkeep-alive[0m
+	[33mHost[0m: [34m127.0.0.1:8000[0m
+	[33mUser-Agent[0m: [34mMozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36[0m
+[33m	Keep alive [0m: 0
+[33m	body [0m: <[37m[0m>
+
+message received
+[32mResponse:	Status = [31mOK[0m
+[33m	Resource path[0m: www/html/index.html
+[32m  Headers[0m :
+	[33mCache-Control[0m: [34mno-store[0m
+	[33mContent-Length[0m: [34m651[0m
+	[33mContent-type[0m: [34mtext/html; charset=utf-8[0m
+	[33mDate[0m: [34mFri, 07 Jan 2022 17:09:20 CET[0m
+	[33mServer[0m: [34mwebserv[0m
+
+end
+before select
+select_res : 1
+begin send
+response send
+end
+before select
+select_res : 1
+[32mRequest:	[31mGET[0m
+[33m	Location [0m: /html/index.css
+[32m  Headers[0m :
+	[33mAccept[0m: [34mtext/css,*/*;q=0.1[0m
+	[33mAccept-Encoding[0m: [34mgzip, deflate, br[0m
+	[33mAccept-Language[0m: [34mfr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7[0m
+	[33mConnection[0m: [34mkeep-alive[0m
+	[33mHost[0m: [34m127.0.0.1:8000[0m
+	[33mReferer[0m: [34mhttp://127.0.0.1:8000/html/[0m
+	[33mUser-Agent[0m: [34mMozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36[0m
+[33m	Keep alive [0m: 0
+[33m	body [0m: <[37m[0m>
+
+message received
+[32mResponse:	Status = [31mOK[0m
+[33m	Resource path[0m: www/html/index.css
+[32m  Headers[0m :
+	[33mCache-Control[0m: [34mno-store[0m
+	[33mContent-Length[0m: [34m174089[0m
+	[33mContent-type[0m: [34mtext/css[0m
+	[33mDate[0m: [34mFri, 07 Jan 2022 17:09:20 CET[0m
+	[33mServer[0m: [34mwebserv[0m
+
+end
+before select
+select_res : 1
+begin send
+response send
+end
+before select

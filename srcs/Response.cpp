@@ -13,7 +13,6 @@ std::map<unsigned int, std::string> ERROR_PAGES = {
 
 Response::Response(Request const & request, Server const & server):_pt_server(&server), _pt_request(&request)
 {
-
     buildRessourcePath(request, server);
     std::ifstream ifs(_ressource_path);
     if (request.getLocation().length() == 0)
