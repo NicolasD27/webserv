@@ -18,9 +18,9 @@ Response::Response(Request const & request, Server const & server):_pt_server(&s
     if (request.getLocation().length() == 0)
         _status = 404;
     else if((ifs.good() && pathIsFile(_ressource_path)) || pathIsDir(_ressource_path))
-        readRessource(false);
+        _status = readRessource(false);
     else
-        buildAutoIndex();
+        _status = buildAutoIndex();
     if (_status == 301)
     {
         _headers.insert(std::make_pair("Content-type", "text/html"));
@@ -81,7 +81,7 @@ void Response::parseExtension()
     _headers.insert(std::make_pair("Content-type", extension));        
 }
 
-void Response::buildAutoIndex()
+unsigned int Response::buildAutoIndex()
 {
     DIR *dir;
     struct dirent *ent;
@@ -109,9 +109,10 @@ void Response::buildAutoIndex()
         else
             _status = 404;
     }
+    return _status;
 }
 
-void Response::readRessource(bool isErrorPage)
+unsigned int Response::readRessource(bool isErrorPage)
 {
     std::string str;
     std::stringstream buff;
@@ -140,6 +141,7 @@ void Response::readRessource(bool isErrorPage)
         else
             _status = 404;
     }
+    return _status;
 }
 
 void Response::addDate()
