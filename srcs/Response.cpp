@@ -2,6 +2,11 @@
 
 std::vector<std::string> HEADERS_OUT = {"Trailers", "Content-Range", "WWW-Authenticate", "Server", "Date", "Content-Length", "Content-Encoding", "Location", "Last-Modified", "Accept-Ranges", "Expires", "Cache-Control", "ETag", "Content-Type"};
 std::map<unsigned int, std::string> STATUS_CODES = {{100, "Continue"}, {101, "Switching Protocols"}, {103, "Early Hints"}, {200, "OK"}, {201, "Created"}, {202, "Accepted"}, {203, "Non-Authoritative Information"}, {204, "No Content"}, {205, "Reset Content"}, {206, "Partial Content"}, {300, "Multiple Choices"}, {301, "Moved Permanently"}, {302, "Found"}, {303, "See Other"}, {304, "Not Modified"}, {307, "Temporary Redirect"}, {308, "Permanent Redirect"}, {400, "Bad Request"}, {401, "Unauthorized"}, {402, "Payment Required"}, {403, "Forbidden"}, {404, "Not Found"}, {405, "Method Not Allowed"}, {406, "Not Acceptable"}, {407, "Proxy Authentication Required"}, {408, "Request Timeout"}, {409, "Conflict"}, {410, "Gone"}, {411, "Length Required"}, {412, "Precondition Failed"}, {413, "Payload Too Large"}, {414, "URI Too Long"}, {415, "Unsupported Media Type"}, {416, "Range Not Satisfiable"}, {417, "Expectation Failed"}, {418, "I'm a teapot"}, {422, "Unprocessable Entity"}, {425, "Too Early"}, {426, "Upgrade Required"}, {428, "Precondition Required"}, {429, "Too Many Requests"}, {431, "Request Header Fields Too Large"}, {451, "Unavailable For Legal Reasons"}, {500, "Internal Server Error"}, {501, "Not Implemented"}, {502, "Bad Gateway"}, {503, "Service Unavailable"}, {504, "Gateway Timeout"}, {505, "HTTP Version Not Supported"}, {506, "Variant Also Negotiates"}, {507, "Insufficient Storage"}, {508, "Loop Detected"}, {510, "Not Extended"}, {511, "Network Authentication Required"}};
+std::map<unsigned int, std::string> ERROR_PAGES = {
+    {403, PAGE403},
+    {404, PAGE404},
+    {500, PAGE500}
+};
 std::map<std::string, std::string> MIMES_TYPES = {
   {"*3gpp", "audio/3gpp"},
   {"*jpm", "video/jpm"},
@@ -356,9 +361,9 @@ Response::Response(Request const & request, Server const & server):_pt_server(&s
 {
     buildRessourcePath(request, server);    
     if (server.getAutoIndex() && request.getLocation().back() == '/')
-        buildAutoIndex();
+        _status = buildAutoIndex();
     else
-        readRessource();
+        _status = readRessource();
     if (_status != 200)
     {
         std::map<std::vector<unsigned int>, std::string> error_pages = server.getErrorPages();
@@ -413,7 +418,7 @@ void Response::parseExtension()
     _headers.insert(std::make_pair("Content-type", extension));        
 }
 
-void Response::buildAutoIndex()
+unsigned int Response::buildAutoIndex()
 {
     DIR *dir;
     struct dirent *ent;
@@ -431,28 +436,30 @@ void Response::buildAutoIndex()
             _body += "<a href=\"" + dir_name + "\" >"+ dir_name + "</a></br>\n" ;
         }
         _body += "<hr>";
-        _status = 200;
+        // _status = 200;
         closedir (dir);
+        return 200;
     }
     else 
     {
         if (pathIsDir(current_directory.c_str()))
-            _status = 403;
+            return 403; //_status = 403;
         else
-            _status = 500;
+            return 500; //_status = 500;
     }
 }
 
-void Response::readRessource(bool isErrorPage)
+unsigned int Response::readRessource(bool isErrorPage)
 {
     std::string str;
     std::stringstream buff;
+    unsigned int status = 200;
 	
+    if(isErrorPage)
+        status = _status;
     std::ifstream ifs(_ressource_path);
     if(ifs.good())
     {
-        if(! isErrorPage)
-            _status = 200;
         while (std::getline(ifs, str))
             buff << str << std::endl;
 	    ifs.close();
@@ -460,21 +467,16 @@ void Response::readRessource(bool isErrorPage)
     }
     else if(isErrorPage)
     {
-        _status = 500;
+        _body = ERROR_PAGES[status];
     }
     else
     {
-        
         if (pathIsFile(_ressource_path))
-        {
-            _status = 403;
-            // std::cout << "Forbidden\n";
-        }
-        else if (pathIsDir(_ressource_path))
-            std::cout << "Repertoire\n";
+            status = 403;
         else
-            _status = 404;
+            status = 404;
     }
+    return (status);
 }
 
 void Response::addDate()
