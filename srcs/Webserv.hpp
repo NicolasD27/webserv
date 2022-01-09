@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/15 14:46:42 by clorin            #+#    #+#             */
-/*   Updated: 2021/12/17 16:47:01 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/09 11:10:35 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,8 @@ class Webserv
 private:
     std::vector<Server*>   _servers;
     std::string             _conf_path;
+
+    bool checkHost(std::string const &host) const;
     
 public:
 
