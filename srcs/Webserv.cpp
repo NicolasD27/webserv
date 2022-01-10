@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 15:32:25 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/05 11:09:58 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/09 11:32:37 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,11 +105,54 @@ bool Webserv::parseConf(std::stringstream & buff)
     return true;
 }
 
+bool Webserv::checkHost(std::string const &host) const
+{
+    char *pch;
+    char *test = strdup(host.c_str());
+    pch = strtok(test, ".");
+    unsigned int nb = 0;
+    bool    ok = true;
+    while(pch != NULL && ok)
+    {
+        size_t i = 0;
+        bool is_digit = true;
+        while(pch[i])
+        {
+            if (! isdigit(pch[i]))
+            {
+                is_digit = false;
+                break;
+            }
+            i++;
+        }
+        if(is_digit)
+        {
+            int value = atoi(pch);
+            if (value >=0 && value <= 255)
+                nb++;
+            else
+                ok = false;
+        }
+        else
+        {
+            ok = false;
+            break;
+        }
+        pch = strtok(NULL, ".");
+    }
+    free(test);
+    free(pch);
+    return (ok && nb == 4);
+
+}
+
 bool Webserv::checkServer(Server const & server) const
 {
     if (server.getPort() == -1 || server.getServerName() == "")
         return false;
-    return true;
+    if (server.getPort() <=0 || server.getPort() > 65535)
+        return false;
+    return (this->checkHost(server.getHost()));
 }
 
 bool        Webserv::run()
