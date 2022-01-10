@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/15 11:27:16 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/05 10:30:31 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/10 09:28:18 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,8 +46,8 @@ private:
     std::map<std::vector<unsigned int>, std::string>    _error_pages;
     
 public:
-    typedef typename std::vector<Client*>::iterator             iterator;
-    typedef typename std::vector<Client*>::const_iterator       const_iterator;
+    typedef std::vector<Client*>::iterator             iterator;
+    typedef std::vector<Client*>::const_iterator       const_iterator;
 
     Server(void);
     Server(int port, std::string server_name, int max_body_size);
