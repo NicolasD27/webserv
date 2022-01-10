@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/15 14:46:42 by clorin            #+#    #+#             */
-/*   Updated: 2021/12/17 16:47:01 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/10 13:54:09 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,8 @@ private:
     
 public:
 
-    typedef typename std::vector<Server*>::iterator             iterator;
-    typedef typename std::vector<Server*>::const_iterator       const_iterator;
+    typedef std::vector<Server*>::iterator             iterator;
+    typedef std::vector<Server*>::const_iterator       const_iterator;
 
     Webserv(); 
     Webserv(Webserv const &);

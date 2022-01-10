@@ -1,27 +1,33 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   file_utils.hpp                                     :+:      :+:    :+:   */
+/*   MimesType.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/01/06 09:38:11 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/10 11:51:29 by clorin           ###   ########.fr       */
+/*   Created: 2022/01/10 11:55:18 by clorin            #+#    #+#             */
+/*   Updated: 2022/01/10 12:44:37 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef FILE_UTILS_HPP
-# define FILE_UTILS_HPP
+#ifndef MIMESTYPE_HPP
+# define MIMESTYPE_HPP
 
 #include <string>
-#include <iostream>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <sys/param.h>
+#include <map>
 
-bool		pathIsFile(const std::string &);
-bool        pathIsDir(const std::string &);
-std::string getWorkingPath(void);
+class MimesType
+{
+    private:
+        MimesType(MimesType const &){};
+        MimesType &operator=(MimesType const &){return *this;};
+        
+        std::map<std::string, std::string>      _mimeType;
 
+    public:
+        MimesType(void);
+        ~MimesType(void);
+
+        const std::string     getType(std::string type);
+};
 #endif
