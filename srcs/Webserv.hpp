@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/15 14:46:42 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/10 13:54:09 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/11 15:35:17 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,9 @@
 #include <arpa/inet.h>
 
 #include "Server.hpp"
+#include "ParserConfig.hpp"
 
-# define PATH_CONF  "./srcs/default.conf"
+# define PATH_CONF  "conf/default.conf"
 
 class Webserv
 {
@@ -43,8 +44,8 @@ public:
     Webserv &operator=(Webserv const &);
 
     void    config(std::string defaultPath = PATH_CONF);
-    bool    readConf(std::stringstream & buff);
-    bool    parseConf(std::stringstream & buff);
+    bool    readConf(std::ifstream & buff);
+    bool    parseConf(std::ifstream & buff);
     bool    checkServer(Server const & server) const ;
     bool    run();
     void    shutdownServers();

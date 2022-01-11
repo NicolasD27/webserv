@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 16:33:58 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/05 11:21:24 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/11 15:45:51 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,7 +155,20 @@ void Server::handleNewConnection()
     _clients.push_back(new_client);
 }
 
+void    Server::addLocation(Location &loc)
+{
+    _locations.push_back(loc);
+}
 
+void Server::print(void)const
+{
+    std::cout << "host : " << _host << ":" << _port << std::endl;
+    std::cout << "server_name : " << _server_name << std::endl;
+    std::cout << "root : " << _root << std::endl;
+    for(int i = 0; i < _locations.size(); i++)
+        _locations[i].print();
+    std::cout << std::endl;
+}
 
 const char	*Server::FailedSetup::what() const throw(){
 	return "Failed to setup server";
