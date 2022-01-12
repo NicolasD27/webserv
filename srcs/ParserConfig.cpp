@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/11 10:42:37 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/12 10:54:46 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/12 11:05:19 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -138,7 +138,6 @@ bool ParserConfig::check_block(std::ifstream &buff, std::vector<Server*> &server
         delete new_server;
         return false;
     }    
-    std::cout << "&new_server = " << new_server << std::endl;
     servers.push_back(new_server);
     //std::cout << "********\n";
     return true;

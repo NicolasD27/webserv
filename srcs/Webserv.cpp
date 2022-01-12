@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 15:32:25 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/12 10:57:58 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/12 11:02:26 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,15 @@ Webserv::Webserv(void):_conf_path(PATH_CONF){
     std::vector<Server*> _servers;
 }
 
-Webserv::~Webserv(void){}
+Webserv::~Webserv(void)
+{
+    if(!_servers.empty())
+        {
+            for(size_t i = 0; i < _servers.size(); i++)
+                delete _servers[i];
+            _servers.clear();
+        }
+}
 
 Webserv::Webserv(Webserv const &cpy)
 {
