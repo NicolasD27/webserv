@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 15:32:25 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/11 15:48:26 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/12 09:57:31 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,7 @@ bool    Webserv::parseConf(std::ifstream & buff)
     while(buff)
     {
         tokens = ParserConfig::form_inst_line(buff);
-
+        
         if(tokens.empty())
             continue;
         if(tokens[0] != "server")
@@ -89,7 +89,8 @@ bool    Webserv::parseConf(std::ifstream & buff)
             std::cerr << "bad expected bracket" << std::endl;
             return false;
         }
-        ParserConfig::check_block(buff, _servers);
+        if(!ParserConfig::check_block(buff, _servers))
+            return false;
     }
     return true;
 }

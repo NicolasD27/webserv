@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 16:33:58 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/11 15:45:51 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/12 09:27:25 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,7 +98,7 @@ void Server::storeLine(std::string & key, std::string & value)
         _auto_index = (value == "on");
     else if (key == "error_page")
         parseErrorPages(value);
-    else if (key == "max_body_name")
+    else if (key == "max_body_size")
     {
         std::istringstream ss(value);
         ss >> _max_body_size;
@@ -165,6 +165,7 @@ void Server::print(void)const
     std::cout << "host : " << _host << ":" << _port << std::endl;
     std::cout << "server_name : " << _server_name << std::endl;
     std::cout << "root : " << _root << std::endl;
+    std::cout << "Client Max Body Size : " << _max_body_size << std::endl;
     for(int i = 0; i < _locations.size(); i++)
         _locations[i].print();
     std::cout << std::endl;

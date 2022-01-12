@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/11 10:42:37 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/11 15:45:07 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/12 10:12:16 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,7 +91,6 @@ bool ParserConfig::check_block(std::ifstream &buff, std::vector<Server*> &server
     std::vector<std::string> tokens;
     bool    closed = false;
     Server *new_server = new Server();
-    //Server new_server;
 
     //std::cout << "check block\n";
     while(buff)
@@ -104,20 +103,23 @@ bool ParserConfig::check_block(std::ifstream &buff, std::vector<Server*> &server
             closed = true;
             break;
         }
+        if(tokens[0] == "server")
+        {
+            std::cerr << "bracket } not found." << std::endl;
+            delete new_server;
+            return false;
+        }
         if(tokens[0] == "location")
         {
             //std::cout << "Check Location block\n";
-            check_location_block(buff, tokens, new_server);
+            if (!check_location_block(buff, tokens, new_server))
+                return false;
             //std::cout << "------------\n";
         }
         else
         {
             if(removeSemicolon(tokens))
-            { 
-                //std::cout << "key = " << tokens[0] << "\tvalue = " << tokens[1] << std::endl;
                 new_server->storeLine(tokens[0], tokens[1]);
-                //new_server.storeLine(tokens[0], tokens[1]);
-            }
             else
             {
                 std::cerr << "Expected ';' at the end of line." << std::endl;
@@ -134,7 +136,6 @@ bool ParserConfig::check_block(std::ifstream &buff, std::vector<Server*> &server
         return false;
     }    
     servers.push_back(new_server);
-
     //std::cout << "********\n";
     return true;
 }
@@ -170,8 +171,12 @@ bool ParserConfig::check_location_block(std::ifstream &buff, std::vector<std::st
         }
         if(removeSemicolon(locationTokens))
         { 
-            //std::cout << "key = " << locationTokens[0] << "\tvalue = " << locationTokens[1] << std::endl;
-            newLocation.storeLine(locationTokens[0], locationTokens[1]);
+            if(locationTokens[0] == "methods")
+            {
+                newLocation.addMethods(locationTokens);
+            }
+            else
+                newLocation.storeLine(locationTokens[0], locationTokens[1]);
         }
         else
         {
@@ -179,6 +184,12 @@ bool ParserConfig::check_location_block(std::ifstream &buff, std::vector<std::st
             return false;
         }
     }
+
+    if (!closed)
+    {
+        std::cerr << "bracket } not found." << std::endl;
+        return false;
+    }    
     server->addLocation(newLocation);
     return true;
 }

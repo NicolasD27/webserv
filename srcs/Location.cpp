@@ -6,28 +6,26 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/11 14:51:26 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/11 15:32:40 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/12 09:44:19 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Location.hpp"
 
-Location::Location(Location const &cpy):_path(cpy._path), _index(cpy._index),_autoIndex(cpy._autoIndex){}
+Location::Location(Location const &cpy):_path(cpy._path), _index(cpy._index),_root(cpy._root),_autoIndex(cpy._autoIndex),_methods(cpy._methods){}
 
-std::string     Location::getPath(void)const
+Location::~Location()
 {
-    return(this->_path);
+    _methods.clear();
 }
 
-std::string     Location::getIndex(void)const
-{
-    return(this->_index);
-}
+std::string     Location::getPath() const {return(_path);}
 
-bool            Location::isAutoindex(void)const
-{
-    return(this->_autoIndex);
-}
+std::string     Location::getIndex() const {return(_index);}
+
+std::string     Location::getRoot() const {return _root;};
+
+bool            Location::isAutoindex(void) const {return(_autoIndex);}
     
 void            Location::setPath(std::string &path)
 {
@@ -45,10 +43,28 @@ void            Location::storeLine(std::string & key, std::string & value)
         _index = value;
     else if (key == "autoindex")
         _autoIndex = (value == "on");
+    else if (key == "root")
+        _root = value;
+}
+
+void            Location::addMethods(std::vector<std::string> &tokens)
+{
+    if(!_methods.empty())
+        _methods.clear();
+    _methods.assign(tokens.begin() + 1, tokens.end());
 }
 
 void            Location::print() const
 {
-    std::cout << "Location : in " << _path << std::endl << "\t index : " <<_index << std::endl << "\t autoIndex = ";
+    std::cout << "Location : " << _path << std::endl;
+    std::cout << "\troot : "<< _root << std::endl << "\tindex : " <<_index << std::endl << "\tautoIndex = ";
     std::cout << ((_autoIndex)? "true":"false") << std::endl;
+    if(!_methods.empty())
+    {
+        std::cout << "\tMethods : ";
+        for(size_t i = 0; i < _methods.size(); i++)
+            std::cout << _methods[i++] << " ";
+        std::cout << std::endl;
+    }
 }
+
