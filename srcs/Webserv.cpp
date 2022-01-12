@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 15:32:25 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/09 11:32:37 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/12 16:22:07 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,8 @@ Webserv::~Webserv(void)
 {
     if(!_servers.empty())
         {
-            for(size_t i = 0; i < _servers.size(); i++)
-                delete _servers[i];
+            for(iterator it = _servers.begin(); it != _servers.end(); ++it)
+                delete (*it);
             _servers.clear();
         }
 }
@@ -54,14 +54,24 @@ void        Webserv::config(std::string conf_path)
         buff.close();
         if(!_servers.empty())
         {
-            for(size_t i = 0; i < _servers.size(); i++)
-                delete _servers[i];
+            for(iterator it = _servers.begin(); it != _servers.end(); ++it)
+                delete (*it);
             _servers.clear();
         }
-
         throw BadConfiguration();
     }
     buff.close();
+    if(!_servers.empty())
+    {
+        for (const_iterator it = _servers.begin(); it != _servers.end(); ++it)
+            if (!checkServer(*(*it)))
+                throw BadConfiguration();
+    }
+    else
+    {
+        std::cerr << "file empty." << std::endl;
+        throw BadConfiguration();
+    }
 }
 
 bool Webserv::readConf(std::ifstream & buff)
@@ -101,7 +111,7 @@ bool    Webserv::parseConf(std::ifstream & buff)
         }
         if(tokens.size() == 1 || (tokens.size() == 2 && tokens[1] != "{"))
         {
-            std::cerr << "bad expected bracket" << std::endl;
+            std::cerr << "bad expected bracket" << std::endl << "\tUsage : server {"<< std::endl;
             return false;
         }
         if(!ParserConfig::check_block(buff, _servers))
