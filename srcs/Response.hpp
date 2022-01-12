@@ -30,7 +30,10 @@
 #include "file_utils.hpp"
 #include "Request.hpp"
 #include "Server.hpp"
-#include "Custom_ERROR.hpp"
+// #include "Custom_ERROR.hpp"
+#include "StatusCode.hpp"
+#include "MimesType.hpp"
+#include "ErrorPages.hpp"
 
 class Response
 {

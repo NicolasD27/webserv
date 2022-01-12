@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 16:33:58 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/05 11:21:24 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/12 10:51:44 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,9 @@ Server::~Server()
 {
     for (iterator it = _clients.begin(); it != _clients.end(); ++it)
         delete (*it);
+    _clients.clear();
+    _error_pages.clear();
+    _locations.clear();
 }
 
 Server      &Server::operator=(Server const &cpy)
@@ -98,7 +101,7 @@ void Server::storeLine(std::string & key, std::string & value)
         _auto_index = (value == "on");
     else if (key == "error_page")
         parseErrorPages(value);
-    else if (key == "max_body_name")
+    else if (key == "max_body_size")
     {
         std::istringstream ss(value);
         ss >> _max_body_size;
@@ -155,7 +158,21 @@ void Server::handleNewConnection()
     _clients.push_back(new_client);
 }
 
+void    Server::addLocation(Location &loc)
+{
+    _locations.push_back(loc);
+}
 
+void Server::print(void)const
+{
+    std::cout << "host : " << _host << ":" << _port << std::endl;
+    std::cout << "server_name : " << _server_name << std::endl;
+    std::cout << "root : " << _root << std::endl;
+    std::cout << "Client Max Body Size : " << _max_body_size << std::endl;
+    for(int i = 0; i < _locations.size(); i++)
+        _locations[i].print();
+    std::cout << std::endl;
+}
 
 const char	*Server::FailedSetup::what() const throw(){
 	return "Failed to setup server";
