@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 16:33:58 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/12 09:27:25 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/12 10:51:44 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,9 @@ Server::~Server()
 {
     for (iterator it = _clients.begin(); it != _clients.end(); ++it)
         delete (*it);
+    _clients.clear();
+    _error_pages.clear();
+    _locations.clear();
 }
 
 Server      &Server::operator=(Server const &cpy)

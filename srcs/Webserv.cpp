@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 15:32:25 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/12 09:57:31 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/12 10:57:58 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,13 @@ void        Webserv::config(std::string conf_path)
     if (!parseConf(buff))
     {   
         buff.close();
+        if(!_servers.empty())
+        {
+            for(size_t i = 0; i < _servers.size(); i++)
+                delete _servers[i];
+            _servers.clear();
+        }
+
         throw BadConfiguration();
     }
     buff.close();
@@ -245,7 +252,7 @@ void Webserv::printServers()
 {
     for (iterator it = _servers.begin(); it != _servers.end(); ++it)
     {
-        std::cout << "servers : " << std::endl;
+        std::cout << "servers : ( " <<&(*it)<< " )" << std::endl;
         (*it)->print();
         // std::cout << "host : " << (*it)->getHost() << ":" << (*it)->getPort() << std::endl;
         // std::cout << "server_name : " << (*it)->getServerName() << std::endl;

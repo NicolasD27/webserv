@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/11 10:42:37 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/12 10:12:16 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/12 10:54:46 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,7 +113,10 @@ bool ParserConfig::check_block(std::ifstream &buff, std::vector<Server*> &server
         {
             //std::cout << "Check Location block\n";
             if (!check_location_block(buff, tokens, new_server))
+            {
+                delete new_server;
                 return false;
+            }
             //std::cout << "------------\n";
         }
         else
@@ -135,6 +138,7 @@ bool ParserConfig::check_block(std::ifstream &buff, std::vector<Server*> &server
         delete new_server;
         return false;
     }    
+    std::cout << "&new_server = " << new_server << std::endl;
     servers.push_back(new_server);
     //std::cout << "********\n";
     return true;
@@ -168,6 +172,11 @@ bool ParserConfig::check_location_block(std::ifstream &buff, std::vector<std::st
         {
             closed = true;
             break;
+        }
+        if(locationTokens[0] == "location")
+        {
+            std::cerr << "bracket } not found." << std::endl;
+            return false;
         }
         if(removeSemicolon(locationTokens))
         { 
