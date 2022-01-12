@@ -8,6 +8,8 @@ Request::Request(std::string request_string) : _request_string(request_string)
 {
 }
 
+std::string & Request::operator[](const char *key) { return _headers[key]; }
+
 void Request::parseHeaders()
 {
     std::stringstream buff(_request_string);
@@ -19,6 +21,7 @@ void Request::parseHeaders()
         if (line.length() == 0)
             continue;
         std::string key;
+        std::cout << "key :" << key << std::endl;
         std::istringstream iss_line(line);        
         if( std::getline(iss_line, key, ':') )
         {

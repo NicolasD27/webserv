@@ -58,6 +58,8 @@ public:
     virtual ~Request();
     Request &operator=(Request const &);
 
+    std::string &operator[](const char *key);
+
     void parseHeaders();
     void storeHeader(std::string key, std::string value);
     void parseMethod(std::string line);

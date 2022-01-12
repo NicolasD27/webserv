@@ -8,11 +8,15 @@
 
 int main()
 {
-    std::cout << htons(80) << std::endl;
-    std::cout << htons(8000) << std::endl;
-    std::cout << htons(3000) << std::endl;
-    std::cout << htons(443) << std::endl;
-    std::cout << ntohs(1668) << std::endl;
+    std::string value = "123fr";
+    int num;
+    if (value.length() == 0)
+        return 0;
+    std::istringstream ss(value);
+    ss >> num;
+    std::cout << num;
+    return 0;
+
 }
 // static int forward_port;
 

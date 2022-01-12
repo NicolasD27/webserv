@@ -73,8 +73,40 @@ bool Client::setup(Server const & server)
 bool Client::receiveFromClient()
 {
     char buff[MAX_SIZE];
-    int r = read(_socket, buff, MAX_SIZE);
-    buff[r] = 0;
+    int r;
+    int content_length;
+
+    _current_receiving_byte = 0;
+    while ((r = recv(_socket, _receiving_buff + _current_receiving_byte, 50, MSG_DONTWAIT)) > 0)
+    {
+        _current_receiving_byte += r;
+        _receiving_buff[_current_receiving_byte] = 0;
+        if (std::string(_receiving_buff).find("\r\n\r\n") != std::string::npos)
+            break ;
+    }
+    std::string request_string(_receiving_buff);
+    Request request(request_string);
+    request.parseHeaders();
+    if (!(request["Transfer-Encoding"].length() == 0 || request["Transfer-Encoding"] == "identity"))
+    {
+        int current_chunk_size;
+        int current_total_bytes;
+        while ((current_chunk_size = StringToInt(request_string.substr(request_string.find_last_of("\r\n\r\n") + 1, request_string.length() - request_string.find_last_of("\r\n\r\n") - 1))) != 0)
+        {
+            while ((r = recv(_socket, _receiving_buff + _current_receiving_byte, current_chunk_size - current_total_bytes, MSG_DONTWAIT)) > 0)
+            {
+                current_total_bytes += r;
+                _current_receiving_byte += r;
+                _receiving_buff[_current_receiving_byte] = 0;
+                if (current_total_bytes >= current_chunk_size)
+                    break;
+                
+            }
+        }
+    }
+    // else if ((content_length = StringToInt(request["Content-Length"])) != 0)
+    // if (content_length != 0)
+    // buff[r] = 0;
     if (r >= 0)
     {
 
