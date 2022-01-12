@@ -1,27 +1,31 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   file_utils.hpp                                     :+:      :+:    :+:   */
+/*   ErrorPages.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/01/06 09:38:11 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/10 11:51:29 by clorin           ###   ########.fr       */
+/*   Created: 2022/01/10 12:50:58 by clorin            #+#    #+#             */
+/*   Updated: 2022/01/10 13:48:29 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef FILE_UTILS_HPP
-# define FILE_UTILS_HPP
+#include "ErrorPages.hpp"
 
-#include <string>
-#include <iostream>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <sys/param.h>
+ErrorPages::ErrorPages()
+{
+    _errorPage[403] = PAGE403;
+    _errorPage[404] = PAGE404;
+    _errorPage[500] = PAGE500;
+}
 
-bool		pathIsFile(const std::string &);
-bool        pathIsDir(const std::string &);
-std::string getWorkingPath(void);
 
-#endif
+ErrorPages::~ErrorPages()
+{
+    _errorPage.clear();
+}
+
+std::string     &ErrorPages::operator[](unsigned int status)
+{
+    return (_errorPage[status]);
+}

@@ -18,6 +18,7 @@
 #include <sstream>
 #include <vector>
 #include <map>
+#include <list>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -26,6 +27,7 @@ class Server;
 #include "Client.hpp"
 
 #include "Webserv.hpp"
+#include "Location.hpp"
 
 #define MAX_CLIENTS 10
 
@@ -44,6 +46,7 @@ private:
     int                     _max_body_size;
     bool                    _auto_index;
     std::map<std::vector<unsigned int>, std::string>    _error_pages;
+    std::vector<Location>   _locations;
     
 public:
     typedef std::vector<Client*>::iterator             iterator;
@@ -73,6 +76,9 @@ public:
     void parseErrorPages(std::string & value);
     std::map<std::vector<unsigned int>, std::string> getErrorPages() const;
 
+    void    addLocation(Location &);
+
+    void    print(void) const;
 
     class	FailedSetup: public std::exception{
 			virtual const char	*what() const throw();

@@ -16,7 +16,15 @@ Webserv::Webserv(void):_conf_path(PATH_CONF){
     std::vector<Server*> _servers;
 }
 
-Webserv::~Webserv(void){}
+Webserv::~Webserv(void)
+{
+    if(!_servers.empty())
+        {
+            for(size_t i = 0; i < _servers.size(); i++)
+                delete _servers[i];
+            _servers.clear();
+        }
+}
 
 Webserv::Webserv(Webserv const &cpy)
 {
@@ -37,73 +45,112 @@ Webserv     &Webserv::operator=(Webserv const &cpy)
 
 void        Webserv::config(std::string conf_path)
 {
-    std::stringstream buff;
+    std::ifstream buff;
     _conf_path = conf_path;
     if (!readConf(buff))
         throw BadConfiguration();
     if (!parseConf(buff))
+    {   
+        buff.close();
+        if(!_servers.empty())
+        {
+            for(size_t i = 0; i < _servers.size(); i++)
+                delete _servers[i];
+            _servers.clear();
+        }
+
         throw BadConfiguration();
+    }
+    buff.close();
 }
 
-bool Webserv::readConf(std::stringstream & buff)
+bool Webserv::readConf(std::ifstream & buff)
 {
     std::string str;
 	
-    std::ifstream ifs(_conf_path);
-    if (ifs.fail())
+    //std::ifstream ifs(_conf_path);
+    buff.open(_conf_path);
+    if (buff.fail())
     {
         std::cout << "File does not exist" << std::endl;
         return false;
     }
 	
-	while (std::getline(ifs, str))
-        buff << str << std::endl;
-	ifs.close();
+	// while (std::getline(ifs, str))
+    //     buff << str << std::endl;
+	//ifs.close();
     return true;
 }
 
-bool Webserv::parseConf(std::stringstream & buff)
+
+
+bool    Webserv::parseConf(std::ifstream & buff)
 {
-    
-    Server *new_server;
-    std::string line;
-    int open = 0;
-    while(std::getline(buff, line))
-    {
-        if (line.length() == 0)
-            continue;
-        std::string::size_type begin = line.find_first_not_of(" ");
-        std::string::size_type end   = line.find_last_not_of(" ");
-        line = line.substr(begin, end-begin + 1);
-        std::string key;
-        std::istringstream iss_line(line);        
-        if (line == "server")
-            new_server = new Server();  
-        else if (line == "{")
-            open++;
-        else if (line == "}")
-        {
-            if (open <= 0)
-                return false;
-            open--;
-            if (!checkServer(*new_server))
-                return false;
-            _servers.push_back(new_server);            
-        }
-        else if( std::getline(iss_line, key, '=') )
-        {
-            key = key.substr(1, key.length() - 1); // je considère qu'il y a un seul \t au début
-            std::string value;
-            if( std::getline(iss_line, value) )
-                new_server->storeLine(key, value);
-        }
+    std::vector<std::string> tokens;
 
-    //     //ajouter parser pour les location { ...}
+    while(buff)
+    {
+        tokens = ParserConfig::form_inst_line(buff);
+        
+        if(tokens.empty())
+            continue;
+        if(tokens[0] != "server")
+        {
+            std::cerr << "unknow instruction : " << tokens[0] << std::endl;
+            return false;
+        }
+        if(tokens.size() == 1 || (tokens.size() == 2 && tokens[1] != "{"))
+        {
+            std::cerr << "bad expected bracket" << std::endl;
+            return false;
+        }
+        if(!ParserConfig::check_block(buff, _servers))
+            return false;
     }
-    if (open < 0)
-        return false;
     return true;
 }
+// bool Webserv::parseConf(std::stringstream & buff)
+// {
+    
+//     Server *new_server;
+//     std::string line;
+//     int open = 0;
+//     while(std::getline(buff, line))
+//     {
+//         if (line.length() == 0)
+//             continue;
+//         std::string::size_type begin = line.find_first_not_of(" ");
+//         std::string::size_type end   = line.find_last_not_of(" ");
+//         line = line.substr(begin, end-begin + 1);
+//         std::string key;
+//         std::istringstream iss_line(line);        
+//         if (line == "server")
+//             new_server = new Server();  
+//         else if (line == "{")
+//             open++;
+//         else if (line == "}")
+//         {
+//             if (open <= 0)
+//                 return false;
+//             open--;
+//             if (!checkServer(*new_server))
+//                 return false;
+//             _servers.push_back(new_server);            
+//         }
+//         else if( std::getline(iss_line, key, '=') )
+//         {
+//             key = key.substr(1, key.length() - 1); // je considère qu'il y a un seul \t au début
+//             std::string value;
+//             if( std::getline(iss_line, value) )
+//                 new_server->storeLine(key, value);
+//         }
+
+//     //     //ajouter parser pour les location { ...}
+//     }
+//     if (open < 0)
+//         return false;
+//     return true;
+// }
 
 bool Webserv::checkHost(std::string const &host) const
 {
@@ -254,13 +301,13 @@ void Webserv::shutdownServers()
 
 void Webserv::printServers() 
 {
-    std::cout << "servers : " << std::endl;
     for (iterator it = _servers.begin(); it != _servers.end(); ++it)
     {
-        
-        std::cout << "host : " << (*it)->getHost() << ":" << (*it)->getPort() << std::endl;
-        std::cout << "server_name : " << (*it)->getServerName() << std::endl;
-        std::cout << "root : " << (*it)->getRoot() << std::endl << std::endl;
+        std::cout << "servers : ( " <<&(*it)<< " )" << std::endl;
+        (*it)->print();
+        // std::cout << "host : " << (*it)->getHost() << ":" << (*it)->getPort() << std::endl;
+        // std::cout << "server_name : " << (*it)->getServerName() << std::endl;
+        // std::cout << "root : " << (*it)->getRoot() << std::endl << std::endl;
     }
 
 }

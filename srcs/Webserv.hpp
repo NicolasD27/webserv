@@ -23,8 +23,9 @@
 #include <arpa/inet.h>
 
 #include "Server.hpp"
+#include "ParserConfig.hpp"
 
-# define PATH_CONF  "./srcs/default.conf"
+# define PATH_CONF  "conf/default.conf"
 
 class Webserv
 {
@@ -45,8 +46,8 @@ public:
     Webserv &operator=(Webserv const &);
 
     void    config(std::string defaultPath = PATH_CONF);
-    bool    readConf(std::stringstream & buff);
-    bool    parseConf(std::stringstream & buff);
+    bool    readConf(std::ifstream & buff);
+    bool    parseConf(std::ifstream & buff);
     bool    checkServer(Server const & server) const ;
     bool    run();
     void    shutdownServers();

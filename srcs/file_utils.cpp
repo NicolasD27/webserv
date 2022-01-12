@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/06 09:35:45 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/06 10:40:47 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/10 11:53:22 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,4 +37,10 @@ bool        pathIsDir(const std::string & path)
         return (! ((s.st_mode & S_IFDIR) == 0));
     else
 		return false;
+}
+
+std::string getWorkingPath(void)
+{
+	char temp[MAXPATHLEN];
+	return ((getcwd(temp, sizeof(temp))? std::string(temp) : std::string("")));
 }

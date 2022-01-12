@@ -1,27 +1,34 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   file_utils.hpp                                     :+:      :+:    :+:   */
+/*   StatusCode.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/01/06 09:38:11 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/10 11:51:29 by clorin           ###   ########.fr       */
+/*   Created: 2022/01/10 10:58:14 by clorin            #+#    #+#             */
+/*   Updated: 2022/01/10 11:07:31 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef FILE_UTILS_HPP
-# define FILE_UTILS_HPP
+#ifndef STATUSCODE_HPP
+# define STATUSCODE_HPP
 
 #include <string>
-#include <iostream>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <sys/param.h>
+#include <map>
 
-bool		pathIsFile(const std::string &);
-bool        pathIsDir(const std::string &);
-std::string getWorkingPath(void);
+class StatusCode
+{
+    private:
+        StatusCode(StatusCode const &){};
+        StatusCode &operator=(StatusCode const &){return *this;};
+        
+        std::map<unsigned int, std::string>      _err_code;
+
+    public:
+         StatusCode(void);
+         ~StatusCode(void){};
+         
+        std::string     &operator[](unsigned int);
+};
 
 #endif
