@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/11 14:51:26 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/12 09:44:19 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/13 12:02:56 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,18 +14,24 @@
 
 Location::Location(Location const &cpy):_path(cpy._path), _index(cpy._index),_root(cpy._root),_autoIndex(cpy._autoIndex),_methods(cpy._methods){}
 
+Location::Location(std::string path, std::vector<std::string> index, std::string root, bool autoIndex, std::vector<std::string> methods):
+_path(path), _index(index), _root(root), _autoIndex(autoIndex), _methods(methods)
+{}
+
 Location::~Location()
 {
     _methods.clear();
+    _index.clear();
 }
 
-std::string     Location::getPath() const {return(_path);}
+std::string                 Location::getPath() const {return(_path);}
 
-std::string     Location::getIndex() const {return(_index);}
+std::vector<std::string>    Location::getIndex() const {return(_index);}
 
-std::string     Location::getRoot() const {return _root;};
+std::string                 Location::getRoot() const {return _root;};
 
-bool            Location::isAutoindex(void) const {return(_autoIndex);}
+bool                        Location::isAutoindex(void) const {return(_autoIndex);}
+
     
 void            Location::setPath(std::string &path)
 {
@@ -37,27 +43,43 @@ void            Location::setAutoIndex(bool autoIndex)
     this->_autoIndex = autoIndex;
 }
 
-void            Location::storeLine(std::string & key, std::string & value)
+void            Location::storeLine(std::string const & key, std::string & value)
 {
-    if (key == "index")
-        _index = value;
-    else if (key == "autoindex")
+    if (key == "autoindex")
         _autoIndex = (value == "on");
     else if (key == "root")
         _root = value;
 }
 
-void            Location::addMethods(std::vector<std::string> &tokens)
+void            Location::addMethods(std::vector<std::string> tokens)
 {
     if(!_methods.empty())
         _methods.clear();
     _methods.assign(tokens.begin() + 1, tokens.end());
 }
 
+
+void            Location::addIndex(std::vector<std::string> tokens)
+{
+    if(! _index.empty())
+        _index.clear();
+    _index.assign(tokens.begin() + 1, tokens.end());
+}
+
 void            Location::print() const
 {
     std::cout << "Location : " << _path << std::endl;
-    std::cout << "\troot : "<< _root << std::endl << "\tindex : " <<_index << std::endl << "\tautoIndex = ";
+    std::cout << "\troot : "<< _root << std::endl << "\tindex : ";
+    if(_index.empty())
+    {
+        std::cout << C_RED << "empty" << C_RESET;
+    }
+    else
+    {
+        for(size_t i = 0; i < _index.size(); i++)
+            std::cout <<_index[i] << " ";
+    }
+    std::cout << std::endl << "\tautoIndex = ";
     std::cout << ((_autoIndex)? "true":"false") << std::endl;
     if(!_methods.empty())
     {
@@ -68,3 +90,8 @@ void            Location::print() const
     }
 }
 
+bool            Location::isValid() const
+{
+    // to continue
+    return (_index.empty() == false);
+}

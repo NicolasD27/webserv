@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/11 14:45:49 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/12 09:43:27 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/13 12:02:35 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,33 +16,38 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include "Colors.hpp"
 
 class Location
 {
     private:
         std::string                 _path;
-        std::string                 _index;
+        std::vector<std::string>    _index;
         std::string                 _root;
         bool                        _autoIndex;
         std::vector<std::string>    _methods;
 
     public:
         Location(void){};
+        Location(std::string path, std::vector<std::string> index, std::string root, bool autoIndex, std::vector<std::string> methods);
         ~Location(void);
         Location(Location const &);
         Location &operator=(Location const &){return *this;};
 
-        void            storeLine(std::string & , std::string &);
-        void            addMethods(std::vector<std::string> &);
+        void                        storeLine(std::string const & , std::string &);
+        void                        addMethods(std::vector<std::string> );
+        void                        addIndex(std::vector<std::string> );
 
-        std::string     getPath(void)const;
-        std::string     getIndex(void)const;
-        std::string     getRoot(void)const;
-        bool            isAutoindex(void)const;
+        std::string                 getPath(void)const;
+        std::vector<std::string>    getIndex(void)const;
+        std::string                 getRoot(void)const;
+        bool                        isAutoindex(void)const;
     
-        void            setPath(std::string &);
-        void            setAutoIndex(bool);
+        void                        setPath(std::string &);
+        void                        setAutoIndex(bool);
 
-        void            print(void) const;
+        bool                        isValid(void) const;
+
+        void                        print(void) const;
 };
 #endif

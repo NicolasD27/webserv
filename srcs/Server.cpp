@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 16:33:58 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/12 10:51:44 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/13 15:17:00 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,11 +58,15 @@ std::string Server::getHost() const { return _host; }
 
 std::string Server::getRoot() const { return _root; }
 
-std::string Server::getIndex() const { return _index; }
+std::vector<std::string>    Server::getIndex() const { return _index;}
 
 std::string Server::getServerName() const { return _server_name; }
 
 Client* Server::getClient(int i) const { return _clients[i]; }
+
+std::vector<Location>   Server::getLocation(void) const {return _locations;}
+
+std::vector<std::string>    Server::getMethods(void) const {return _methods;}
 
 std::vector<Client*>::const_iterator Server::getBeginClients() const { return _clients.cbegin(); }
 
@@ -75,7 +79,7 @@ bool        Server::getAutoIndex() const { return _auto_index; }
 void Server::storeLine(std::string & key, std::string & value)
 {
     //_root = "";
-    _index = "index.html";
+    //_index = "index.html";
     if (key == "listen")
     {
         if (value.find(':') != std::string::npos)
@@ -95,8 +99,6 @@ void Server::storeLine(std::string & key, std::string & value)
         _server_name = value;
     else if (key == "root")
         _root = value;
-    else if (key == "index")
-        _index = value;
     else if (key == "autoindex")
         _auto_index = (value == "on");
     else if (key == "error_page")
@@ -161,6 +163,25 @@ void Server::handleNewConnection()
 void    Server::addLocation(Location &loc)
 {
     _locations.push_back(loc);
+}
+
+void    Server::addIndex(std::vector<std::string> &index)
+{
+    if(!_index.empty())
+        _index.clear();
+    _index.assign(index.begin() + 1, index.end());
+}
+
+void    Server::addMethods(std::string &method)
+{
+    _methods.push_back(method);
+}
+
+void    Server::setMethods(std::vector<std::string> &methods)
+{
+    if(!_methods.empty())
+        _methods.clear();
+    _methods.assign(methods.begin(), methods.end());
 }
 
 void Server::print(void)const
