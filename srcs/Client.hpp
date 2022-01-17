@@ -31,17 +31,18 @@ class Client;
 #define MAX_SIZE 30000
 class Client
 {
-private:
+// private:
+public:
     int     _socket;
     struct sockaddr_in _address;
-    std::queue<std::string> _message_queue;
+    std::vector<Response*> _responses_to_build;
+    std::queue<Response*> _responses_to_send;
     char _sending_buff[MAX_SIZE];
     int _current_sending_byte;
     char _receiving_buff[MAX_SIZE];
     int _current_receiving_byte;
     Server const *_server;
     
-public:
     Client();
     Client(Client const &);
     virtual ~Client();
@@ -49,8 +50,12 @@ public:
 
     int getSocket() const;
     Server const & getServer() const;
-    std::string const & getCurrentMessage() const;
-    bool hasMessages() const;
+    const Response * getCurrentSendableResponse() const;
+    bool hasResponseToSend() const;
+    std::vector<Response*>::iterator getBeginResponseToBuild(); 
+    std::vector<Response*>::iterator getEndResponseToBuild();
+    size_t getResponseToBuildSize() const;
+    void switchToSendQueue(Response* response);
 
     bool receiveFromClient();
     bool sendToClient();

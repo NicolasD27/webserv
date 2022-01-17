@@ -59,6 +59,7 @@ public:
     void storeHeader(std::string key, std::string value);
     void parseMethod(std::string line);
     void printHeaders(std::ostream &);
+    void addToBody(std::string new_elem);
 
     unsigned    getHttpMethod(void) const;
     std::string getLocation(void) const;

@@ -1,3 +1,5 @@
+#ifndef UTILITY_HPP
+#define UTILITY_HPP
 #include <sstream>
 
 template <typename T>
@@ -8,13 +10,8 @@ template <typename T>
         return ss.str();
     }
 
-int StringToInt ( std::string value )
-{
-    int num;
-    if (value.length() == 0)
-        return 0;
-    std::istringstream ss(value);
-    ss >> num;
-    return num;
-}
+int StringToInt(std::string value);
+int StringHexaToInt(std::string value);
+int HexaToInt(int value);
     
+#endif

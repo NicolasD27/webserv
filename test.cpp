@@ -5,18 +5,15 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <unistd.h>
 
 int main()
 {
-    std::string value = "123fr";
-    int num;
-    if (value.length() == 0)
-        return 0;
-    std::istringstream ss(value);
-    ss >> num;
-    std::cout << num;
-    return 0;
+     int y;
+    std::stringstream stream("3d\n");
 
+    stream >> std::hex >> y;
+    std::cout << y << std::endl;
 }
 // static int forward_port;
 

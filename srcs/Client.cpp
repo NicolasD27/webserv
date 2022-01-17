@@ -15,7 +15,7 @@
 Client::Client()
 {
     _socket = NO_SOCKET;
-    std::queue<std::string> _message_queue; 
+    std::queue<std::string> _response_queue; 
 
 }
 
@@ -45,10 +45,28 @@ int Client::getSocket() const { return _socket; }
 
 Server const & Client::getServer() const { return *_server; }
 
+std::vector<Response*>::iterator Client::getBeginResponseToBuild() { return _responses_to_build.begin(); }
+std::vector<Response*>::iterator Client::getEndResponseToBuild() { return _responses_to_build.end(); }
 
-std::string const & Client::getCurrentMessage() const { return _message_queue.front();}
+size_t Client::getResponseToBuildSize() const { return _responses_to_build.size(); }
+const Response * Client::getCurrentSendableResponse() const { return _responses_to_send.front();}
 
-bool Client::hasMessages() const { return _message_queue.size() != 0; }
+bool Client::hasResponseToSend() const { return _responses_to_send.size() != 0; }
+
+
+void Client::switchToSendQueue(Response* response)
+{
+    std::vector<Response*>::iterator it_to_erase;
+    _responses_to_send.push(response);
+    for (std::vector<Response*>::iterator ite = _responses_to_build.begin(); ite != _responses_to_build.end(); ++ite)
+    {
+        if ((*ite)->getRequest() == response->getRequest())
+        {
+            it_to_erase = ite;
+        }
+     }
+    _responses_to_build.erase(it_to_erase);
+}
 
 bool Client::setup(Server const & server)
 {
@@ -72,65 +90,82 @@ bool Client::setup(Server const & server)
 
 bool Client::receiveFromClient()
 {
-    char buff[MAX_SIZE];
     int r;
     int content_length;
+    int newline_pos = -1;
+    int prev_newline_pos;
+    int offset_newline = 3;
+    int current_chunk_size;
+    int read_bytes;
+    int current_last_nl;
 
     _current_receiving_byte = 0;
-    while ((r = recv(_socket, _receiving_buff + _current_receiving_byte, 50, MSG_DONTWAIT)) > 0)
+    _receiving_buff[0] = 0;
+    while ((newline_pos == -1 || newline_pos == std::string::npos) && (r = recv(_socket, _receiving_buff + _current_receiving_byte, 1, MSG_DONTWAIT)) > 0)
     {
         _current_receiving_byte += r;
         _receiving_buff[_current_receiving_byte] = 0;
-        if (std::string(_receiving_buff).find("\r\n\r\n") != std::string::npos)
-            break ;
+        newline_pos = std::string(_receiving_buff).find("\r\n\r\n");
     }
     std::string request_string(_receiving_buff);
     Request request(request_string);
     request.parseHeaders();
     if (!(request["Transfer-Encoding"].length() == 0 || request["Transfer-Encoding"] == "identity"))
     {
-        int current_chunk_size;
-        int current_total_bytes;
-        while ((current_chunk_size = StringToInt(request_string.substr(request_string.find_last_of("\r\n\r\n") + 1, request_string.length() - request_string.find_last_of("\r\n\r\n") - 1))) != 0)
+        while (1)
         {
-            while ((r = recv(_socket, _receiving_buff + _current_receiving_byte, current_chunk_size - current_total_bytes, MSG_DONTWAIT)) > 0)
+            read_bytes = 0;
+            current_last_nl = newline_pos + offset_newline;
+            while (newline_pos + offset_newline == current_last_nl && (r = recv(_socket, _receiving_buff + _current_receiving_byte, 1, MSG_DONTWAIT)) > 0)
             {
-                current_total_bytes += r;
                 _current_receiving_byte += r;
                 _receiving_buff[_current_receiving_byte] = 0;
-                if (current_total_bytes >= current_chunk_size)
-                    break;
-                
+                current_last_nl = std::string(_receiving_buff).find_last_of("\r\n");
             }
+            offset_newline = 0;
+            request_string = std::string(_receiving_buff);
+            current_chunk_size = StringHexaToInt(request_string.substr(newline_pos + 1));
+            offset_newline = 1;
+            if (current_chunk_size == 0)
+                break;
+            while (read_bytes < current_chunk_size + 2 && (r = recv(_socket, _receiving_buff + _current_receiving_byte, current_chunk_size + 2 - read_bytes, MSG_DONTWAIT)) > 0)
+            {
+                read_bytes += r;
+                _current_receiving_byte += r;
+                _receiving_buff[_current_receiving_byte] = 0;
+            }
+            request.addToBody(std::string(_receiving_buff).substr(_current_receiving_byte - current_chunk_size - 1, current_chunk_size));
+            newline_pos = std::string(_receiving_buff).find_last_of("\r\n");    
+        }        
+    }
+    else if ((content_length = StringToInt(request["Content-Length"])) != 0)
+    {
+        while (read_bytes < content_length && (r = recv(_socket, _receiving_buff + _current_receiving_byte, content_length - read_bytes, MSG_DONTWAIT)) > 0)
+        {
+            read_bytes += r;
+            _current_receiving_byte += r;
+            _receiving_buff[_current_receiving_byte] = 0;
         }
     }
-    // else if ((content_length = StringToInt(request["Content-Length"])) != 0)
-    // if (content_length != 0)
-    // buff[r] = 0;
-    if (r >= 0)
-    {
-
-        std::string request_string(buff);
-        Request request(request_string);
-        request.parseHeaders();
-        Response response(request, *_server);
-        _message_queue.push(response.getResponseString());
-        std::cout << request << std::endl;
-        std::cout << "message received" << std::endl;
-        std::cout << response << std::endl;
-    }
+    Response* response = new Response(request, *_server);
+    if (response->isToSend())
+        _responses_to_send.push(response);
     else
-        std::cout << "nothing received" << std::endl;
+        _responses_to_build.push_back(response);
+    std::cout << request << std::endl;
+    std::cout << "message received" << std::endl;
+    // std::cout << response << std::endl;
     return true;
 } 
 
 bool Client::sendToClient()
 {
     std::cout << "begin send" << std::endl;
-    std::string response = _message_queue.front();
-    int r = write(_socket, response.c_str(), response.length());
-    if (r == response.length())
-        _message_queue.pop();
+    Response* response = _responses_to_send.front();
+    std::string response_string = response->buildResponseString();
+    int r = write(_socket, response_string.c_str(), response_string.length());
+    if (r == response_string.length())
+        _responses_to_send.pop();
     std::cout << "response send" << std::endl;
     return true;
 }
