@@ -53,26 +53,4 @@ https://www.tutorialspoint.com/cplusplus/cpp_web_programming.htm
 
 [Non-blocking I/O](https://www.ibm.com/support/knowledgecenter/ssw_ibm_i_72/rzab6/xnonblock.htm)
 
-### Class: ???
-
--webserv    : class générale ayant :
-
-            1. une liste de server (voir en dessous)
-            2. des fonctions permetant de run, reload, shutdown les serveurs 
-
-- server    : implémente la configuration d'un serveur:  
-
-*attributs* :
-            
-            -class config      : infos (port, adress, directory du site, directory logs, du cgi etc...)
-            -class socket       :
-
-- socket    : stocké dans server ? (regroupant les infos du ou des sockets ):  
-*fonctions membres publics* :(hors coplien)  
-
-            ->init() : initialisation  
-            ->send() :   
-            ->recev():
-
-... to continue...
-
+[Comprendre le serveur Nginx et les algorithmes de sélection de blocs de localisation](https://www.digitalocean.com/community/tutorials/understanding-nginx-server-and-location-block-selection-algorithms-fr)
