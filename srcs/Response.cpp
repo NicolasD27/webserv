@@ -25,7 +25,7 @@ Response::Response(Request const & request, Server const & server):_pt_server(&s
     std::ifstream ifs(_ressource_path);
     if (request.getLocation().length() == 0)
         _status = 404;
-    else if((ifs.good() && pathIsFile(_ressource_path)) || pathIsDir(_ressource_path))
+    else if((ifs.good() && pathIsFile(_ressource_path)))
         _status = readRessource(false);
     else
         _status = buildAutoIndex();
@@ -68,10 +68,20 @@ void Response::buildRessourcePath(Request const & request, Server const & server
 
     if (request.getLocation().back() == '/')
     {
-        _headers.insert(std::make_pair("Content-type", "text/html; charset=utf-8"));
-        _ressource_path = server.getRoot() + request.getLocation() + server.getIndex();
-        std::ifstream ifs(_ressource_path);
-        if(ifs.fail() && !pathIsFile(_ressource_path) && server.getAutoIndex())
+         _headers.insert(std::make_pair("Content-type", "text/html; charset=utf-8"));
+        std::stack<std::string,std::vector<std::string> > index(server.getIndex());
+        while (!index.empty())
+        {
+            _ressource_path = server.getRoot() + request.getLocation() + index.top();
+            std::ifstream ifs(_ressource_path);
+            if(ifs.good())
+                return;
+            index.pop();
+        }
+       
+        //_ressource_path = server.getRoot() + request.getLocation() + server.getIndex();
+        //std::ifstream ifs(_ressource_path);
+        if(!pathIsFile(_ressource_path) && server.getAutoIndex())
             _ressource_path = server.getRoot() + request.getLocation();
     }
     else

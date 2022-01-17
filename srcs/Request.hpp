@@ -23,6 +23,7 @@
 #include <map>
 #include <vector>
 #include <utility> 
+#include "Colors.hpp"
 
 class Request;
 
@@ -32,12 +33,6 @@ class Request;
 #define HTTP_POST       2
 #define HTTP_DELETE     3
 
-# define C_GREEN 	"\e[32m"
-# define C_RED		"\e[31m"
-# define C_YELLOW	"\e[33m"
-# define C_CYAN		"\e[34m"
-# define C_GRAY		"\e[37m"
-# define C_RESET	"\e[0m"
 
 class Request
 {
