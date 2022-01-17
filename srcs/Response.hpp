@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include <map>
 #include <vector>
+#include <stack>
 #include <utility>
 #include <ctime>
 #include <dirent.h>

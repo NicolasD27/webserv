@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/11 10:42:37 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/12 11:05:19 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/13 14:40:11 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,7 +122,12 @@ bool ParserConfig::check_block(std::ifstream &buff, std::vector<Server*> &server
         else
         {
             if(removeSemicolon(tokens))
-                new_server->storeLine(tokens[0], tokens[1]);
+            {
+                if(tokens[0] == "index")
+                    new_server->addIndex(tokens);
+                else
+                    new_server->storeLine(tokens[0], tokens[1]);
+            }
             else
             {
                 std::cerr << "Expected ';' at the end of line." << std::endl;
@@ -180,9 +185,9 @@ bool ParserConfig::check_location_block(std::ifstream &buff, std::vector<std::st
         if(removeSemicolon(locationTokens))
         { 
             if(locationTokens[0] == "methods")
-            {
                 newLocation.addMethods(locationTokens);
-            }
+            else if(locationTokens[0] == "index")
+                newLocation.addIndex(locationTokens);
             else
                 newLocation.storeLine(locationTokens[0], locationTokens[1]);
         }

@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 15:32:25 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/09 11:32:37 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/13 15:19:37 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,8 @@ Webserv::~Webserv(void)
 {
     if(!_servers.empty())
         {
-            for(size_t i = 0; i < _servers.size(); i++)
-                delete _servers[i];
+            for(iterator it = _servers.begin(); it != _servers.end(); ++it)
+                delete (*it);
             _servers.clear();
         }
 }
@@ -54,35 +54,44 @@ void        Webserv::config(std::string conf_path)
         buff.close();
         if(!_servers.empty())
         {
-            for(size_t i = 0; i < _servers.size(); i++)
-                delete _servers[i];
+            for(iterator it = _servers.begin(); it != _servers.end(); ++it)
+                delete (*it);
             _servers.clear();
         }
-
         throw BadConfiguration();
     }
     buff.close();
+    if(!_servers.empty())
+    {
+        for (const_iterator it = _servers.begin(); it != _servers.end(); ++it)
+        {   
+            Location    loc_default("/", (*it)->getIndex(), (*it)->getRoot(), (*it)->getAutoIndex(), (*it)->getMethods());
+            
+            (*it)->addLocation(loc_default);
+            
+            if (!checkServer(*(*it)))
+                throw BadConfiguration();           
+        }
+    }
+    else
+    {
+        std::cerr << "file empty." << std::endl;
+        throw BadConfiguration();
+    }
 }
 
 bool Webserv::readConf(std::ifstream & buff)
 {
     std::string str;
 	
-    //std::ifstream ifs(_conf_path);
     buff.open(_conf_path);
     if (buff.fail())
     {
         std::cout << "File does not exist" << std::endl;
         return false;
     }
-	
-	// while (std::getline(ifs, str))
-    //     buff << str << std::endl;
-	//ifs.close();
     return true;
 }
-
-
 
 bool    Webserv::parseConf(std::ifstream & buff)
 {
@@ -101,7 +110,7 @@ bool    Webserv::parseConf(std::ifstream & buff)
         }
         if(tokens.size() == 1 || (tokens.size() == 2 && tokens[1] != "{"))
         {
-            std::cerr << "bad expected bracket" << std::endl;
+            std::cerr << "bad expected bracket" << std::endl << "\tUsage : server {"<< std::endl;
             return false;
         }
         if(!ParserConfig::check_block(buff, _servers))
@@ -109,48 +118,6 @@ bool    Webserv::parseConf(std::ifstream & buff)
     }
     return true;
 }
-// bool Webserv::parseConf(std::stringstream & buff)
-// {
-    
-//     Server *new_server;
-//     std::string line;
-//     int open = 0;
-//     while(std::getline(buff, line))
-//     {
-//         if (line.length() == 0)
-//             continue;
-//         std::string::size_type begin = line.find_first_not_of(" ");
-//         std::string::size_type end   = line.find_last_not_of(" ");
-//         line = line.substr(begin, end-begin + 1);
-//         std::string key;
-//         std::istringstream iss_line(line);        
-//         if (line == "server")
-//             new_server = new Server();  
-//         else if (line == "{")
-//             open++;
-//         else if (line == "}")
-//         {
-//             if (open <= 0)
-//                 return false;
-//             open--;
-//             if (!checkServer(*new_server))
-//                 return false;
-//             _servers.push_back(new_server);            
-//         }
-//         else if( std::getline(iss_line, key, '=') )
-//         {
-//             key = key.substr(1, key.length() - 1); // je considère qu'il y a un seul \t au début
-//             std::string value;
-//             if( std::getline(iss_line, value) )
-//                 new_server->storeLine(key, value);
-//         }
-
-//     //     //ajouter parser pour les location { ...}
-//     }
-//     if (open < 0)
-//         return false;
-//     return true;
-// }
 
 bool Webserv::checkHost(std::string const &host) const
 {
@@ -190,12 +157,22 @@ bool Webserv::checkHost(std::string const &host) const
     free(test);
     free(pch);
     return (ok && nb == 4);
+}
 
+bool Webserv::checkLocations(std::vector<Location> &locations)
+{
+    for(size_t i = 0 ; i < locations.size(); i++)
+    {
+        std::cout << "Control of Location #"<< i << " ...";
+        if(!locations[i].isValid())
+            return false;
+    }
+    return true;
 }
 
 bool Webserv::checkServer(Server const & server) const
 {
-    if (server.getPort() == -1 || server.getServerName() == "")
+    if (server.getPort() == -1 || server.getServerName() == "" || server.getRoot() == "")
         return false;
     if (server.getPort() <=0 || server.getPort() > 65535)
         return false;
@@ -305,9 +282,6 @@ void Webserv::printServers()
     {
         std::cout << "servers : ( " <<&(*it)<< " )" << std::endl;
         (*it)->print();
-        // std::cout << "host : " << (*it)->getHost() << ":" << (*it)->getPort() << std::endl;
-        // std::cout << "server_name : " << (*it)->getServerName() << std::endl;
-        // std::cout << "root : " << (*it)->getRoot() << std::endl << std::endl;
     }
 
 }

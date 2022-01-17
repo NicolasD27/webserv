@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/15 11:27:16 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/10 09:28:18 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/13 15:16:55 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,17 +36,18 @@ class Server;
 class Server
 {
 private:
-    int                     _port;
-    std::string             _host;
-    std::string             _server_name;
-    std::string             _root;
-    std::string             _index;
-    int                     _listen_socket;
-    std::vector<Client*>    _clients;
-    int                     _max_body_size;
-    bool                    _auto_index;
+    int                         _port;
+    std::string                 _host;
+    std::string                 _server_name;
+    std::string                 _root;
+    int                         _listen_socket;
+    std::vector<Client*>        _clients;
+    int                         _max_body_size;
+    bool                        _auto_index;
     std::map<std::vector<unsigned int>, std::string>    _error_pages;
-    std::vector<Location>   _locations;
+    std::vector<Location>       _locations;
+    std::vector<std::string>    _methods;
+    std::vector<std::string>    _index;
     
 public:
     typedef std::vector<Client*>::iterator             iterator;
@@ -62,9 +63,12 @@ public:
     int getSocket() const;
     std::string getHost() const;
     std::string getRoot() const;
-    std::string getIndex() const;
+    std::vector<std::string> getIndex() const;
     std::string getServerName() const;
+
     Client* getClient(int index) const;
+    std::vector<Location>   getLocation(void) const;
+    std::vector<std::string>    getMethods(void) const;
     const_iterator getBeginClients() const;
     const_iterator getEndClients() const;
     bool           getAutoIndex() const;
@@ -72,11 +76,14 @@ public:
     bool setup();
     
     void storeLine(std::string & key, std::string & value);
+    void setMethods(std::vector<std::string> &);
     void handleNewConnection(void);
     void parseErrorPages(std::string & value);
     std::map<std::vector<unsigned int>, std::string> getErrorPages() const;
 
     void    addLocation(Location &);
+    void    addMethods(std::string &);
+    void    addIndex(std::vector<std::string> &);
 
     void    print(void) const;
 

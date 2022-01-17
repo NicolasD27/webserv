@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/15 14:46:42 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/10 10:40:27 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/13 15:19:01 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 
 #include "Server.hpp"
 #include "ParserConfig.hpp"
+#include "Location.hpp"
 
 # define PATH_CONF  "conf/default.conf"
 
@@ -34,6 +35,7 @@ private:
     std::string             _conf_path;
 
     bool checkHost(std::string const &host) const;
+    bool checkLocations(std::vector<Location> &);
     
 public:
 

@@ -6,17 +6,13 @@
 #    By: clorin <clorin@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/12/17 16:20:01 by clorin            #+#    #+#              #
-<<<<<<< HEAD
-#    Updated: 2022/01/11 15:00:39 by clorin           ###   ########.fr        #
-=======
-#    Updated: 2022/01/10 10:22:11 by clorin           ###   ########.fr        #
->>>>>>> main
+#    Updated: 2022/01/12 11:53:30 by clorin           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME 		:= webserv 	
 
-CC		:= g++
+CC		:= clang++
 
 CFLAGS	+= -Wall -Wextra -Werror -std=c++98
 
