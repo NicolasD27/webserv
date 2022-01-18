@@ -68,6 +68,7 @@ void        Webserv::config(std::string conf_path)
             Location    loc_default("/", (*it)->getIndex(), (*it)->getRoot(), (*it)->getAutoIndex(), (*it)->getMethods());
             
             (*it)->addLocation(loc_default);
+            (*it)->sortLocations();
             
             if (!checkServer(*(*it)))
                 throw BadConfiguration();           

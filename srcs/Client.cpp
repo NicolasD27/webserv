@@ -151,8 +151,8 @@ bool Client::receiveFromClient()
     if (request_string.length() == 0)
         return false;
     std::cout << "request : " << request_string << std::endl;
-    Response* response = new Response(request, *_server);
     std::cout << request << std::endl;
+    Response* response = new Response(request, *_server);
     if (response->isToSend())
         _responses_to_send.push(response);
     else

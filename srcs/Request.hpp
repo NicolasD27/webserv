@@ -39,7 +39,7 @@ class Request
 
 private:
     std::string                         _request_string;
-    unsigned int                        _http_method;
+    std::string                        _http_method;
     std::string                         _location;
     time_t                              _keep_alive_n;
     std::map<std::string, std::string>  _headers;
@@ -53,7 +53,7 @@ public:
     virtual ~Request();
     Request &operator=(Request const &);
 
-    std::string &operator[](const char *key);
+    std::string & operator[](const char *key);
 
     void parseHeaders();
     void storeHeader(std::string key, std::string value);
@@ -61,7 +61,7 @@ public:
     void printHeaders(std::ostream &);
     void addToBody(std::string new_elem);
 
-    unsigned    getHttpMethod(void) const;
+    std::string    getHttpMethod(void) const;
     std::string getLocation(void) const;
     time_t      getKeepAliveN() const;
     std::string getBody() const;

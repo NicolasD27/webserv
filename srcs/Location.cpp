@@ -108,3 +108,13 @@ bool            Location::isValid() const
     // to continue
     return (_index.empty() == false);
 }
+
+bool            Location::hasMethod(std::string method) const
+{
+    if (_methods.size() == 0)
+        return true;
+    for(std::vector<std::string>::const_iterator it = _methods.begin(); it != _methods.end(); ++it)
+        if ((*it) == method)
+            return true;
+    return false;
+}
