@@ -36,6 +36,11 @@ Server::~Server()
     _locations.clear();
 }
 
+void Server::removeClient(std::vector<Client*>::const_iterator it)
+{
+    _clients.erase(it);
+}
+
 Server      &Server::operator=(Server const &cpy)
 {
     if(this != &cpy)

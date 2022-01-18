@@ -1,10 +1,10 @@
-servers : ( 0xdd7470 )
+servers : ( 0x19a2470 )
 host : 127.0.0.1:3000
 server_name : webserv
 root : www/html
 Client Max Body Size : 9000
 
-servers : ( 0xdd7478 )
+servers : ( 0x19a2478 )
 host : 127.0.0.1:8000
 server_name : webserv
 root : www/html

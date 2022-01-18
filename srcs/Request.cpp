@@ -116,7 +116,7 @@ Request::~Request()
 std::ostream &operator<<(std::ostream & o, Request & request)
 {
     const char *Methode[4] = {"Unknown","GET", "POST","DELETE"};
-    
+    o << "here";
     o << C_GREEN << "Request:\t"<<C_RED<<Methode[request.getHttpMethod()]<<C_RESET<<"\n";
     o << C_YELLOW << "\tLocation "<< C_RESET << ": " << request.getLocation() << "\n";
     request.printHeaders(o);

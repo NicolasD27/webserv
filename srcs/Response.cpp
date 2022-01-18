@@ -22,9 +22,31 @@ Response::Response(Request const & request, Server const & server):_pt_server(&s
         buildDeleteResponse(request, server, block);   
 }
 
-void Response::buildDeleteResponse(Request const & request, Server const & server, Location block)
+void Response::buildDeleteResponse(Request const & request, Server const & server, Location location)
 {
-    
+    std::string current_directory = getWorkingPath();
+    _ressource_path = location.getRoot() + request.getLocation();
+    std::string file_to_delete = current_directory + "/" + _ressource_path;
+    if(pathIsDir(file_to_delete))
+    {
+        _status = 404;
+        _to_send = true;
+        buildErrorResponse(server);
+    }
+    else
+    {
+        _ressource_fd = open(_ressource_path.c_str(), O_NONBLOCK);
+        if (_ressource_fd == -1)
+        {
+            _to_send = true;
+            _status = 404;
+        }
+        else
+        {
+            _to_send = false;
+            _status = 200;
+        }
+    }
 }
 
 void Response::buildGetResponse(Request const & request, Server const & server, Location block)

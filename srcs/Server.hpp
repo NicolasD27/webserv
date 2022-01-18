@@ -72,6 +72,7 @@ public:
     const_iterator getBeginClients() const;
     const_iterator getEndClients() const;
     bool           getAutoIndex() const;
+    void removeClient(std::vector<Client*>::const_iterator);
 
     bool setup();
     
