@@ -220,7 +220,6 @@ bool        Webserv::run()
                         {
                             if (FD_ISSET((*ite)->getRessourceFD(), &read_fds))
                             {
-                                std::cout << "here" << std::endl;
                                 (*ite)->readRessource();
                                 to_switch = ite;
                                 
