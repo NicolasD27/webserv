@@ -72,6 +72,22 @@ Client* Server::getClient(int i) const { return _clients[i]; }
 
 std::vector<Location>  Server::getLocation(void)const {return _locations;}
 
+void Server::sortLocations()
+{
+    for(size_t j = 1; j < _locations.size(); j++)
+    {
+        Location key = _locations[j];
+        int i = j-1;
+
+        while(i >= 0 && _locations[i].getPath().length() < key.getPath().length())
+        {
+            _locations[i+1] = _locations[i];
+            i--;
+        }
+        _locations[i+1] = key;
+    }
+}
+
 std::vector<std::string>    Server::getMethods(void) const {return _methods;}
 
 std::vector<Client*>::const_iterator Server::getBeginClients() const { return _clients.cbegin(); }

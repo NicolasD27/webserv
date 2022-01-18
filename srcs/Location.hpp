@@ -47,6 +47,7 @@ class Location
         void                        setAutoIndex(bool);
 
         bool                        isValid(void) const;
+        bool                        hasMethod(std::string) const;
 
         void                        print(void) const;
 };

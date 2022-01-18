@@ -41,14 +41,7 @@ void Request::parseMethod(std::string line)
     std::istringstream iss_line(line);        
     if( std::getline(iss_line, method, ' '))
     {
-        if (method == "GET")
-            _http_method = 1;
-        else if (method == "POST")
-            _http_method = 2;
-        else if (method == "DELETE")
-            _http_method = 3;
-        else
-            _http_method = 0;
+        _http_method = method;
         std::string location;
         if( std::getline(iss_line, location, ' '))
             _location = location;
@@ -89,7 +82,7 @@ void Request::printHeaders(std::ostream & o)
 }
 
 
-unsigned int        Request::getHttpMethod() const
+std::string        Request::getHttpMethod() const
 {
     return this->_http_method;
 }
@@ -115,9 +108,7 @@ Request::~Request()
 
 std::ostream &operator<<(std::ostream & o, Request & request)
 {
-    const char *Methode[4] = {"Unknown","GET", "POST","DELETE"};
-    o << "here";
-    o << C_GREEN << "Request:\t"<<C_RED<<Methode[request.getHttpMethod()]<<C_RESET<<"\n";
+    o << C_GREEN << "Request:\t"<<C_RED<< request.getHttpMethod() <<C_RESET<<"\n";
     o << C_YELLOW << "\tLocation "<< C_RESET << ": " << request.getLocation() << "\n";
     request.printHeaders(o);
     o << C_YELLOW << "\tKeep alive " << C_RESET << ": " << request.getKeepAliveN()<<"\n";

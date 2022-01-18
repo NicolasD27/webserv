@@ -6,52 +6,31 @@ StatusCode STATUS_CODES;
 
 ErrorPages  ERROR_PAGES;
 
-Response::Response(Request const & request, Server const & server):_pt_server(&server), _pt_request(&request), _body(""), _to_send(true), _ressource_fd(-1)
+Response::Response(Request const & request, Server const & server):_pt_server(&server), _pt_request(&request), _body(""), _to_send(true), _ressource_fd(-1), _ressource_path(""), _status(0)
 {
-    Location    block;
-    std::cout << "Creation de Response avec Request.getLocation() = " << request.getLocation();
-    block = findLocation(request.getLocation(), server);
-    std::cout << "on travail avec le block : \n";
-    block.print();
+    // Location    block;
+    // std::cout << "Creation de Response avec Request.getLocation() = " << request.getLocation();
+    // block = findLocation(request.getLocation(), server);
+    // std::cout << "on travail avec le block : \n";
+    // block.print();
 
-    if (request.getHttpMethod() == HTTP_GET)
-        buildGetResponse(request, server, block);
-    // else if (request.getHttpMethod() == HTTP_POST)
+    if (request.getHttpMethod() == "GET")
+        buildGetResponse(request, server);
+    // else if (request.getHttpMethod() == "POST")
     //     buildPostResponse();
-    else if (request.getHttpMethod() == HTTP_DELETE)
-        buildDeleteResponse(request, server, block);   
+    else if (request.getHttpMethod() == "DELETE")
+        buildDeleteResponse(request, server);   
 }
 
-void Response::buildDeleteResponse(Request const & request, Server const & server, Location location)
+void Response::buildDeleteResponse(Request const & request, Server const & server)
 {
-    std::string current_directory = getWorkingPath();
-    _ressource_path = location.getRoot() + request.getLocation();
-    std::string file_to_delete = current_directory + "/" + _ressource_path;
-    if(pathIsDir(file_to_delete))
-    {
-        _status = 404;
-        _to_send = true;
-        buildErrorResponse(server);
-    }
-    else
-    {
-        _ressource_fd = open(_ressource_path.c_str(), O_NONBLOCK);
-        if (_ressource_fd == -1)
-        {
-            _to_send = true;
-            _status = 404;
-        }
-        else
-        {
-            _to_send = false;
-            _status = 200;
-        }
-    }
+    
 }
 
-void Response::buildGetResponse(Request const & request, Server const & server, Location block)
+void Response::buildGetResponse(Request const & request, Server const & server)
 {
-    buildRessourcePath(request.getLocation(), block);
+    findLocation(request.getLocation(), server, request);
+    // buildRessourcePath(request.getLocation(), block);
     std::cout << "_RessourcePath = " << _ressource_path << "\t _status = " << _status << std::endl;
     if(_status == 301)
     {
@@ -143,7 +122,7 @@ Response::Response(Response const & src)
 
 
 
-void Response::buildRessourcePath(std::string const &locRequest, Location const &location)
+bool Response::buildRessourcePath(std::string const &locRequest, Location const &location)
 {
     std::string current_directory = getWorkingPath();
     std::string file_testing;
@@ -178,7 +157,7 @@ void Response::buildRessourcePath(std::string const &locRequest, Location const 
             _status = 404;
     }
     else
-     {   
+    {   
         // controle si _ressource_path est un directory
         file_testing = current_directory + "/" + _ressource_path;
         std::cout << file_testing<<" is a Directory ? ";
@@ -188,7 +167,8 @@ void Response::buildRessourcePath(std::string const &locRequest, Location const 
             _ressource_path += "/";
             _status = 301;
         }
-     }
+    }
+    return find_index;
 }
 
 void Response::parseExtension()
@@ -327,31 +307,57 @@ void                    Response::printHeaders(std::ostream & o)
     }
 }
 
-Location                Response::findLocation(std::string const &uri, Server const &server)
+// Location                Response::findLocation(std::string const &uri, Server const &server)
+// {
+//     std::vector<Location> loc = server.getLocation();
+//     std::cout << "\nfind the Location request : " << uri << " in Location of server\n";
+
+//     size_t i = 0;
+//     size_t pos_start = uri.find_first_not_of('/',1);
+//     size_t pos_end = uri.find_first_of('/', pos_start);
+
+//     std::string str = "/";
+//     if(pos_end != std::string::npos)
+//         str = uri.substr(0,pos_end);
+
+//     for(; i < loc.size(); i++)
+//     {
+//         std::cout << "\t"<<i<<") "<< loc[i].getPath() << " == " << str << " ... ";
+//         if(loc[i].getPath() == str)
+//         {
+//             std::cout << C_GREEN << " Found" << C_RESET << std::endl;
+//             return loc[i];   
+//         }
+//         else
+//             std::cout << C_RED << " No" << C_RESET << std::endl;
+//     }
+//     return loc.back();
+// }
+
+void Response::findLocation(std::string const & uri, Server const & server, Request const & request)
 {
-    std::vector<Location> loc = server.getLocation();
-    std::cout << "\nfind the Location request : " << uri << " in Location of server\n";
+    std::cout << "uri : " << uri << std::endl;
+    std::vector<Location> locations = server.getLocation();
 
-    size_t i = 0;
-    size_t pos_start = uri.find_first_not_of('/',1);
-    size_t pos_end = uri.find_first_of('/', pos_start);
-
-    std::string str = "/";
-    if(pos_end != std::string::npos)
-        str = uri.substr(0,pos_end);
-
-    for(; i < loc.size(); i++)
+    for (std::vector<Location>::iterator it = locations.begin(); it != locations.end(); ++it)
+        std::cout << "loc : " << (*it).getPath() << std::endl;
+    
+    
+    for (std::vector<Location>::iterator it = locations.begin(); it != locations.end(); ++it)
     {
-        std::cout << "\t"<<i<<") "<< loc[i].getPath() << " == " << str << " ... ";
-        if(loc[i].getPath() == str)
+        std::cout << "uri : " << uri.substr(0, (*it).getPath().length()) << std::endl << "loc : " << (*it).getPath() << std::endl << ((*it).getPath() == uri.substr(0, (*it).getPath().length())) << std::endl;
+        if ((*it).getPath() == uri.substr(0, (*it).getPath().length()))
         {
-            std::cout << C_GREEN << " Found" << C_RESET << std::endl;
-            return loc[i];   
+            
+            if ((*it).hasMethod(request.getHttpMethod()))
+            {
+                std::cout << "changing" << std::endl ;
+                if (buildRessourcePath(request.getLocation(), *it))
+                    findLocation(_ressource_path, server, request);
+                return;
+            }
         }
-        else
-            std::cout << C_RED << " No" << C_RESET << std::endl;
     }
-    return loc.back();
 }
 
 std::ostream &operator<<(std::ostream & o, Response & response)

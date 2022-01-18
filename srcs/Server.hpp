@@ -83,6 +83,7 @@ public:
     std::map<std::vector<unsigned int>, std::string> getErrorPages() const;
 
     void    addLocation(Location &);
+    void    sortLocations(void);
     void    addMethods(std::string &);
     void    addIndex(std::vector<std::string> &);
 
