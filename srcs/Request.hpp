@@ -53,10 +53,13 @@ public:
     virtual ~Request();
     Request &operator=(Request const &);
 
+    std::string &operator[](const char *key);
+
     void parseHeaders();
     void storeHeader(std::string key, std::string value);
     void parseMethod(std::string line);
     void printHeaders(std::ostream &);
+    void addToBody(std::string new_elem);
 
     unsigned    getHttpMethod(void) const;
     std::string getLocation(void) const;

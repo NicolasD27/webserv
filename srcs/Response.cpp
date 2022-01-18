@@ -18,15 +18,20 @@ ErrorPages  ERROR_PAGES;
 //     {500, PAGE500}
 // };
 
-Response::Response(Request const & request, Server const & server):_pt_server(&server), _pt_request(&request)
+Response::Response(Request const & request, Server const & server):_pt_server(&server), _pt_request(&request), _body(""), _to_send(true), _ressource_fd(-1)
 {
-    std::cout << "Creation: " << request.getLocation();
+    std::cout << "Creation: " << request.getLocation() << std::endl;
     buildRessourcePath(request, server);
     std::ifstream ifs(_ressource_path);
     if (request.getLocation().length() == 0)
         _status = 404;
     else if((ifs.good() && pathIsFile(_ressource_path)))
-        _status = readRessource(false);
+    {
+        // _status = readRessource(false);
+        _to_send = false;
+        _ressource_fd = open(_ressource_path.c_str(), O_NONBLOCK);
+        _status = 200;
+    }
     else
         _status = buildAutoIndex();
     if (_status == 301)
@@ -44,13 +49,19 @@ Response::Response(Request const & request, Server const & server):_pt_server(&s
                 {
                     _ressource_path = server.getRoot() + it->second;
                     _headers.insert(std::make_pair("Content-type", "text/html"));
-                    readRessource(true);
+                    // readRessource(true);
+                    _to_send = false;
+                    _ressource_fd = open(_ressource_path.c_str(), O_NONBLOCK);
                 }
                 break;
             }
     }
     else
         parseExtension();
+}
+
+std::string Response::buildResponseString()
+{
     addDate();
     _headers.insert(std::make_pair("Cache-Control", "no-store"));
     _headers.insert(std::make_pair("Server", "webserv"));
@@ -59,6 +70,22 @@ Response::Response(Request const & request, Server const & server):_pt_server(&s
     for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); ++it)
         _response_string += it->first + ": " + it->second + "\n";
     _response_string += "\n" + _body;
+    return _response_string;
+}
+
+Response::Response(Response const & src)
+{
+    
+    for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); ++it)
+        this->_headers.insert(*it);
+    _status = src._status;
+    _response_string = src._response_string;
+    _ressource_path = src._ressource_path;
+    _body = src._body;
+    _pt_request = src._pt_request;
+    _pt_server = src._pt_server;
+    _to_send = src._to_send;
+    _ressource_fd = src._ressource_fd;
 }
 
 void Response::buildRessourcePath(Request const & request, Server const & server)
@@ -140,7 +167,7 @@ unsigned int Response::readRessource(bool isErrorPage)
     std::ifstream ifs(_ressource_path);
     if(ifs.good() && pathIsFile(_ressource_path))
     {
-        if(! isErrorPage)
+        if(!isErrorPage)
             _status = 200;
 
         while (std::getline(ifs, str))
@@ -149,9 +176,7 @@ unsigned int Response::readRessource(bool isErrorPage)
         _body = buff.str();
     }
     else if(isErrorPage)
-    {
         _body = ERROR_PAGES[_status];
-    }
     else
     {
         if (pathIsFile(_ressource_path))
@@ -161,6 +186,7 @@ unsigned int Response::readRessource(bool isErrorPage)
         else
             _status = 404;
     }
+    _headers.insert(std::make_pair("Content-Length", NumberToString(_body.length())));
     return _status;
 }
 
@@ -192,15 +218,21 @@ Response      &Response::operator=(Response const &cpy)
     return *this;
 }
 
-std::string & Response::getResponseString()
+Request const * Response::getRequest() const { return _pt_request; }
+
+std::string Response::getResponseString() const
 {
     return _response_string;
 }
 
-std::string & Response::getRessourcePath()
+std::string Response::getRessourcePath() const
 {
     return _ressource_path;
 }
+
+int Response::getRessourceFD() const { return _ressource_fd; }
+
+bool Response::isToSend() const { return _to_send; }
 
 unsigned int            Response::getStatus() const
 {

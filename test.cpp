@@ -5,14 +5,15 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <unistd.h>
 
 int main()
 {
-    std::cout << htons(80) << std::endl;
-    std::cout << htons(8000) << std::endl;
-    std::cout << htons(3000) << std::endl;
-    std::cout << htons(443) << std::endl;
-    std::cout << ntohs(1668) << std::endl;
+     int y;
+    std::stringstream stream("3d\n");
+
+    stream >> std::hex >> y;
+    std::cout << y << std::endl;
 }
 // static int forward_port;
 

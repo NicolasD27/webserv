@@ -213,11 +213,25 @@ bool        Webserv::run()
             
                 for (std::vector<Client*>::const_iterator client_it = (*server_it)->getBeginClients(); client_it != (*server_it)->getEndClients(); ++client_it)
                 {
+                    if ((*client_it)->getResponseToBuildSize() > 0)
+                    {
+                        std::vector<Response*>::iterator to_switch;
+                        for (std::vector<Response*>::iterator ite = (*client_it)->getBeginResponseToBuild(); ite != (*client_it)->getEndResponseToBuild(); ++ite)
+                        {
+                            if (FD_ISSET((*ite)->getRessourceFD(), &read_fds))
+                            {
+                                std::cout << "here" << std::endl;
+                                (*ite)->readRessource();
+                                to_switch = ite;
+                                
+                            }
+                        }
+                        (*client_it)->switchToSendQueue(*to_switch);
+                    }
                     if ((*client_it)->getSocket() != NO_SOCKET && FD_ISSET((*client_it)->getSocket(), &read_fds))
                     {
 
                         (*client_it)->receiveFromClient();
-
                         
                     }
                     if ((*client_it)->getSocket() != NO_SOCKET && FD_ISSET((*client_it)->getSocket(), &write_fds))
@@ -254,17 +268,22 @@ void Webserv::buildFDSets(Server const & server, fd_set *read_fds, fd_set *write
     FD_SET(server.getSocket(), except_fds);
     for (std::vector<Client*>::const_iterator it = server.getBeginClients(); it != server.getEndClients(); ++it)
     {
+        
+        for (std::vector<Response*>::iterator ite = (*it)->getBeginResponseToBuild(); ite != (*it)->getEndResponseToBuild(); ++ite)
+        {
+            if ((*ite)->getRessourceFD() > *highest_socket)
+                *highest_socket = (*ite)->getRessourceFD();
+            FD_SET((*ite)->getRessourceFD(), read_fds);
+        }
+        
         if ((*it)->getSocket() != NO_SOCKET)
         {
             if ((*it)->getSocket() > *highest_socket)
                 *highest_socket = (*it)->getSocket();
             FD_SET((*it)->getSocket(), read_fds);
             FD_SET((*it)->getSocket(), except_fds);
-            if ((*it)->hasMessages() && (*it)->getCurrentMessage().length() > 0)
-            {
-                // std::cout << "message is : " << (*it)->getCurrentMessage() << std::endl;
+            if ((*it)->hasResponseToSend())
                 FD_SET((*it)->getSocket(), write_fds);
-            }
         }
     }
 }

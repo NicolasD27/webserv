@@ -21,7 +21,7 @@ SRCS_DIR = srcs/
 OBJS_DIR = objs/
 
 SRCS	= main.cpp Webserv.cpp Server.cpp Client.cpp Request.cpp Response.cpp file_utils.cpp \
-		  ErrorPages.cpp MimesType.cpp StatusCode.cpp ParserConfig.cpp Location.cpp
+		  ErrorPages.cpp MimesType.cpp StatusCode.cpp ParserConfig.cpp Location.cpp utility.cpp
 
 OBJS	= $(SRCS:.cpp=.o) 
 
