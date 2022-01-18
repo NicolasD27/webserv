@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/11 10:42:37 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/13 14:40:11 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/17 09:41:28 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -203,6 +203,7 @@ bool ParserConfig::check_location_block(std::ifstream &buff, std::vector<std::st
         std::cerr << "bracket } not found." << std::endl;
         return false;
     }    
+    //newLocation.print();
     server->addLocation(newLocation);
     return true;
 }

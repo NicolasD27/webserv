@@ -31,7 +31,7 @@
 #include "file_utils.hpp"
 #include "Request.hpp"
 #include "Server.hpp"
-// #include "Custom_ERROR.hpp"
+#include "Location.hpp"
 #include "StatusCode.hpp"
 #include "MimesType.hpp"
 #include "ErrorPages.hpp"
@@ -48,6 +48,9 @@ private:
     std::string                         _body;
     Request const                       *_pt_request;
     Server    const                     *_pt_server;
+
+    Location                            findLocation(std::string const &, Server const &);
+    void buildRessourcePath(std::string const &, Location const &);
     
 public:
     Response(Request const & request, Server const & server);
@@ -58,7 +61,7 @@ public:
     void addDate();
     std::string & getResponseString();
     unsigned int readRessource(bool isErrorPage = false);
-    void buildRessourcePath(Request const & request, Server const & server);
+
     unsigned int buildAutoIndex();
     void parseExtension();
     std::string & getRessourcePath(void);

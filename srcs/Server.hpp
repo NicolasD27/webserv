@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/15 11:27:16 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/13 15:16:55 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/17 10:09:34 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,7 @@ public:
     std::string getServerName() const;
 
     Client* getClient(int index) const;
-    std::vector<Location>   getLocation(void) const;
+    std::vector<Location>       getLocation(void) const;
     std::vector<std::string>    getMethods(void) const;
     const_iterator getBeginClients() const;
     const_iterator getEndClients() const;

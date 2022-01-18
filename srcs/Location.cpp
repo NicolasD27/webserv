@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/11 14:51:26 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/13 12:02:56 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/17 10:27:56 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,19 @@ Location::Location(Location const &cpy):_path(cpy._path), _index(cpy._index),_ro
 Location::Location(std::string path, std::vector<std::string> index, std::string root, bool autoIndex, std::vector<std::string> methods):
 _path(path), _index(index), _root(root), _autoIndex(autoIndex), _methods(methods)
 {}
+
+Location &Location::operator=(Location const &cpy)
+{
+    if(&cpy != this)
+    {
+        _path = cpy._path;
+        _index = cpy._index;
+        _root = cpy._root;
+        _autoIndex = cpy._autoIndex;
+        _methods = cpy._methods;
+    }
+    return *this;
+};
 
 Location::~Location()
 {
@@ -68,7 +81,7 @@ void            Location::addIndex(std::vector<std::string> tokens)
 
 void            Location::print() const
 {
-    std::cout << "Location : " << _path << std::endl;
+    std::cout << "Location ("<<(&(*this))<<"): " << _path << std::endl;
     std::cout << "\troot : "<< _root << std::endl << "\tindex : ";
     if(_index.empty())
     {

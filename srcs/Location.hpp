@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/11 14:45:49 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/13 12:02:35 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/17 10:26:40 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ class Location
         Location(std::string path, std::vector<std::string> index, std::string root, bool autoIndex, std::vector<std::string> methods);
         ~Location(void);
         Location(Location const &);
-        Location &operator=(Location const &){return *this;};
+        Location &operator=(Location const &);
 
         void                        storeLine(std::string const & , std::string &);
         void                        addMethods(std::vector<std::string> );
