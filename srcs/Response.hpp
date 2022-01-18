@@ -55,8 +55,13 @@ private:
     Request const                       *_pt_request;
     Server    const                     *_pt_server;
     bool                                _to_send;
-    Location                            findLocation(std::string const &, Server const &);
+
+    Location findLocation(std::string const &, Server const &);
     void buildRessourcePath(std::string const &, Location const &);
+    void buildErrorResponse(Server const & server);
+    void buildGetResponse(Request const & request, Server const & server, Location block);
+    void buildPostResponse(Request const & request, Server const & server, Location block);
+    void buildDeleteResponse(Request const & request, Server const & server, Location block);
     
     
 public:

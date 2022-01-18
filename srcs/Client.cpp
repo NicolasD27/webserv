@@ -126,7 +126,7 @@ bool Client::receiveFromClient()
             request_string = std::string(_receiving_buff);
             current_chunk_size = StringHexaToInt(request_string.substr(newline_pos + 1));
             offset_newline = 1;
-            if (current_chunk_size == 0)
+            if (current_chunk_size == 0) // ajouter max body
                 break;
             while (read_bytes < current_chunk_size + 2 && (r = recv(_socket, _receiving_buff + _current_receiving_byte, current_chunk_size + 2 - read_bytes, MSG_DONTWAIT)) > 0)
             {
@@ -146,13 +146,14 @@ bool Client::receiveFromClient()
             _current_receiving_byte += r;
             _receiving_buff[_current_receiving_byte] = 0;
         }
+        request.addToBody(std::string(_receiving_buff).substr(newline_pos + 4));
     }
+    std::cout << request << std::endl;
     Response* response = new Response(request, *_server);
     if (response->isToSend())
         _responses_to_send.push(response);
     else
         _responses_to_build.push_back(response);
-    std::cout << request << std::endl;
     std::cout << "message received" << std::endl;
     // std::cout << response << std::endl;
     return true;
