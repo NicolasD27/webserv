@@ -1,0 +1,17 @@
+servers : ( 0xdd7470 )
+host : 127.0.0.1:3000
+server_name : webserv
+root : www/html
+Client Max Body Size : 9000
+
+servers : ( 0xdd7478 )
+host : 127.0.0.1:8000
+server_name : webserv
+root : www/html
+Client Max Body Size : 30000
+
+47115
+Accepting connections on port 3000.
+16415
+Accepting connections on port 8000.
+before select

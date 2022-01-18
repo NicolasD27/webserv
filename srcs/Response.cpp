@@ -14,92 +14,81 @@ Response::Response(Request const & request, Server const & server):_pt_server(&s
     std::cout << "on travail avec le block : \n";
     block.print();
 
+    if (request.getHttpMethod() == HTTP_GET)
+        buildGetResponse(request, server, block);
+    // else if (request.getHttpMethod() == HTTP_POST)
+    //     buildPostResponse();
+    else if (request.getHttpMethod() == HTTP_DELETE)
+        buildDeleteResponse(request, server, block);   
+}
+
+void Response::buildDeleteResponse(Request const & request, Server const & server, Location block)
+{
+    
+}
+
+void Response::buildGetResponse(Request const & request, Server const & server, Location block)
+{
     buildRessourcePath(request.getLocation(), block);
     std::cout << "_RessourcePath = " << _ressource_path << "\t _status = " << _status << std::endl;
     if(_status == 301)
     {
         _headers.insert(std::make_pair("Content-type", "text/html"));
         _headers.insert(std::make_pair("Location", "http://" + server.getHost() + ":" + NumberToString(server.getPort()) + request.getLocation() + "/"));
-        // std::cout << "http://" << server.getHost() << ":" << NumberToString(server.getPort()) << request.getLocation() << "/" << std::endl;
-    }
-    else if(_status == 404)
-    {
-        std::map<std::vector<unsigned int>, std::string> error_pages = server.getErrorPages();
-        if(error_pages.size() > 0)
-        {
-            for (std::map<std::vector<unsigned int>, std::string>::iterator it = error_pages.begin(); it != error_pages.end(); ++it)
-                for (std::vector<unsigned int>::const_iterator ite = it->first.begin(); ite != it->first.end(); ++ite)
-                {
-                    if (*ite == _status)
-                    {
-                        _ressource_path = server.getRoot() + it->second;
-                        _headers.insert(std::make_pair("Content-type", "text/html"));
-                        _to_send = false;
-                        _ressource_fd = open(_ressource_path.c_str(), O_NONBLOCK);
-                        if (_ressource_fd == -1)
-                        {
-                            _body = ERROR_PAGES[_status];
-                            _to_send = true;
-                        }
-                    }
-                    break;
-                }
-        }
-        else
-            _body = ERROR_PAGES[_status];
     }
     else
     {
-        
-        if (!pathIsDir(_ressource_path))
+        if (_status != 404)
         {
-            
-            _ressource_fd = open(_ressource_path.c_str(), O_NONBLOCK);
-            if (_ressource_fd == -1)
+            if (!pathIsDir(_ressource_path))
             {
-                _to_send = true;
-                _status = 404;
-            }
-            else
-            {
-                _to_send = false;
-                _status = 200;
-            }
-
-        }
-            // _status = readRessource(false);
-        else
-            _status = buildAutoIndex();
-        
-        if (_status != 200)
-        {
-            std::map<std::vector<unsigned int>, std::string> error_pages = server.getErrorPages();
-            if(error_pages.size() > 0)
-            {
-            for (std::map<std::vector<unsigned int>, std::string>::iterator it = error_pages.begin(); it != error_pages.end(); ++it)
-                for (std::vector<unsigned int>::const_iterator ite = it->first.begin(); ite != it->first.end(); ++ite)
+                _ressource_fd = open(_ressource_path.c_str(), O_NONBLOCK);
+                if (_ressource_fd == -1)
                 {
-                    if (*ite == _status)
-                    {
-                        _ressource_path = server.getRoot() + it->second;
-                        _headers.insert(std::make_pair("Content-type", "text/html"));
-                        _to_send = false;
-                        _ressource_fd = open(_ressource_path.c_str(), O_NONBLOCK);
-                        if (_ressource_fd == -1)
-                        {
-                            _body = ERROR_PAGES[_status];
-                            _to_send = true;
-                        }
-                    }
-                    break;
+                    _to_send = true;
+                    _status = 404;
+                }
+                else
+                {
+                    _to_send = false;
+                    _status = 200;
                 }
             }
             else
-                _body = ERROR_PAGES[_status];
+                _status = buildAutoIndex();
         }
+        if (_status != 200)
+            buildErrorResponse(server);
         else
             parseExtension();
     }
+}
+
+void Response::buildErrorResponse(Server const & server)
+{
+    std::map<std::vector<unsigned int>, std::string> error_pages = server.getErrorPages();
+    if(error_pages.size() > 0)
+    {
+        for (std::map<std::vector<unsigned int>, std::string>::iterator it = error_pages.begin(); it != error_pages.end(); ++it)
+            for (std::vector<unsigned int>::const_iterator ite = it->first.begin(); ite != it->first.end(); ++ite)
+            {
+                if (*ite == _status)
+                {
+                    _ressource_path = server.getRoot() + it->second;
+                    _headers.insert(std::make_pair("Content-type", "text/html"));
+                    _to_send = false;
+                    _ressource_fd = open(_ressource_path.c_str(), O_NONBLOCK);
+                    if (_ressource_fd == -1)
+                    {
+                        _body = ERROR_PAGES[_status];
+                        _to_send = true;
+                    }
+                }
+                break;
+            }
+    }
+    else
+        _body = ERROR_PAGES[_status];
 }
 
 std::string Response::buildResponseString()
