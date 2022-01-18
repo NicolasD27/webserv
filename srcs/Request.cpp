@@ -4,9 +4,11 @@
 const char *HEADERS_IN[] = {"Accept-Language", "Accept", "Keep-Alive", "Authorization", "Via", "Accept-Encoding", "Upgrade", "Expect", "TE", "If-Range", "Range", "Transfer-Encoding", "Content-Type", "Content-Range", "Content-Length", "Referer", "User-Agent", "If-None-Match", "If-Match", "If-Unmodified-Since", "If-Modified-Since", "Connection", "Host", NULL};
 
 
-Request::Request(std::string request_string) : _request_string(request_string)
+Request::Request(std::string request_string) : _request_string(request_string), _body(""), _keep_alive_n(0), _location("")
 {
 }
+
+std::string & Request::operator[](const char *key) { return _headers[key]; }
 
 void Request::parseHeaders()
 {
@@ -74,6 +76,8 @@ void Request::storeHeader(std::string key, std::string value)
     //     }
     // }
 }
+
+void Request::addToBody(std::string new_elem) { _body += new_elem;}
 
 void Request::printHeaders(std::ostream & o)
 {

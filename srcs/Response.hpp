@@ -26,6 +26,11 @@
 #include <utility>
 #include <ctime>
 #include <dirent.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+class Response;
+
 
 #include "utility.hpp"
 #include "file_utils.hpp"
@@ -45,12 +50,14 @@ private:
     // std::string                         _status_string;
     std::string                         _response_string;
     std::string                         _ressource_path;
+    int                                 _ressource_fd;
     std::string                         _body;
     Request const                       *_pt_request;
     Server    const                     *_pt_server;
-
+    bool                                _to_send;
     Location                            findLocation(std::string const &, Server const &);
     void buildRessourcePath(std::string const &, Location const &);
+    
     
 public:
     Response(Request const & request, Server const & server);
@@ -59,12 +66,16 @@ public:
     Response &operator=(Response const &);
 
     void addDate();
-    std::string & getResponseString();
+    std::string buildResponseString();
+    std::string getResponseString() const;
+    bool isToSend() const;
     unsigned int readRessource(bool isErrorPage = false);
 
     unsigned int buildAutoIndex();
     void parseExtension();
-    std::string & getRessourcePath(void);
+    std::string getRessourcePath(void) const;
+    int getRessourceFD() const;
+    Request const * getRequest() const;
 
     unsigned int    getStatus(void) const;
 

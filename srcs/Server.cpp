@@ -12,10 +12,11 @@
 
 #include "Server.hpp"
 
-Server::Server() : _port(-1), _server_name("") {
+
+Server::Server() : _host(""), _port(-1), _server_name(""), _max_body_size(30000) {
 }
 
-Server::Server(int port, std::string server_name, int max_body_size) : _port(port), _server_name(server_name), _max_body_size(max_body_size), _root("/")
+Server::Server(int port, std::string server_name, int max_body_size) : _host(""), _port(port), _server_name(server_name), _max_body_size(max_body_size), _root("/")
 {   
 }
 
@@ -190,8 +191,8 @@ void Server::print(void)const
     std::cout << "server_name : " << _server_name << std::endl;
     std::cout << "root : " << _root << std::endl;
     std::cout << "Client Max Body Size : " << _max_body_size << std::endl;
-    for(int i = 0; i < _locations.size(); i++)
-        _locations[i].print();
+    // for(std::vector<Location>::const_iterator it = _locations.begin(); it != _locations.end(); ++it)
+    //     it->print();
     std::cout << std::endl;
 }
 
