@@ -210,7 +210,7 @@ bool        Webserv::run()
                     std::cout << "new connection "  << std::endl;
                     (*server_it)->handleNewConnection();
                 }
-            
+                std::vector<std::vector<Client*>::const_iterator> client_to_remove;
                 for (std::vector<Client*>::const_iterator client_it = (*server_it)->getBeginClients(); client_it != (*server_it)->getEndClients(); ++client_it)
                 {
                     if ((*client_it)->getResponseToBuildSize() > 0)
@@ -230,7 +230,9 @@ bool        Webserv::run()
                     if ((*client_it)->getSocket() != NO_SOCKET && FD_ISSET((*client_it)->getSocket(), &read_fds))
                     {
 
-                        (*client_it)->receiveFromClient();
+                        if (!(*client_it)->receiveFromClient())
+                            client_to_remove.push_back(client_it);
+                            
                         
                     }
                     if ((*client_it)->getSocket() != NO_SOCKET && FD_ISSET((*client_it)->getSocket(), &write_fds))
@@ -240,6 +242,9 @@ bool        Webserv::run()
                     }
 
                 }
+                for (std::vector<std::vector<Client*>::const_iterator>::iterator ite = client_to_remove.begin(); ite != client_to_remove.end(); ++ite)
+                    (*server_it)->removeClient(*ite);
+
                 
             }
             std::cout << "end" << std::endl;

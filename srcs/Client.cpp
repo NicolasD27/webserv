@@ -148,8 +148,11 @@ bool Client::receiveFromClient()
         }
         request.addToBody(std::string(_receiving_buff).substr(newline_pos + 4));
     }
-    std::cout << request << std::endl;
+    if (request_string.length() == 0)
+        return false;
+    std::cout << "request : " << request_string << std::endl;
     Response* response = new Response(request, *_server);
+    std::cout << request << std::endl;
     if (response->isToSend())
         _responses_to_send.push(response);
     else
