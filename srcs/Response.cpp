@@ -34,7 +34,13 @@ Response::Response(Request const & request, Server const & server):_pt_server(&s
                     {
                         _ressource_path = server.getRoot() + it->second;
                         _headers.insert(std::make_pair("Content-type", "text/html"));
-                        readRessource(true);
+                        _to_send = false;
+                        _ressource_fd = open(_ressource_path.c_str(), O_NONBLOCK);
+                        if (_ressource_fd == -1)
+                        {
+                            _body = ERROR_PAGES[_status];
+                            _to_send = true;
+                        }
                     }
                     break;
                 }
@@ -47,9 +53,18 @@ Response::Response(Request const & request, Server const & server):_pt_server(&s
         
         if (!pathIsDir(_ressource_path))
         {
-            _to_send = false;
+            
             _ressource_fd = open(_ressource_path.c_str(), O_NONBLOCK);
-            _status = 200;
+            if (_ressource_fd == -1)
+            {
+                _to_send = true;
+                _status = 404;
+            }
+            else
+            {
+                _to_send = false;
+                _status = 200;
+            }
 
         }
             // _status = readRessource(false);
@@ -70,6 +85,11 @@ Response::Response(Request const & request, Server const & server):_pt_server(&s
                         _headers.insert(std::make_pair("Content-type", "text/html"));
                         _to_send = false;
                         _ressource_fd = open(_ressource_path.c_str(), O_NONBLOCK);
+                        if (_ressource_fd == -1)
+                        {
+                            _body = ERROR_PAGES[_status];
+                            _to_send = true;
+                        }
                     }
                     break;
                 }
@@ -326,7 +346,7 @@ Location                Response::findLocation(std::string const &uri, Server co
 std::ostream &operator<<(std::ostream & o, Response & response)
 {
    
-    o << C_GREEN << "Response:\tStatus = "<<C_RED<< STATUS_CODES[response.getStatus()] << C_RESET<<"\n";
+    o << C_GREEN << "Response:\tStatus = "<<C_RED<< STATUS_CODES[response.getStatus()] << " " << response.getStatus() << C_RESET<<"\n";
     o << C_YELLOW << "\tResource path"<< C_RESET << ": " << response.getRessourcePath() << "\n";
     response.printHeaders(o);
     return o;
