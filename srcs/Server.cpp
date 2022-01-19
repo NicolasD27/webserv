@@ -13,12 +13,9 @@
 #include "Server.hpp"
 
 
-Server::Server() : _host(""), _port(-1), _server_name(""), _max_body_size(30000) {
+Server::Server() : _host(""), _port(-1), _max_body_size(30000) {
 }
 
-Server::Server(int port, std::string server_name, int max_body_size) : _host(""), _port(port), _server_name(server_name), _max_body_size(max_body_size), _root("/")
-{   
-}
 
 Server::Server(Server const &cpy)
 {
@@ -29,7 +26,7 @@ Server::Server(Server const &cpy)
 
 Server::~Server()
 {
-    for (iterator it = _clients.begin(); it != _clients.end(); ++it)
+    for (client_iterator it = _clients.begin(); it != _clients.end(); ++it)
         delete (*it);
     _clients.clear();
     _error_pages.clear();
@@ -47,7 +44,7 @@ Server      &Server::operator=(Server const &cpy)
     {
         _port = cpy._port;
         _host = cpy._host;
-        _server_name = cpy._server_name;
+        _server_names = cpy._server_names;
         _root = cpy._root;
         _listen_socket = cpy._listen_socket;
         _clients = cpy._clients;
@@ -66,7 +63,10 @@ std::string Server::getRoot() const { return _root; }
 
 std::vector<std::string>    Server::getIndex() const { return _index;}
 
-std::string Server::getServerName() const { return _server_name; }
+std::vector<std::string> Server::getServerNames() const { return _server_names; }
+
+std::vector<std::string>::iterator Server::getBeginServerNames() { return _server_names.begin(); }; 
+std::vector<std::string>::iterator Server::getEndServerNames() { return _server_names.end(); };
 
 Client* Server::getClient(int i) const { return _clients[i]; }
 
@@ -117,8 +117,6 @@ void Server::storeLine(std::string & key, std::string & value)
             ss >> _port; 
         }
     }
-    else if (key == "server_name")
-        _server_name = value;
     else if (key == "root")
         _root = value;
     else if (key == "autoindex")
@@ -151,8 +149,18 @@ void Server::parseErrorPages(std::string & value)
     //     for (std::vector<unsigned int>::const_iterator ite = it->first.begin(); ite != it->first.end(); ++ite)
     //         std::cout << *ite << " : " << it->second << std::endl;
 }
-bool Server::setup()
+bool Server::setup(std::vector<Server*> servers)
 {
+    for (server_iterator it = servers.begin(); it != servers.end(); ++it)
+    {
+        if (*it == this)
+            break;
+        if ((*it)->getPort() == _port && (*it)->getHost() == _host )
+        {
+            _listen_socket = (*it)->getSocket();
+            return true;
+        }
+    }
     _listen_socket = socket(AF_INET, SOCK_STREAM, 0);
 
     if (_listen_socket < 0)
@@ -165,7 +173,7 @@ bool Server::setup()
     my_addr.sin_family = AF_INET;
     my_addr.sin_addr.s_addr = inet_addr(_host.c_str());
     my_addr.sin_port = htons(_port);
-    std::cout << my_addr.sin_port << std::endl;
+    
     if (bind(_listen_socket, (struct sockaddr*)&my_addr, sizeof(struct sockaddr)) != 0)
         return false;
          // start accept client connections
@@ -178,7 +186,7 @@ bool Server::setup()
 void Server::handleNewConnection()
 {
     Client *new_client = new Client();
-    new_client->setup(*this);
+    new_client->setup(this);
     _clients.push_back(new_client);
 }
 
@@ -192,6 +200,13 @@ void    Server::addIndex(std::vector<std::string> &index)
     if(!_index.empty())
         _index.clear();
     _index.assign(index.begin() + 1, index.end());
+}
+
+void    Server::addServerNames(std::vector<std::string> &server_names)
+{
+    if(!_server_names.empty())
+        _server_names.clear();
+    _server_names.assign(server_names.begin() + 1, server_names.end());
 }
 
 void    Server::addMethods(std::string &method)
@@ -209,7 +224,10 @@ void    Server::setMethods(std::vector<std::string> &methods)
 void Server::print(void)const
 {
     std::cout << "host : " << _host << ":" << _port << std::endl;
-    std::cout << "server_name : " << _server_name << std::endl;
+    std::cout << "server_name : ";
+    for (std::vector<std::string>::const_iterator it = _server_names.begin(); it != _server_names.end(); ++it)
+        std::cout << *it << " ";
+    std::cout  << std::endl;
     std::cout << "root : " << _root << std::endl;
     std::cout << "Client Max Body Size : " << _max_body_size << std::endl;
     // for(std::vector<Location>::const_iterator it = _locations.begin(); it != _locations.end(); ++it)

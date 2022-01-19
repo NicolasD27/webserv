@@ -336,22 +336,17 @@ void                    Response::printHeaders(std::ostream & o)
 
 void Response::findLocation(std::string const & uri, Server const & server, Request const & request)
 {
-    std::cout << "uri : " << uri << std::endl;
     std::vector<Location> locations = server.getLocation();
 
-    for (std::vector<Location>::iterator it = locations.begin(); it != locations.end(); ++it)
-        std::cout << "loc : " << (*it).getPath() << std::endl;
     
     
     for (std::vector<Location>::iterator it = locations.begin(); it != locations.end(); ++it)
     {
-        std::cout << "uri : " << uri.substr(0, (*it).getPath().length()) << std::endl << "loc : " << (*it).getPath() << std::endl << ((*it).getPath() == uri.substr(0, (*it).getPath().length())) << std::endl;
         if ((*it).getPath() == uri.substr(0, (*it).getPath().length()))
         {
             
             if ((*it).hasMethod(request.getHttpMethod()))
             {
-                std::cout << "changing" << std::endl ;
                 if (buildRessourcePath(request.getLocation(), *it))
                     findLocation(_ressource_path, server, request);
                 return;

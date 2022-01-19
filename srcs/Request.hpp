@@ -27,6 +27,7 @@
 
 class Request;
 
+#include "ParserConfig.hpp"
 
 #define HTTP_UNKNOWN    0
 #define HTTP_GET        1
@@ -39,32 +40,37 @@ class Request
 
 private:
     std::string                         _request_string;
-    std::string                        _http_method;
+    std::string                         _http_method;
     std::string                         _location;
     time_t                              _keep_alive_n;
     std::map<std::string, std::string>  _headers;
     std::vector<std::string>            _x_forwarded_for;
     std::string                         _body;
+    std::map<std::string, std::string>  _params;
     
+    void                                handleLocation(std::string);
     
 public:
     Request(std::string request_string);
     Request(Request const &);
     virtual ~Request();
-    Request &operator=(Request const &);
 
-    std::string & operator[](const char *key);
+    Request &                           operator=(Request const &);
+    std::string &                       operator[](const char *key);
 
-    void parseHeaders();
-    void storeHeader(std::string key, std::string value);
-    void parseMethod(std::string line);
-    void printHeaders(std::ostream &);
-    void addToBody(std::string new_elem);
+    void                                parseHeaders();
+    void                                storeHeader(std::string key, std::string value);
+    void                                parseMethod(std::string line);
+    void                                printHeaders(std::ostream &);
+    void                                printParams(std::ostream &);
+    void                                addToBody(std::string new_elem);
 
-    std::string    getHttpMethod(void) const;
-    std::string getLocation(void) const;
-    time_t      getKeepAliveN() const;
-    std::string getBody() const;
+    std::string                         getHttpMethod(void) const;
+    std::string                         getLocation(void) const;
+    time_t                              getKeepAliveN() const;
+    std::string                         getBody() const;
+
+    void                                setLocation(std::string);
 };
 
 std::ostream &operator <<(std::ostream &, Request &);

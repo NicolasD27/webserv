@@ -173,7 +173,7 @@ bool Webserv::checkLocations(std::vector<Location> &locations)
 
 bool Webserv::checkServer(Server const & server) const
 {
-    if (server.getPort() == -1 || server.getServerName() == "" || server.getRoot() == "")
+    if (server.getPort() == -1 || server.getServerNames().size() == 0 || server.getRoot() == "")
         return false;
     if (server.getPort() <=0 || server.getPort() > 65535)
         return false;
@@ -188,7 +188,7 @@ bool        Webserv::run()
     int highest_socket;
 
     for (iterator it = _servers.begin(); it != _servers.end(); ++it)
-        if (!(*it)->setup())
+        if (!(*it)->setup(_servers))
             throw Server::FailedSetup();
     
 
@@ -208,8 +208,8 @@ bool        Webserv::run()
             for (iterator server_it = _servers.begin(); server_it != _servers.end(); ++server_it)
             {
                 if (FD_ISSET((*server_it)->getSocket(), &read_fds)) {
-                    std::cout << "new connection "  << std::endl;
                     (*server_it)->handleNewConnection();
+                    break;
                 }
                 std::vector<std::vector<Client*>::const_iterator> client_to_remove;
                 for (std::vector<Client*>::const_iterator client_it = (*server_it)->getBeginClients(); client_it != (*server_it)->getEndClients(); ++client_it)
@@ -231,7 +231,7 @@ bool        Webserv::run()
                     if ((*client_it)->getSocket() != NO_SOCKET && FD_ISSET((*client_it)->getSocket(), &read_fds))
                     {
 
-                        if (!(*client_it)->receiveFromClient())
+                        if (!(*client_it)->receiveFromClient(_servers))
                             client_to_remove.push_back(client_it);
                             
                         
@@ -248,7 +248,6 @@ bool        Webserv::run()
 
                 
             }
-            std::cout << "end" << std::endl;
         }
     }
     return true;
