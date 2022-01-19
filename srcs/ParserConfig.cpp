@@ -19,7 +19,7 @@ std::vector<std::string> ParserConfig::form_inst_line(std::ifstream &buff)
     std::getline(buff, line);
     line = removeComments(line);
     line = trim(line);
-    return(split(line));
+    return(split(line, WHITESPACES));
 }
 
 std::string     ParserConfig::removeComments(std::string const &str)
@@ -45,28 +45,6 @@ std::string     ParserConfig::trim(std::string const &str)
     if(end != std::string::npos)
         ret = ret.substr(0, end + 1);
     return ret;
-}
-
-std::vector<std::string>    ParserConfig::split(std::string const &str)
-{
-    std::vector<std::string>    ret;
-    std::string                 token;
-    size_t                      i = 0, pos, len;
-
-    while(i < str.size())
-    {
-        pos = str.find_first_of(WHITESPACES, i);
-        if(pos == std::string::npos)
-            break;
-        len = pos - i;
-        token = str.substr(i, len);
-        i += len + 1;
-        if(token.empty() == false)
-            ret.push_back(token);
-    }
-    if(i < str.size())
-        ret.push_back(str.substr(i));
-    return (ret);
 }
 
 bool                  ParserConfig::removeSemicolon(std::vector<std::string> &tokens)
@@ -125,6 +103,8 @@ bool ParserConfig::check_block(std::ifstream &buff, std::vector<Server*> &server
             {
                 if(tokens[0] == "index")
                     new_server->addIndex(tokens);
+                else if (tokens[0] == "server_name")
+                    new_server->addServerNames(tokens);
                 else
                     new_server->storeLine(tokens[0], tokens[1]);
             }

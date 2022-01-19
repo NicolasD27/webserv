@@ -31,8 +31,7 @@ class Client;
 #define MAX_SIZE 30000
 class Client
 {
-// private:
-public:
+private:
     int     _socket;
     struct sockaddr_in _address;
     std::vector<Response*> _responses_to_build;
@@ -41,8 +40,11 @@ public:
     int _current_sending_byte;
     char _receiving_buff[MAX_SIZE];
     int _current_receiving_byte;
-    Server const *_server;
+    Server *_server;
+
+    void findMatchingServer(std::vector<Server*>, Request & request);
     
+public:
     Client();
     Client(Client const &);
     virtual ~Client();
@@ -57,11 +59,11 @@ public:
     size_t getResponseToBuildSize() const;
     void switchToSendQueue(Response* response);
 
-    bool receiveFromClient();
+    bool receiveFromClient(std::vector<Server*>);
     bool sendToClient();
 
 
-    bool     setup(Server const & server);
+    bool     setup(Server *server);
     
 };
 

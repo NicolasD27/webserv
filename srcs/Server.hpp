@@ -38,7 +38,7 @@ class Server
 private:
     int                         _port;
     std::string                 _host;
-    std::string                 _server_name;
+    std::vector<std::string>    _server_names;
     std::string                 _root;
     int                         _listen_socket;
     std::vector<Client*>        _clients;
@@ -50,11 +50,12 @@ private:
     std::vector<std::string>    _index;
     
 public:
-    typedef std::vector<Client*>::iterator             iterator;
-    typedef std::vector<Client*>::const_iterator       const_iterator;
+    typedef std::vector<Client*>::iterator             client_iterator;
+    typedef std::vector<Client*>::const_iterator       client_const_iterator;
+    typedef std::vector<Server*>::iterator             server_iterator;
+    typedef std::vector<Server*>::const_iterator       server_const_iterator;
 
     Server(void);
-    Server(int port, std::string server_name, int max_body_size);
     Server(Server const &);
     virtual ~Server();
     Server &operator=(Server const &);
@@ -64,17 +65,19 @@ public:
     std::string getHost() const;
     std::string getRoot() const;
     std::vector<std::string> getIndex() const;
-    std::string getServerName() const;
+    std::vector<std::string> getServerNames() const;
 
     Client* getClient(int index) const;
     std::vector<Location>       getLocation(void) const;
     std::vector<std::string>    getMethods(void) const;
-    const_iterator getBeginClients() const;
-    const_iterator getEndClients() const;
+    client_const_iterator getBeginClients() const;
+    client_const_iterator getEndClients() const;
     bool           getAutoIndex() const;
-    void removeClient(std::vector<Client*>::const_iterator);
+    std::vector<std::string>::iterator getBeginServerNames(); 
+    std::vector<std::string>::iterator getEndServerNames();
+    void removeClient(client_const_iterator);
 
-    bool setup();
+    bool setup(std::vector<Server*>);
     
     void storeLine(std::string & key, std::string & value);
     void setMethods(std::vector<std::string> &);
@@ -86,6 +89,7 @@ public:
     void    sortLocations(void);
     void    addMethods(std::string &);
     void    addIndex(std::vector<std::string> &);
+    void    addServerNames(std::vector<std::string> &);
 
     void    print(void) const;
 

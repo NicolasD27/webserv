@@ -27,7 +27,7 @@ void Request::parseHeaders()
             std::string value;
             if( std::getline(iss_line, value) )
             {
-                value = value.substr(1, value.length() - 1);
+                value = value.substr(1, value.length() - 2);
                 storeHeader(key, value);
             }
         }
@@ -44,8 +44,25 @@ void Request::parseMethod(std::string line)
         _http_method = method;
         std::string location;
         if( std::getline(iss_line, location, ' '))
-            _location = location;
+            handleLocation(location);
     }
+}
+
+void Request::handleLocation(std::string location)
+{
+    int sep_pos = location.find('?');
+    if (sep_pos != std::string::npos)
+    {
+        std::vector<std::string> params_vec = split(location.substr(sep_pos + 1), "&");
+        for (std::vector<std::string>::iterator it = params_vec.begin(); it != params_vec.end(); ++it)
+        {
+            std::vector<std::string> param = split(*it, "=");
+            _params.insert(std::make_pair(param[0], param[1]));
+        }
+        _location = location.substr(0, sep_pos);
+    }
+    else
+        _location = location;
 }
 
 void Request::storeHeader(std::string key, std::string value)
@@ -81,6 +98,19 @@ void Request::printHeaders(std::ostream & o)
     }
 }
 
+void Request::printParams(std::ostream & o)
+{
+    if (_params.size() != 0)
+    {
+        o << C_GREEN << "  Params" << C_RESET <<" :" << std::endl;
+        for (std::map<std::string, std::string>::iterator it = this->_params.begin(); it != _params.end(); ++it)
+        {
+            o << "\t"<< C_YELLOW << it->first << C_RESET<<": "<< C_CYAN << it->second << C_RESET<< std::endl;
+        }
+        
+    }
+}
+
 
 std::string        Request::getHttpMethod() const
 {
@@ -92,6 +122,10 @@ std::string         Request::getLocation() const
     return this->_location;
 }
 
+void                Request::setLocation(std::string new_loc)
+{
+    _location = new_loc;
+}
 time_t              Request::getKeepAliveN() const
 {
     return this->_keep_alive_n;
@@ -113,5 +147,6 @@ std::ostream &operator<<(std::ostream & o, Request & request)
     request.printHeaders(o);
     o << C_YELLOW << "\tKeep alive " << C_RESET << ": " << request.getKeepAliveN()<<"\n";
     o << C_YELLOW << "\tbody " << C_RESET << ": <"<< C_GRAY << request.getBody() << C_RESET <<">\n";
+    request.printParams(o);
     return o;
 }

@@ -30,8 +30,8 @@ class ParserConfig
         
         static std::string                 removeComments(std::string const &str);
         static std::string                 trim(std::string const &str);
-        static std::vector<std::string>    split(std::string const &str);
         static bool                        removeSemicolon(std::vector<std::string> &tokens);
+        
 
     public:
     

@@ -68,9 +68,9 @@ void Client::switchToSendQueue(Response* response)
     _responses_to_build.erase(it_to_erase);
 }
 
-bool Client::setup(Server const & server)
+bool Client::setup(Server * server)
 {
-    _server = &server;
+    _server = server;
     struct sockaddr_in address;
     memset(&address, 0, sizeof(address));
     socklen_t client_len = sizeof(address);
@@ -88,7 +88,7 @@ bool Client::setup(Server const & server)
     return true;
 }
 
-bool Client::receiveFromClient()
+bool Client::receiveFromClient(std::vector<Server*> servers)
 {
     int r;
     int content_length;
@@ -150,21 +150,41 @@ bool Client::receiveFromClient()
     }
     if (request_string.length() == 0)
         return false;
-    std::cout << "request : " << request_string << std::endl;
+    findMatchingServer(servers, request);
     std::cout << request << std::endl;
     Response* response = new Response(request, *_server);
     if (response->isToSend())
         _responses_to_send.push(response);
     else
         _responses_to_build.push_back(response);
-    std::cout << "message received" << std::endl;
-    // std::cout << response << std::endl;
     return true;
 } 
 
+void Client::findMatchingServer(std::vector<Server*> servers, Request & request)
+{
+    if (request["Host"].length() == 0)
+        return;
+    for (std::vector<Server*>::iterator it = servers.begin(); it != servers.end(); ++it)
+    {
+        if ((*it)->getSocket() == _server->getSocket() )
+        {
+            for (std::vector<std::string>::iterator ite = (*it)->getBeginServerNames(); ite != (*it)->getEndServerNames(); ++ite)
+            {
+                
+                if (*ite == request["Host"])
+                {
+                    _server = *it;
+                    if (request.getLocation().substr(0, 7) == "http://")
+                        request.setLocation(request.getLocation().substr(7 + request["Host"].length()));
+                    return;
+                }
+            }
+        }
+    }
+}
+
 bool Client::sendToClient()
 {
-    std::cout << "begin send" << std::endl;
     Response* response = _responses_to_send.front();
     std::string response_string = response->buildResponseString();
     int r = write(_socket, response_string.c_str(), response_string.length());
