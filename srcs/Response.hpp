@@ -27,6 +27,7 @@
 #include <ctime>
 #include <dirent.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 class Response;
@@ -40,6 +41,7 @@ class Response;
 #include "StatusCode.hpp"
 #include "MimesType.hpp"
 #include "ErrorPages.hpp"
+#include "CGIHandler.hpp"
 
 class Response
 {
@@ -63,6 +65,8 @@ private:
     void buildPostResponse(Request const & request, Server const & server);
     void buildDeleteResponse(Request const & request, Server const & server);
     
+    std::string		executeCgi(const char **scriptName, const std::string & body, char **env);
+
     
 public:
     Response(Request const & request, Server const & server);

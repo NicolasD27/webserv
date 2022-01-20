@@ -6,7 +6,7 @@
 #    By: clorin <clorin@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/12/17 16:20:01 by clorin            #+#    #+#              #
-#    Updated: 2022/01/12 11:53:30 by clorin           ###   ########.fr        #
+#    Updated: 2022/01/20 14:51:47 by clorin           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,7 +21,8 @@ SRCS_DIR = srcs/
 OBJS_DIR = objs/
 
 SRCS	= main.cpp Webserv.cpp Server.cpp Client.cpp Request.cpp Response.cpp file_utils.cpp \
-		  ErrorPages.cpp MimesType.cpp StatusCode.cpp ParserConfig.cpp Location.cpp utility.cpp
+		  ErrorPages.cpp MimesType.cpp StatusCode.cpp ParserConfig.cpp Location.cpp utility.cpp \
+		  CGIHandler.cpp
 
 OBJS	= $(SRCS:.cpp=.o) 
 

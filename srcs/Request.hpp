@@ -69,6 +69,7 @@ public:
     std::string                         getLocation(void) const;
     time_t                              getKeepAliveN() const;
     std::string                         getBody() const;
+    std::map<std::string, std::string>  getParams() const;
 
     void                                setLocation(std::string);
 };
