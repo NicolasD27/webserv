@@ -84,6 +84,23 @@ void            Location::addIndex(std::vector<std::string> tokens)
     _index.assign(tokens.begin() + 1, tokens.end());
 }
 
+void            Location::addCgi(std::vector<std::string> tokens)
+{
+    if (tokens.size() == 3)
+    {
+        _cgi_path = tokens[1];
+        _extensions = split(tokens[2], "|");
+    }
+}
+
+bool            Location::hasExtension(std::string uri) const
+{
+    for (std::vector<std::string>::const_iterator it = _extensions.begin(); it != _extensions.end(); ++it)
+        if ((*it) == uri.substr(uri.length() - (*it).length() + 1, (*it).length() - 1))
+            return true;
+    return false;
+}
+
 void            Location::print() const
 {
     std::cout << "Location ("<<(&(*this))<<"): " << _path << std::endl;
@@ -107,7 +124,10 @@ void            Location::print() const
         std::cout << std::endl;
     }
     std::cout << "Cgi_path = ";
-    std::cout << ((_cgi_path.empty())? "Empty" : _cgi_path) << std::endl;
+    std::cout << ((_cgi_path.empty())? "Empty" : _cgi_path) << " for ";
+    for (std::vector<std::string>::const_iterator it = _extensions.begin(); it != _extensions.end(); ++it)
+        std::cout << *it << "|";
+    std::cout << std::endl;
 }
 
 bool            Location::isValid() const

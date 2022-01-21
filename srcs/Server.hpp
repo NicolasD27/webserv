@@ -45,7 +45,7 @@ private:
     int                         _max_body_size;
     bool                        _auto_index;
     std::map<std::vector<unsigned int>, std::string>    _error_pages;
-    std::vector<Location>       _locations;
+    std::vector<Location*>       _locations;
     std::vector<std::string>    _methods;
     std::vector<std::string>    _index;
     std::string                 _cgi_path;
@@ -70,7 +70,7 @@ public:
     std::string getCgiPath() const;
 
     Client* getClient(int index) const;
-    std::vector<Location>       getLocation(void) const;
+    std::vector<Location*>       getLocation(void) const;
     std::vector<std::string>    getMethods(void) const;
     client_const_iterator getBeginClients() const;
     client_const_iterator getEndClients() const;
@@ -87,7 +87,7 @@ public:
     void parseErrorPages(std::string & value);
     std::map<std::vector<unsigned int>, std::string> getErrorPages() const;
 
-    void    addLocation(Location &);
+    void    addLocation(Location *);
     void    sortLocations(void);
     void    addMethods(std::string &);
     void    addIndex(std::vector<std::string> &);

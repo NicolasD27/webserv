@@ -17,6 +17,7 @@
 #include <iostream>
 #include <vector>
 #include "Colors.hpp"
+#include "utility.hpp"
 
 class Location
 {
@@ -29,6 +30,7 @@ class Location
         std::string                 _cgi_path;
 
     public:
+        std::vector<std::string>    _extensions;
         Location(void){};
         Location(std::string path, std::vector<std::string> index, std::string root, bool autoIndex, std::vector<std::string> methods, std::string);
         ~Location(void);
@@ -38,6 +40,7 @@ class Location
         void                        storeLine(std::string const & , std::string &);
         void                        addMethods(std::vector<std::string> );
         void                        addIndex(std::vector<std::string> );
+        void                        addCgi(std::vector<std::string> );
 
         std::string                 getPath(void)const;
         std::vector<std::string>    getIndex(void)const;
@@ -50,6 +53,7 @@ class Location
 
         bool                        isValid(void) const;
         bool                        hasMethod(std::string) const;
+        bool                        hasExtension(std::string) const;
 
         void                        print(void) const;
 };
