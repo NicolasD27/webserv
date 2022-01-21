@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 15:32:25 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/13 15:19:37 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/20 18:12:12 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ void        Webserv::config(std::string conf_path)
     {
         for (const_iterator it = _servers.begin(); it != _servers.end(); ++it)
         {   
-            Location    loc_default("/", (*it)->getIndex(), (*it)->getRoot(), (*it)->getAutoIndex(), (*it)->getMethods());
+            Location    loc_default("/", (*it)->getIndex(), (*it)->getRoot(), (*it)->getAutoIndex(), (*it)->getMethods(), (*it)->getCgiPath());
             
             (*it)->addLocation(loc_default);
             (*it)->sortLocations();

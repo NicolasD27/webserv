@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Response.cpp                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/01/19 22:28:13 by clorin            #+#    #+#             */
+/*   Updated: 2022/01/20 19:06:10 by clorin           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "Response.hpp"
 
 const char *HEADERS_OUT[] = {"Trailers", "Content-Range", "WWW-Authenticate", "Server", "Date", "Content-Length", "Content-Encoding", "Location", "Last-Modified", "Accept-Ranges", "Expires", "Cache-Control", "ETag", "Content-Type", NULL};
@@ -30,6 +42,7 @@ void Response::buildDeleteResponse(Request const & request, Server const & serve
 void Response::buildGetResponse(Request const & request, Server const & server)
 {
     findLocation(request.getLocation(), server, request);
+    _cgi_path = server.getCgiPath();
     // buildRessourcePath(request.getLocation(), block);
     std::cout << "_RessourcePath = " << _ressource_path << "\t _status = " << _status << std::endl;
     if(_status == 301)
@@ -167,6 +180,8 @@ bool Response::buildRessourcePath(std::string const &locRequest, Location const 
             _ressource_path += "/";
             _status = 301;
         }
+        else
+            std::cout << "No\n";
     }
     return find_index;
 }
@@ -219,6 +234,15 @@ unsigned int Response::buildAutoIndex()
 
 unsigned int Response::readRessource(bool isErrorPage)
 {
+/* bloc à decommenter pour essayer l'execution du cgi*/
+    CGIHandler  cgi;
+    std::string     script = _cgi_path + "/php7.3";
+
+    const char *scriptName[3] = {script.c_str(), _ressource_path.c_str() ,NULL};
+    _body = cgi.executeCgi(scriptName,"");
+
+    return _status;
+
     std::string str;
     std::stringstream buff;
     
@@ -306,33 +330,6 @@ void                    Response::printHeaders(std::ostream & o)
         o << "\t"<< C_YELLOW << it->first << C_RESET<<": "<< C_CYAN << it->second << C_RESET<< std::endl;
     }
 }
-
-// Location                Response::findLocation(std::string const &uri, Server const &server)
-// {
-//     std::vector<Location> loc = server.getLocation();
-//     std::cout << "\nfind the Location request : " << uri << " in Location of server\n";
-
-//     size_t i = 0;
-//     size_t pos_start = uri.find_first_not_of('/',1);
-//     size_t pos_end = uri.find_first_of('/', pos_start);
-
-//     std::string str = "/";
-//     if(pos_end != std::string::npos)
-//         str = uri.substr(0,pos_end);
-
-//     for(; i < loc.size(); i++)
-//     {
-//         std::cout << "\t"<<i<<") "<< loc[i].getPath() << " == " << str << " ... ";
-//         if(loc[i].getPath() == str)
-//         {
-//             std::cout << C_GREEN << " Found" << C_RESET << std::endl;
-//             return loc[i];   
-//         }
-//         else
-//             std::cout << C_RED << " No" << C_RESET << std::endl;
-//     }
-//     return loc.back();
-// }
 
 void Response::findLocation(std::string const & uri, Server const & server, Request const & request)
 {

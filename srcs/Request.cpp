@@ -136,6 +136,11 @@ std::string         Request::getBody() const
     return this->_body;
 }
 
+std::map<std::string, std::string>  Request::getParams() const
+{
+    return this->_params;
+}
+
 Request::~Request()
 {
 }

@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/15 11:27:16 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/17 10:09:34 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/20 17:08:56 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,7 @@ private:
     std::vector<Location>       _locations;
     std::vector<std::string>    _methods;
     std::vector<std::string>    _index;
+    std::string                 _cgi_path;
     
 public:
     typedef std::vector<Client*>::iterator             client_iterator;
@@ -66,6 +67,7 @@ public:
     std::string getRoot() const;
     std::vector<std::string> getIndex() const;
     std::vector<std::string> getServerNames() const;
+    std::string getCgiPath() const;
 
     Client* getClient(int index) const;
     std::vector<Location>       getLocation(void) const;
