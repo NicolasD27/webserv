@@ -6,16 +6,16 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/11 14:51:26 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/17 10:27:56 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/20 18:13:23 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Location.hpp"
 
-Location::Location(Location const &cpy):_path(cpy._path), _index(cpy._index),_root(cpy._root),_autoIndex(cpy._autoIndex),_methods(cpy._methods){}
+Location::Location(Location const &cpy):_path(cpy._path), _index(cpy._index),_root(cpy._root),_autoIndex(cpy._autoIndex),_methods(cpy._methods),_cgi_path(cpy._cgi_path){}
 
-Location::Location(std::string path, std::vector<std::string> index, std::string root, bool autoIndex, std::vector<std::string> methods):
-_path(path), _index(index), _root(root), _autoIndex(autoIndex), _methods(methods)
+Location::Location(std::string path, std::vector<std::string> index, std::string root, bool autoIndex, std::vector<std::string> methods, std::string cgi_path):
+_path(path), _index(index), _root(root), _autoIndex(autoIndex), _methods(methods), _cgi_path(cgi_path)
 {}
 
 Location &Location::operator=(Location const &cpy)
@@ -27,6 +27,7 @@ Location &Location::operator=(Location const &cpy)
         _root = cpy._root;
         _autoIndex = cpy._autoIndex;
         _methods = cpy._methods;
+        _cgi_path = cpy._cgi_path;
     }
     return *this;
 };
@@ -42,6 +43,8 @@ std::string                 Location::getPath() const {return(_path);}
 std::vector<std::string>    Location::getIndex() const {return(_index);}
 
 std::string                 Location::getRoot() const {return _root;};
+
+std::string                 Location::getCgiPath() const {return _cgi_path;}
 
 bool                        Location::isAutoindex(void) const {return(_autoIndex);}
 
@@ -62,6 +65,8 @@ void            Location::storeLine(std::string const & key, std::string & value
         _autoIndex = (value == "on");
     else if (key == "root")
         _root = value;
+    else if (key == "cgi_path")
+        _cgi_path = value;
 }
 
 void            Location::addMethods(std::vector<std::string> tokens)
@@ -101,6 +106,8 @@ void            Location::print() const
             std::cout << _methods[i++] << " ";
         std::cout << std::endl;
     }
+    std::cout << "Cgi_path = ";
+    std::cout << ((_cgi_path.empty())? "Empty" : _cgi_path) << std::endl;
 }
 
 bool            Location::isValid() const

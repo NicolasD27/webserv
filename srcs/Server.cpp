@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 16:33:58 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/17 10:09:38 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/20 17:19:33 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,6 +96,8 @@ std::vector<Client*>::const_iterator Server::getEndClients() const { return _cli
 
 std::map<std::vector<unsigned int>, std::string> Server::getErrorPages() const { return _error_pages;}
 
+std::string    Server::getCgiPath() const { return _cgi_path;};
+
 bool        Server::getAutoIndex() const { return _auto_index; }
 
 void Server::storeLine(std::string & key, std::string & value)
@@ -128,6 +130,8 @@ void Server::storeLine(std::string & key, std::string & value)
         std::istringstream ss(value);
         ss >> _max_body_size;
     }
+    else if (key == "cgi_path")
+        _cgi_path = value;
 }
 void Server::parseErrorPages(std::string & value)
 {
@@ -230,8 +234,9 @@ void Server::print(void)const
     std::cout  << std::endl;
     std::cout << "root : " << _root << std::endl;
     std::cout << "Client Max Body Size : " << _max_body_size << std::endl;
-    // for(std::vector<Location>::const_iterator it = _locations.begin(); it != _locations.end(); ++it)
-    //     it->print();
+    for(std::vector<Location>::const_iterator it = _locations.begin(); it != _locations.end(); ++it)
+        it->print();
+
     std::cout << std::endl;
 }
 

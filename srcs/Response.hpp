@@ -66,7 +66,7 @@ private:
     void buildDeleteResponse(Request const & request, Server const & server);
     
     std::string		executeCgi(const char **scriptName, const std::string & body, char **env);
-
+    std::string  _cgi_path;
     
 public:
     Response(Request const & request, Server const & server);

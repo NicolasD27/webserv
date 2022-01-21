@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/19 22:40:48 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/20 16:11:25 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/21 09:39:04 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,12 +84,6 @@ std::string		CGIHandler::executeCgi(const char **scriptName, const std::string &
 	long	fdOut = fileno(fOut);
 	int		ret = 1;
 
-
-    // std::cout << "Execute with env : \n";
-    // int i = 0;
-    // while(env[i]){
-    //     std::cout << "env[" << i << "] = " << env[i] << std::endl;
-    //     i++;}
 	pid = fork();
 
 	if (pid == -1)
@@ -99,9 +93,14 @@ std::string		CGIHandler::executeCgi(const char **scriptName, const std::string &
 	}
 	else if (pid == 0)
 	{
-        std::cout << "execution de "<<scriptName[0]<< std::endl;
+        std::cout << "execution de "<<scriptName[0] << " with ";
+        
 		char **env;
-        env = this->getEnv();
+        env = this->getEnv();		//todo free()
+		size_t i = 1;
+        while(scriptName[i])
+            std::cout << scriptName[i++] << " ";
+        std::cout << std::endl;
 		dup2(fdIn, STDIN_FILENO);
 		dup2(fdOut, STDOUT_FILENO);
 		execve(scriptName[0], const_cast<char* const *>(scriptName), env);

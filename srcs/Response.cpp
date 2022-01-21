@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/19 22:28:13 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/20 16:23:30 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/20 19:06:10 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ void Response::buildDeleteResponse(Request const & request, Server const & serve
 void Response::buildGetResponse(Request const & request, Server const & server)
 {
     findLocation(request.getLocation(), server, request);
+    _cgi_path = server.getCgiPath();
     // buildRessourcePath(request.getLocation(), block);
     std::cout << "_RessourcePath = " << _ressource_path << "\t _status = " << _status << std::endl;
     if(_status == 301)
@@ -233,15 +234,15 @@ unsigned int Response::buildAutoIndex()
 
 unsigned int Response::readRessource(bool isErrorPage)
 {
-/* bloc à decommenter pour essayer l'execution du cgi
+/* bloc à decommenter pour essayer l'execution du cgi*/
     CGIHandler  cgi;
-    std::cout << "Avant status =  " << _status << std::endl;
-    const char *scriptName[2] = {(const char*)"cgi-bin/essais.cgi", NULL};
+    std::string     script = _cgi_path + "/php7.3";
+
+    const char *scriptName[3] = {script.c_str(), _ressource_path.c_str() ,NULL};
     _body = cgi.executeCgi(scriptName,"");
-    std::cout << "après status = " << _status << std::endl;
 
     return _status;
-*/
+
     std::string str;
     std::stringstream buff;
     

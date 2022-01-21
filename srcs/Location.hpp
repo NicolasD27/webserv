@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/11 14:45:49 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/17 10:26:40 by clorin           ###   ########.fr       */
+/*   Updated: 2022/01/20 18:12:51 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,10 +26,11 @@ class Location
         std::string                 _root;
         bool                        _autoIndex;
         std::vector<std::string>    _methods;
+        std::string                 _cgi_path;
 
     public:
         Location(void){};
-        Location(std::string path, std::vector<std::string> index, std::string root, bool autoIndex, std::vector<std::string> methods);
+        Location(std::string path, std::vector<std::string> index, std::string root, bool autoIndex, std::vector<std::string> methods, std::string);
         ~Location(void);
         Location(Location const &);
         Location &operator=(Location const &);
@@ -41,6 +42,7 @@ class Location
         std::string                 getPath(void)const;
         std::vector<std::string>    getIndex(void)const;
         std::string                 getRoot(void)const;
+        std::string                 getCgiPath(void)const;
         bool                        isAutoindex(void)const;
     
         void                        setPath(std::string &);
