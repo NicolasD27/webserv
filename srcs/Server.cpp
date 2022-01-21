@@ -79,7 +79,7 @@ void Server::sortLocations()
         Location key = _locations[j];
         int i = j-1;
 
-        while(i >= 0 && _locations[i].getPath().length() < key.getPath().length())
+        while(i >= 0 && (_locations[i].getPath().length() < key.getPath().length() || (key.getPath()[0] == '*' && _locations[i].getPath()[0] != '*')))
         {
             _locations[i+1] = _locations[i];
             i--;
@@ -236,7 +236,6 @@ void Server::print(void)const
     std::cout << "Client Max Body Size : " << _max_body_size << std::endl;
     for(std::vector<Location>::const_iterator it = _locations.begin(); it != _locations.end(); ++it)
         it->print();
-
     std::cout << std::endl;
 }
 

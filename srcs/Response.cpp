@@ -334,16 +334,16 @@ void                    Response::printHeaders(std::ostream & o)
 void Response::findLocation(std::string const & uri, Server const & server, Request const & request)
 {
     std::vector<Location> locations = server.getLocation();
-
-    
     
     for (std::vector<Location>::iterator it = locations.begin(); it != locations.end(); ++it)
     {
-        if ((*it).getPath() == uri.substr(0, (*it).getPath().length()))
+        if ((*it).getPath() == uri.substr(0, (*it).getPath().length())
+            || ((*it).getPath()[0] == '*'&& (*it).getPath().substr(1) == uri.substr(uri.length() - (*it).getPath().length(), (*it).getPath().length())))
         {
             
             if ((*it).hasMethod(request.getHttpMethod()))
             {
+                _location_block = *it;
                 if (buildRessourcePath(request.getLocation(), *it))
                     findLocation(_ressource_path, server, request);
                 return;
