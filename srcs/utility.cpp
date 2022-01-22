@@ -51,3 +51,53 @@ std::vector<std::string>   split(std::string const &str, const char *s)
         ret.push_back(str.substr(i));
     return (ret);
 }
+
+std::string urlEncode(std::string const &value)
+{
+    std::ostringstream escaped;
+    escaped.fill('0');
+    escaped << std::hex;
+
+    for (std::string::const_iterator i = value.begin(), n = value.end(); i != n; ++i)
+    {
+        std::string::value_type c = (*i);
+        if (c == ' ')
+        {
+            escaped << '+';
+            continue;
+        }
+        // Keep alphanumeric and other accepted characters intact
+        if (isalnum((unsigned char) c) || c == '-' || c == '_' || c == '.' || c == '~') {
+            escaped << c;
+            continue;
+        }
+
+        // Any other characters are percent-encoded
+        escaped << std::uppercase;
+        escaped << '%' << std::setw(2) << int((unsigned char) c);
+        escaped << std::nouppercase;
+    }
+
+    return escaped.str();
+}
+
+std::string urlDecode(std::string const & str)
+{
+    std::string ret;
+    int i, charHex;
+
+    for (i=0; i < str.length(); i++)
+    {
+        if(str[i] != '%'){
+            if(str[i] == '+')
+                ret.append(" ");
+            else
+                ret.append(1, str[i]);
+        }else{
+            sscanf(str.substr(i + 1, 2).c_str(), "%x", &charHex);   //TODO in c++ function
+            ret.append(1, static_cast<char>(charHex));
+            i += 2;
+        }
+    }
+    return ret;
+}
