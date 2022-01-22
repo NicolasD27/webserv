@@ -65,7 +65,7 @@ void        Webserv::config(std::string conf_path)
     {
         for (const_iterator it = _servers.begin(); it != _servers.end(); ++it)
         {   
-            Location    loc_default("/", (*it)->getIndex(), (*it)->getRoot(), (*it)->getAutoIndex(), (*it)->getMethods(), (*it)->getCgiPath());
+            Location    *loc_default = new Location("/", (*it)->getIndex(), (*it)->getRoot(), (*it)->getAutoIndex(), (*it)->getMethods(), (*it)->getCgiPath());
             
             (*it)->addLocation(loc_default);
             (*it)->sortLocations();

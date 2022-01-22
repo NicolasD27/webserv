@@ -235,13 +235,16 @@ unsigned int Response::buildAutoIndex()
 unsigned int Response::readRessource(bool isErrorPage)
 {
 /* bloc à decommenter pour essayer l'execution du cgi*/
-    CGIHandler  cgi;
-    std::string     script = _cgi_path + "/php7.3";
+    if (_location_block.hasExtension(_ressource_path)  && _location_block.getCgiPath().length() != 0)
+    {
+        CGIHandler  cgi;
+        std::string     script = _location_block.getCgiPath();
 
-    const char *scriptName[3] = {script.c_str(), _ressource_path.c_str() ,NULL};
-    _body = cgi.executeCgi(scriptName,"");
+        const char *scriptName[3] = {script.c_str(), _ressource_path.c_str() ,NULL};
+        _body = cgi.executeCgi(scriptName,"");
 
-    return _status;
+        return _status;
+    }
 
     std::string str;
     std::stringstream buff;
@@ -333,18 +336,16 @@ void                    Response::printHeaders(std::ostream & o)
 
 void Response::findLocation(std::string const & uri, Server const & server, Request const & request)
 {
-    std::vector<Location> locations = server.getLocation();
-
+    std::vector<Location*> locations = server.getLocation();
     
-    
-    for (std::vector<Location>::iterator it = locations.begin(); it != locations.end(); ++it)
+    for (std::vector<Location*>::iterator it = locations.begin(); it != locations.end(); ++it)
     {
-        if ((*it).getPath() == uri.substr(0, (*it).getPath().length()))
+        if ((*it)->getPath() == uri.substr(0, (*it)->getPath().length()))
         {
-            
-            if ((*it).hasMethod(request.getHttpMethod()))
+            if ((*it)->hasMethod(request.getHttpMethod()))
             {
-                if (buildRessourcePath(request.getLocation(), *it))
+                _location_block = **it;
+                if (buildRessourcePath(request.getLocation(), **it))
                     findLocation(_ressource_path, server, request);
                 return;
             }

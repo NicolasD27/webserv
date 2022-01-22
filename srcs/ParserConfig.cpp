@@ -89,13 +89,11 @@ bool ParserConfig::check_block(std::ifstream &buff, std::vector<Server*> &server
         }
         if(tokens[0] == "location")
         {
-            //std::cout << "Check Location block\n";
             if (!check_location_block(buff, tokens, new_server))
             {
                 delete new_server;
                 return false;
             }
-            //std::cout << "------------\n";
         }
         else
         {
@@ -124,7 +122,7 @@ bool ParserConfig::check_block(std::ifstream &buff, std::vector<Server*> &server
         return false;
     }    
     servers.push_back(new_server);
-    //std::cout << "********\n";
+    
     return true;
 }
 
@@ -132,7 +130,7 @@ bool ParserConfig::check_location_block(std::ifstream &buff, std::vector<std::st
 {
     bool                        closed = false;
     std::string                 path;
-    Location                    newLocation;
+    Location                    *newLocation = new Location();
     std::vector<std::string>    locationTokens;
 
     if(tokens.size() != 3)
@@ -146,7 +144,7 @@ bool ParserConfig::check_location_block(std::ifstream &buff, std::vector<std::st
         std::cerr << "Expected '{' in location block." << std::endl;
         return false;
     }
-    newLocation.setPath(path);
+    newLocation->setPath(path);
     while(buff)
     {
         locationTokens = ParserConfig::form_inst_line(buff);
@@ -165,11 +163,14 @@ bool ParserConfig::check_location_block(std::ifstream &buff, std::vector<std::st
         if(removeSemicolon(locationTokens))
         { 
             if(locationTokens[0] == "methods")
-                newLocation.addMethods(locationTokens);
+                newLocation->addMethods(locationTokens);
             else if(locationTokens[0] == "index")
-                newLocation.addIndex(locationTokens);
+                newLocation->addIndex(locationTokens);
+            else if (locationTokens[0] == "cgi")
+                newLocation->addCgi(locationTokens);
             else
-                newLocation.storeLine(locationTokens[0], locationTokens[1]);
+                newLocation->storeLine(locationTokens[0], locationTokens[1]);
+            
         }
         else
         {
@@ -177,13 +178,11 @@ bool ParserConfig::check_location_block(std::ifstream &buff, std::vector<std::st
             return false;
         }
     }
-
     if (!closed)
     {
         std::cerr << "bracket } not found." << std::endl;
         return false;
     }    
-    //newLocation.print();
     server->addLocation(newLocation);
     return true;
 }

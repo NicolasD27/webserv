@@ -70,16 +70,16 @@ std::vector<std::string>::iterator Server::getEndServerNames() { return _server_
 
 Client* Server::getClient(int i) const { return _clients[i]; }
 
-std::vector<Location>  Server::getLocation(void)const {return _locations;}
+std::vector<Location*>  Server::getLocation(void)const {return _locations;}
 
 void Server::sortLocations()
 {
     for(size_t j = 1; j < _locations.size(); j++)
     {
-        Location key = _locations[j];
+        Location* key = _locations[j];
         int i = j-1;
 
-        while(i >= 0 && _locations[i].getPath().length() < key.getPath().length())
+        while(i >= 0 && _locations[i]->getPath().length() < key->getPath().length())
         {
             _locations[i+1] = _locations[i];
             i--;
@@ -194,7 +194,7 @@ void Server::handleNewConnection()
     _clients.push_back(new_client);
 }
 
-void    Server::addLocation(Location &loc)
+void    Server::addLocation(Location *loc)
 {
     _locations.push_back(loc);
 }
@@ -234,9 +234,8 @@ void Server::print(void)const
     std::cout  << std::endl;
     std::cout << "root : " << _root << std::endl;
     std::cout << "Client Max Body Size : " << _max_body_size << std::endl;
-    for(std::vector<Location>::const_iterator it = _locations.begin(); it != _locations.end(); ++it)
-        it->print();
-
+    for(std::vector<Location*>::const_iterator it = _locations.begin(); it != _locations.end(); ++it)
+        (*it)->print();
     std::cout << std::endl;
 }
 
