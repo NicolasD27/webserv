@@ -67,7 +67,8 @@ std::string urlEncode(std::string const &value)
             continue;
         }
         // Keep alphanumeric and other accepted characters intact
-        if (isalnum((unsigned char) c) || c == '-' || c == '_' || c == '.' || c == '~') {
+        if (isalnum((unsigned char) c) || c == '-' || c == '_' || c == '.' || c == '~')
+        {
             escaped << c;
             continue;
         }
@@ -83,20 +84,21 @@ std::string urlEncode(std::string const &value)
 
 std::string urlDecode(std::string const & str)
 {
-    std::string ret;
-    int i, charHex;
+    std::string ret = "";
 
-    for (i=0; i < str.length(); i++)
+    for (int i=0; i < str.length(); i++)
     {
-        if(str[i] != '%'){
+        if(str[i] == '%')
+        {
+            ret.append(1, static_cast<char>(StringHexaToInt(str.substr(i + 1,2))));
+            i += 2;
+        }
+        else
+        {
             if(str[i] == '+')
                 ret.append(" ");
             else
                 ret.append(1, str[i]);
-        }else{
-            sscanf(str.substr(i + 1, 2).c_str(), "%x", &charHex);   //TODO in c++ function
-            ret.append(1, static_cast<char>(charHex));
-            i += 2;
         }
     }
     return ret;
