@@ -57,7 +57,7 @@ void Request::handleLocation(std::string location)
         for (std::vector<std::string>::iterator it = params_vec.begin(); it != params_vec.end(); ++it)
         {
             std::vector<std::string> param = split(*it, "=");
-            _params.insert(std::make_pair(param[0], param[1]));
+            _params.insert(std::make_pair(param[0], urlDecode(param[1])));
         }
         _location = location.substr(0, sep_pos);
     }
