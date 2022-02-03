@@ -26,14 +26,16 @@ class Client;
 #include "Server.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
+#include "Base64.hpp"
 
 #define NO_SOCKET -1
-#define MAX_SIZE 30000
+#define MAX_SIZE 400000
 class Client
 {
 private:
     int     _socket;
     struct sockaddr_in _address;
+    Request                 *_request_in_progress;
     std::vector<Response*> _responses_to_build;
     std::queue<Response*> _responses_to_send;
     char _sending_buff[MAX_SIZE];
@@ -59,7 +61,7 @@ public:
     size_t getResponseToBuildSize() const;
     void switchToSendQueue(Response* response);
 
-    bool receiveFromClient(std::vector<Server*>);
+    bool receiveFromClient(std::vector<Server*>, int max_body_size);
     bool sendToClient();
 
 

@@ -35,6 +35,7 @@ void    CGIHandler::initEnv()
     _env["HTTP_HOST"] = "";
     _env["HTTP_USER_AGENT"] = "";
     _env["PATH"] = "";
+	_env["PATH_INFO"] = "";
     _env["QUERY_STRING"] = "say=Salut&to=Maman";
     _env["REMOTE_ADDR"] = "";
     _env["REMOTE_PORT"] = "";
@@ -96,6 +97,8 @@ std::string		CGIHandler::executeCgi(const char **scriptName, const std::string &
         std::cout << "execution de "<<scriptName[0] << " with ";
         
 		char **env;
+		//pour cgi tester
+		_env["PATH_INFO"] = "/www/html/rep/hello.php";
         env = this->getEnv();		//todo free()
 		size_t i = 1;
         while(scriptName[i])

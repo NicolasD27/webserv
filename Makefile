@@ -22,7 +22,7 @@ OBJS_DIR = objs/
 
 SRCS	= main.cpp Webserv.cpp Server.cpp Client.cpp Request.cpp Response.cpp file_utils.cpp \
 		  ErrorPages.cpp MimesType.cpp StatusCode.cpp ParserConfig.cpp Location.cpp utility.cpp \
-		  CGIHandler.cpp
+		  CGIHandler.cpp Base64.cpp
 
 OBJS	= $(SRCS:.cpp=.o) 
 

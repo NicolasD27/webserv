@@ -1,214 +1,212 @@
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <vector>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <signal.h>
 #include <unistd.h>
+#include <sys/select.h>
+#include <netinet/in.h>
+#include <stdlib.h>
+#include <string.h>
 
-int main()
+#include "common.h"
+
+peer_t server;
+
+void shutdown_properly(int code);
+
+void handle_signal_action(int sig_number)
 {
-     int y;
-    std::stringstream stream("3d\n");
-
-    stream >> std::hex >> y;
-    std::cout << y << std::endl;
+  if (sig_number == SIGINT) {
+    printf("SIGINT was catched!\n");
+    shutdown_properly(EXIT_SUCCESS);
+  }
+  else if (sig_number == SIGPIPE) {
+    printf("SIGPIPE was catched!\n");
+    shutdown_properly(EXIT_SUCCESS);
+  }
 }
-// static int forward_port;
 
-// // #undef std::max
-// // #define std::max(x,y) ((x) > (y) ? (x) : (y))
+int setup_signals()
+{
+  struct sigaction sa;
+  sa.sa_handler = handle_signal_action;
+  if (sigaction(SIGINT, &sa, 0) != 0) {
+    perror("sigaction()");
+    return -1;
+  }
+  if (sigaction(SIGPIPE, &sa, 0) != 0) {
+    perror("sigaction()");
+    return -1;
+  }
+  
+  return 0;
+}
 
-// static int
-// listen_socket(int listen_port)
-// {
-//     struct sockaddr_in a;
-//     int s;
-//     int yes;
+int get_client_name(int argc, char **argv, char *client_name)
+{
+  if (argc > 1)
+    strcpy(client_name, argv[1]);
+  else
+    strcpy(client_name, "no name");
+  
+  return 0;
+}
 
-//     if ((s = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-//         perror("socket");
-//         return -1;
-//     }
-//     yes = 1;
-//     if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR,
-//                (char *) &yes, sizeof (yes)) < 0) {
-//         perror("setsockopt");
-//         close(s);
-//         return -1;
-//     }
-//     memset(&a, 0, sizeof (a));
-//     a.sin_port = htons(listen_port);
-//     a.sin_family = AF_INET;
-//     if (bind(s, (struct sockaddr *) &a, sizeof (a)) < 0) {
-//         perror("bind");
-//         close(s);
-//         return -1;
-//     }
-//     printf("accepting connections on port %d\n", listen_port);
-//     listen(s, 10);
-//     return s;
-// }
+int connect_server(peer_t *server)
+{
+  // create socket
+  server->socket = socket(AF_INET, SOCK_STREAM, 0);
+  if (server->socket < 0) {
+    perror("socket()");
+    return -1;
+  }
+  
+  // set up addres
+  struct sockaddr_in server_addr;
+  memset(&server_addr, 0, sizeof(server_addr));
+  server_addr.sin_family = AF_INET;
+  server_addr.sin_addr.s_addr = inet_addr(SERVER_IPV4_ADDR);
+  server_addr.sin_port = htons(SERVER_LISTEN_PORT);
+  
+  server->addres = server_addr;
+  
+  if (connect(server->socket, (struct sockaddr *)&server_addr, sizeof(struct sockaddr)) != 0) {
+    perror("connect()");
+    return -1;
+  }
+  
+  printf("Connected to %s:%d.\n", SERVER_IPV4_ADDR, SERVER_LISTEN_PORT);
+  
+  return 0;
+}
 
-// static int
-// connect_socket(int connect_port, char *address)
-// {
-//     struct sockaddr_in a;
-//     int s;
+int build_fd_sets(peer_t *server, fd_set *read_fds, fd_set *write_fds, fd_set *except_fds)
+{
+  FD_ZERO(read_fds);
+  FD_SET(STDIN_FILENO, read_fds);
+  FD_SET(server->socket, read_fds);
+  
+  FD_ZERO(write_fds);
+  // there is smth to send, set up write_fd for server socket
+  if (server->send_buffer.current > 0)
+    FD_SET(server->socket, write_fds);
+  
+  FD_ZERO(except_fds);
+  FD_SET(STDIN_FILENO, except_fds);
+  FD_SET(server->socket, except_fds);
+  
+  return 0;
+}
 
-//     if ((s = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-//         perror("socket");
-//         close(s);
-//         return -1;
-//     }
+int handle_read_from_stdin(peer_t *server, char *client_name)
+{
+  char read_buffer[DATA_MAXSIZE]; // buffer for stdin
+  if (read_from_stdin(read_buffer, DATA_MAXSIZE) != 0)
+    return -1;
+  
+  // Create new message and enqueue it.
+  message_t new_message;
+  prepare_message(client_name, read_buffer, &new_message);
+  print_message(&new_message);
+  
+  if (peer_add_to_send(server, &new_message) != 0) {
+    printf("Send buffer is overflowed, we lost this message!\n");
+    return 0;
+  }
+  printf("New message to send was enqueued right now.\n");
+  
+  return 0;
+}
 
-//     memset(&a, 0, sizeof (a));
-//     a.sin_port = htons(connect_port);
-//     a.sin_family = AF_INET;
+/* You should be careful when using this function in multythread program. 
+ * Ensure that server is thread-safe. */
+void shutdown_properly(int code)
+{
+  delete_peer(&server);
+  printf("Shutdown client properly.\n");
+  exit(code);
+}
 
-//     if ((a.sin_addr.s_addr = (in_addr_t)inet_addr(address))) {
-//         perror("bad IP address format");
-//         close(s);
-//         return -1;
-//     }
+int handle_received_message(message_t *message)
+{
+  printf("Received message from server.\n");
+  print_message(message);
+  return 0;
+}
 
-//     if (connect(s, (struct sockaddr *) &a, sizeof (a)) < 0) {
-//         perror("connect()");
-//         shutdown(s, SHUT_RDWR);
-//         close(s);
-//         return -1;
-//     }
-//     return s;
-// }
+int main(int argc, char **argv)
+{
+  if (setup_signals() != 0)
+    exit(EXIT_FAILURE);
+  
+  char client_name[256];
+  get_client_name(argc, argv, client_name);
+  printf("Client '%s' start.\n", client_name);
+  
+  create_peer(&server);
+  if (connect_server(&server) != 0)
+    shutdown_properly(EXIT_FAILURE);
+  
+  /* Set nonblock for stdin. */
+  int flag = fcntl(STDIN_FILENO, F_GETFL, 0);
+  flag |= O_NONBLOCK;
+  fcntl(STDIN_FILENO, F_SETFL, flag);
+  
+  fd_set read_fds;
+  fd_set write_fds;
+  fd_set except_fds;
+  
+  printf("Waiting for server message or stdin input. Please, type text to send:\n");
+  
+  // server socket always will be greater then STDIN_FILENO
+  int maxfd = server.socket;
+  
+  while (1) {
+    // Select() updates fd_set's, so we need to build fd_set's before each select()call.
+    build_fd_sets(&server, &read_fds, &write_fds, &except_fds);
+        
+    int activity = select(maxfd + 1, &read_fds, &write_fds, &except_fds, NULL);
+    
+    switch (activity) {
+      case -1:
+        perror("select()");
+        shutdown_properly(EXIT_FAILURE);
 
-// #define SHUT_FD1 {                      \
-//         if (fd1 >= 0) {                 \
-//             shutdown(fd1, SHUT_RDWR);   \
-//             close(fd1);                 \
-//             fd1 = -1;                   \
-//         }                               \
-//     }
+      case 0:
+        // you should never get here
+        printf("select() returns 0.\n");
+        shutdown_properly(EXIT_FAILURE);
 
-// #define SHUT_FD2 {                      \
-//         if (fd2 >= 0) {                 \
-//             shutdown(fd2, SHUT_RDWR);   \
-//             close(fd2);                 \
-//             fd2 = -1;                   \
-//         }                               \
-//     }
+      default:
+        /* All fd_set's should be checked. */
+        if (FD_ISSET(STDIN_FILENO, &read_fds)) {
+          if (handle_read_from_stdin(&server, client_name) != 0)
+            shutdown_properly(EXIT_FAILURE);
+        }
 
-// #include <sstream>
+        if (FD_ISSET(STDIN_FILENO, &except_fds)) {
+          printf("except_fds for stdin.\n");
+          shutdown_properly(EXIT_FAILURE);
+        }
 
-// #define SSTR( x ) static_cast< std::ostringstream & >( \
-//         ( std::ostringstream() << std::dec << x ) ).str()
-// #define BUF_SIZE 30000
-// #define PORT 3000
+        if (FD_ISSET(server.socket, &read_fds)) {
+          if (receive_from_peer(&server, &handle_received_message) != 0)
+            shutdown_properly(EXIT_FAILURE);
+        }
 
-// int
-// main(int argc, char **argv)
-// {
-//     int h;
-//     int fd1 = -1, fd2 = -1;
-//     char buf1[BUF_SIZE], buf2[BUF_SIZE];
-//     std::string header = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: ";
-//     std::string response = "";
-//     int buf1_avail, buf1_written;
-//     int buf2_avail, buf2_written;
-//     int content_length = 0;
+        if (FD_ISSET(server.socket, &write_fds)) {
+          if (send_to_peer(&server) != 0)
+            shutdown_properly(EXIT_FAILURE);
+        }
 
-//     signal(SIGPIPE, SIG_IGN);
-
-
-//     h = listen_socket(PORT);
-//     if (h < 0)
-//         exit(EXIT_FAILURE);
-
-//     for (;;) {
-//         int r, nfds = 0;
-//         fd_set rd, wr, er;
-//         FD_ZERO(&rd);
-//         FD_ZERO(&wr);
-//         FD_ZERO(&er);
-//         FD_SET(h, &rd);
-//         nfds = std::max(nfds, h);
-//         if (fd1 > 0 && buf1_avail < BUF_SIZE) {
-//             FD_SET(fd1, &rd);
-//             nfds = std::max(nfds, fd1);
-//         }
-//         if (response.length() - buf1_written > 0) {
-//             FD_SET(fd2, &wr);
-//             printf("here\n");
-//             nfds = std::max(nfds, fd2);
-//         }
-//         r = select(nfds + 1, &rd, &wr, &er, NULL);
-
-//         if (r == -1 && errno == EINTR)
-//             continue;
-//         if (r < 0) {
-//             perror("select()");
-//             exit(EXIT_FAILURE);
-//         }
-//         if (FD_ISSET(h, &rd)) {
-//             printf("accepting");
-//             unsigned int l;
-//             struct sockaddr_in client_address;
-//             memset(&client_address, 0, l = sizeof(client_address));
-//             r = accept(h, (struct sockaddr *) &client_address, &l);
-//             if (r < 0) {
-//                 perror("accept()");
-//             } else {
-//                 SHUT_FD1;
-//                 SHUT_FD2;
-//                 buf1_avail = buf1_written = 0;
-//                 buf2_avail = buf2_written = 0;
-//                 fd1 = r;
-//                 fd2 = r;
-//                 if (fd2 < 0) {
-//                     SHUT_FD1;
-//                 } else
-//                     printf("connexion de %s\n",
-//                            inet_ntoa(client_address.sin_addr));
-//             }
-//         }
-
-//         if (fd1 > 0)
-//             if (FD_ISSET(fd1, &rd)) {
-//                 printf("fd1 est la");
-//                 r = read(fd1, buf1 + buf1_avail,
-//                          BUF_SIZE - buf1_avail);
-//                 // buf1[r] = 0;
-//                 if (content_length < std::string(buf1).length())
-//                 {
-//                     content_length = std::string(buf1).length();
-//                     response = header + SSTR(content_length) + "\n\r\n" + buf1;
-                    
-//                 }
-//                 buf1_avail += r;
-//             }
-//         if (fd2 > 0 && buf1_written < response.length() && std::string(buf1).find("\r\n") != std::string::npos)
-//             if (FD_ISSET(fd2, &wr)) {
-                
-                
-                
-//                  r = write(fd2, response.c_str() + buf1_written,
-//                           response.length() - buf1_written);
-                
-//                 if (r < 1) {
-//                     printf("shutdown2\n");
-//                     SHUT_FD2;
-//                 } else
-//                     buf1_written += r;
-//             }
-//         // if (fd1 < 0 && response.length() - buf1_written == 0) {
-//         //     SHUT_FD1;
-//         // }
-//         // if (response.length() == buf1_written && std::string(buf1).find("\r\n") != std::string::npos) {
-//         //     SHUT_FD1;
-//         //     buf1_written = 0;
-//         // }
-//         // printf("|%s|\n", buf1);
-//         printf("fd1 %d\n%d %d %ld\n%s\n", fd1, buf1_avail, buf1_written, response.length(), "response.c_str()");
-//     }
-//     exit(EXIT_SUCCESS);
-// }
+        if (FD_ISSET(server.socket, &except_fds)) {
+          printf("except_fds for server.\n");
+          shutdown_properly(EXIT_FAILURE);
+        }
+    }
+    
+    printf("And we are still waiting for server or stdin activity. You can type something to send:\n");
+  }
+  
+  return 0;
+}

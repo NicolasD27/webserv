@@ -28,9 +28,9 @@ class Location
         bool                        _autoIndex;
         std::vector<std::string>    _methods;
         std::string                 _cgi_path;
+        std::vector<std::string>    _extensions;
 
     public:
-        std::vector<std::string>    _extensions;
         Location(void){};
         Location(std::string path, std::vector<std::string> index, std::string root, bool autoIndex, std::vector<std::string> methods, std::string);
         ~Location(void);

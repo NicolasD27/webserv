@@ -13,7 +13,7 @@
 #include "Server.hpp"
 
 
-Server::Server() : _host(""), _port(-1), _max_body_size(30000) {
+Server::Server() : _host(""), _port(-1), _max_body_size(-1), _is_listening(false) {
 }
 
 
@@ -56,6 +56,8 @@ Server      &Server::operator=(Server const &cpy)
 int Server::getPort() const { return _port; }
 
 int Server::getSocket() const { return _listen_socket; }
+
+int Server::getMaxBodySize() const { return _max_body_size; }
 
 std::string Server::getHost() const { return _host; }
 
@@ -180,12 +182,21 @@ bool Server::setup(std::vector<Server*> servers)
     
     if (bind(_listen_socket, (struct sockaddr*)&my_addr, sizeof(struct sockaddr)) != 0)
         return false;
-         // start accept client connections
-    if (listen(_listen_socket, 10) != 0)
-        return false;
-    printf("Accepting connections on port %d.\n", _port);
+    fcntl(_listen_socket, F_SETFL, O_NONBLOCK);
     return true;
 }
+
+bool Server::listenSocket()
+{
+    if (listen(_listen_socket, 10) != 0)
+        return false;
+    _is_listening = true;
+    printf("Accepting connections on port %d.\n", _port);
+
+    return true;
+}
+
+bool Server::isListening() const { return _is_listening; }
 
 void Server::handleNewConnection()
 {

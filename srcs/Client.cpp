@@ -15,6 +15,7 @@
 Client::Client()
 {
     _socket = NO_SOCKET;
+    _request_in_progress = NULL;
     std::queue<std::string> _response_queue; 
 
 }
@@ -79,66 +80,75 @@ bool Client::setup(Server * server)
         return false;
     char client_ipv4_str[INET_ADDRSTRLEN];
     inet_ntop(AF_INET, &address.sin_addr, client_ipv4_str, INET_ADDRSTRLEN);
-    
     printf("Incoming connection from %s:%d.\n", client_ipv4_str, address.sin_port);
     _socket = new_client_sock;
+    fcntl(_socket, F_SETFL, O_NONBLOCK);
     address = address;
     _current_sending_byte   = -1;
     _current_receiving_byte = 0;
     return true;
 }
 
-bool Client::receiveFromClient(std::vector<Server*> servers)
+bool Client::receiveFromClient(std::vector<Server*> servers, int max_body_size)
 {
     int r;
     int content_length;
     int newline_pos = -1;
     int prev_newline_pos;
-    int offset_newline = 3;
+    int offset_newline = 1;
     int current_chunk_size;
-    int read_bytes;
+    int read_bytes = 0;
     int current_last_nl;
+    Request *request;
+    std::string request_string;
 
-    _current_receiving_byte = 0;
-    _receiving_buff[0] = 0;
-    while ((newline_pos == -1 || newline_pos == std::string::npos) && (r = recv(_socket, _receiving_buff + _current_receiving_byte, 1, MSG_DONTWAIT)) > 0)
+    if (!_request_in_progress)
     {
-        _current_receiving_byte += r;
-        _receiving_buff[_current_receiving_byte] = 0;
-        newline_pos = std::string(_receiving_buff).find("\r\n\r\n");
+        while ((newline_pos == -1 || newline_pos == std::string::npos) && (r = read(_socket, _receiving_buff + _current_receiving_byte, 1)) > 0)
+        {
+            _current_receiving_byte += r;
+            _receiving_buff[_current_receiving_byte] = 0;
+            newline_pos = std::string(_receiving_buff).find("\r\n\r\n");
+        }
+        request_string = std::string(_receiving_buff);
+        request = new Request(request_string);
+        request->parseHeaders();
+        offset_newline = 3;
     }
-    std::string request_string(_receiving_buff);
-    Request request(request_string);
-    request.parseHeaders();
-    if (!(request["Transfer-Encoding"].length() == 0 || request["Transfer-Encoding"] == "identity"))
+    else
+    {
+        request = _request_in_progress;
+        newline_pos = _current_receiving_byte - 2;
+    }
+    if (!((*request)["Transfer-Encoding"].length() == 0 || (*request)["Transfer-Encoding"] == "identity"))
     {
         while (1)
         {
             read_bytes = 0;
             current_last_nl = newline_pos + offset_newline;
-            while (newline_pos + offset_newline == current_last_nl && (r = recv(_socket, _receiving_buff + _current_receiving_byte, 1, MSG_DONTWAIT)) > 0)
+            while (newline_pos + offset_newline == current_last_nl && (r = read(_socket, _receiving_buff + _current_receiving_byte, 1)) > 0)
             {
                 _current_receiving_byte += r;
                 _receiving_buff[_current_receiving_byte] = 0;
                 current_last_nl = std::string(_receiving_buff).find_last_of("\r\n");
             }
-            offset_newline = 0;
+            
             request_string = std::string(_receiving_buff);
-            current_chunk_size = StringHexaToInt(request_string.substr(newline_pos + 1));
-            offset_newline = 1;
-            if (current_chunk_size == 0) // ajouter max body
+            current_chunk_size = StringHexaToInt(request_string.substr(newline_pos + offset_newline + 1));            
+            if (current_chunk_size == 0 || (read_bytes > max_body_size && max_body_size != -1)) // ajouter max body 
                 break;
-            while (read_bytes < current_chunk_size + 2 && (r = recv(_socket, _receiving_buff + _current_receiving_byte, current_chunk_size + 2 - read_bytes, MSG_DONTWAIT)) > 0)
+            offset_newline = 1;
+            while (read_bytes < current_chunk_size + 2 && (r = read(_socket, _receiving_buff + _current_receiving_byte, current_chunk_size + 2 - read_bytes)) > 0)
             {
                 read_bytes += r;
                 _current_receiving_byte += r;
                 _receiving_buff[_current_receiving_byte] = 0;
             }
-            request.addToBody(std::string(_receiving_buff).substr(_current_receiving_byte - current_chunk_size - 1, current_chunk_size));
+            request->addToBody(std::string(_receiving_buff).substr(_current_receiving_byte - current_chunk_size - 1, current_chunk_size));
             newline_pos = std::string(_receiving_buff).find_last_of("\r\n");    
         }        
     }
-    else if ((content_length = StringToInt(request["Content-Length"])) != 0)
+    else if ((content_length = StringToInt((*request)["Content-Length"])) != 0 && content_length < MAX_SIZE)
     {
         while (read_bytes < content_length && (r = recv(_socket, _receiving_buff + _current_receiving_byte, content_length - read_bytes, MSG_DONTWAIT)) > 0)
         {
@@ -146,17 +156,36 @@ bool Client::receiveFromClient(std::vector<Server*> servers)
             _current_receiving_byte += r;
             _receiving_buff[_current_receiving_byte] = 0;
         }
-        request.addToBody(std::string(_receiving_buff).substr(newline_pos + 4));
+        request->addToBody(std::string(_receiving_buff).substr(newline_pos + 4));
     }
     if (request_string.length() == 0)
-        return false;
-    findMatchingServer(servers, request);
-    std::cout << request << std::endl;
-    Response* response = new Response(request, *_server);
-    if (response->isToSend())
-        _responses_to_send.push(response);
+            return false;
+    if (!((*request)["Transfer-Encoding"].length() == 0 || (*request)["Transfer-Encoding"] == "identity") && request_string[(newline_pos + offset_newline + 1)] == 0)
+    {
+        _request_in_progress = request;
+        std::cout << *request << std::endl;
+        std::cout << "request chunked" << std::endl;
+        
+    }
     else
-        _responses_to_build.push_back(response);
+    {
+        if (!((*request)["Transfer-Encoding"].length() == 0 || (*request)["Transfer-Encoding"] == "identity"))
+        {
+            read(_socket, _receiving_buff + _current_receiving_byte, 3); // read the last /r/n
+        }
+        std::cout << "request finished" << std::endl;
+        
+            _request_in_progress = NULL;
+            _current_receiving_byte = 0;
+            _receiving_buff[0] = 0;
+        findMatchingServer(servers, *request);
+        std::cout << request << std::endl;
+        Response* response = new Response(*request, *_server);
+        if (response->isToSend())
+            _responses_to_send.push(response);
+        else
+            _responses_to_build.push_back(response);
+    }
     return true;
 } 
 
@@ -186,6 +215,7 @@ void Client::findMatchingServer(std::vector<Server*> servers, Request & request)
 bool Client::sendToClient()
 {
     Response* response = _responses_to_send.front();
+    std::cout << *response << std::endl;
     std::string response_string = response->buildResponseString();
     int r = write(_socket, response_string.c_str(), response_string.length());
     if (r == response_string.length())

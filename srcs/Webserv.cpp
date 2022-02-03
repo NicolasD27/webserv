@@ -207,8 +207,13 @@ bool        Webserv::run()
         {
             for (iterator server_it = _servers.begin(); server_it != _servers.end(); ++server_it)
             {
-                if (FD_ISSET((*server_it)->getSocket(), &read_fds)) {
-                    (*server_it)->handleNewConnection();
+                
+                if (FD_ISSET((*server_it)->getSocket(), &read_fds))
+                {
+                    if (!(*server_it)->isListening())
+                        (*server_it)->listenSocket();
+                    else
+                        (*server_it)->handleNewConnection();
                     break;
                 }
                 std::vector<std::vector<Client*>::const_iterator> client_to_remove;
@@ -231,7 +236,7 @@ bool        Webserv::run()
                     if ((*client_it)->getSocket() != NO_SOCKET && FD_ISSET((*client_it)->getSocket(), &read_fds))
                     {
 
-                        if (!(*client_it)->receiveFromClient(_servers))
+                        if (!(*client_it)->receiveFromClient(_servers, (*server_it)->getMaxBodySize()))
                             client_to_remove.push_back(client_it);
                             
                         

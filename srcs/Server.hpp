@@ -49,7 +49,7 @@ private:
     std::vector<std::string>    _methods;
     std::vector<std::string>    _index;
     std::string                 _cgi_path;
-    
+    bool                        _is_listening;
 public:
     typedef std::vector<Client*>::iterator             client_iterator;
     typedef std::vector<Client*>::const_iterator       client_const_iterator;
@@ -68,6 +68,7 @@ public:
     std::vector<std::string> getIndex() const;
     std::vector<std::string> getServerNames() const;
     std::string getCgiPath() const;
+    int getMaxBodySize() const;
 
     Client* getClient(int index) const;
     std::vector<Location*>       getLocation(void) const;
@@ -80,6 +81,8 @@ public:
     void removeClient(client_const_iterator);
 
     bool setup(std::vector<Server*>);
+    bool listenSocket();
+    bool isListening() const;
     
     void storeLine(std::string & key, std::string & value);
     void setMethods(std::vector<std::string> &);
