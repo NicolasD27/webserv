@@ -23,11 +23,12 @@ Location &Location::operator=(Location const &cpy)
     if(&cpy != this)
     {
         _path = cpy._path;
-        _index = cpy._index;
         _root = cpy._root;
         _autoIndex = cpy._autoIndex;
-        _methods = cpy._methods;
         _cgi_path = cpy._cgi_path;
+        _methods = cpy._methods;
+        _index = cpy._index;
+        _extensions = cpy._extensions;
     }
     return *this;
 };
@@ -96,8 +97,10 @@ void            Location::addCgi(std::vector<std::string> tokens)
 bool            Location::hasExtension(std::string uri) const
 {
     for (std::vector<std::string>::const_iterator it = _extensions.begin(); it != _extensions.end(); ++it)
-        if ((*it) == uri.substr(uri.length() - (*it).length() + 1, (*it).length() - 1))
+    {
+        if ((*it) == uri.substr(uri.length() - (*it).length(), (*it).length()))
             return true;
+    }
     return false;
 }
 

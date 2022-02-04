@@ -20,12 +20,6 @@ ErrorPages  ERROR_PAGES;
 
 Response::Response(Request const & request, Server const & server):_pt_server(&server), _pt_request(&request), _body(""), _to_send(true), _ressource_fd(-1), _ressource_path(""), _status(0)
 {
-    // Location    block;
-    // std::cout << "Creation de Response avec Request.getLocation() = " << request.getLocation();
-    // block = findLocation(request.getLocation(), server);
-    // std::cout << "on travail avec le block : \n";
-    // block.print();
-
     if (request.getHttpMethod() == "GET")
         buildGetResponse(request, server);
     // else if (request.getHttpMethod() == "POST")
@@ -42,6 +36,7 @@ void Response::buildDeleteResponse(Request const & request, Server const & serve
 void Response::buildGetResponse(Request const & request, Server const & server)
 {
     findLocation(request.getLocation(), server, request);
+    _location_block.print();
     _cgi_path = server.getCgiPath();
     // buildRessourcePath(request.getLocation(), block);
     std::cout << "_RessourcePath = " << _ressource_path << "\t _status = " << _status << std::endl;
