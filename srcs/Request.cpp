@@ -141,6 +141,11 @@ std::map<std::string, std::string>  Request::getParams() const
     return this->_params;
 }
 
+std::string         Request::getRequestString() const
+{
+    return this->_request_string;
+}
+
 Request::~Request()
 {
 }

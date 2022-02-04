@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/19 22:28:13 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/20 19:06:10 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/04 14:58:28 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -232,7 +232,9 @@ unsigned int Response::readRessource(bool isErrorPage)
 /* bloc à decommenter pour essayer l'execution du cgi*/
     if (_location_block.hasExtension(_ressource_path)  && _location_block.getCgiPath().length() != 0)
     {
-        CGIHandler  cgi;
+        //CGIHandler  cgi;
+        CGIHandler  cgi(_pt_request);
+        
         std::string     script = _location_block.getCgiPath();
 
         const char *scriptName[3] = {script.c_str(), _ressource_path.c_str() ,NULL};

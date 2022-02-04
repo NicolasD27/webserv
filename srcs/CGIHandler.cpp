@@ -6,47 +6,66 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/19 22:40:48 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/21 09:39:04 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/04 15:24:21 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "CGIHandler.hpp"
 
-CGIHandler::CGIHandler()
-{
-    initEnv();
-}
-
-
 CGIHandler::~CGIHandler(){}
 
-void    CGIHandler::initEnv()
+// void    CGIHandler::initEnv()
+// {
+//     _env["REQUEST_METHOD"] = "GET";//ok
+//     _env["SERVER_PROTOCOL"] = "HTTP/1.1";
+// 	_env["SERVER_SOFTWARE"] = "Webserv/1.0";
+//     _env["COMSPEC"] = "";
+//     _env["DOCUMENT_ROOT"] = "";
+//     _env["GATEWAY_INTERFACE"] = "CGI/1.1";//ok
+//     _env["HTTP_ACCEPT"] = "";
+//     _env["HTTP_ACCEPT_ENCODING"] = "";
+//     _env["HTTP_ACCEPT_LANGUAGE"] = "";
+//     _env["HTTP_CONNECTION"] = "";
+//     _env["HTTP_HOST"] = "";
+//     _env["HTTP_USER_AGENT"] = "";
+//     _env["PATH"] = "";
+// 	_env["PATH_INFO"] = "";	//ok
+//     _env["QUERY_STRING"] = "say=Salut&to=Maman"; //ok
+//     _env["REMOTE_ADDR"] = "";//ok
+//     _env["REMOTE_PORT"] = "";
+//     _env["REQUEST_URI"] = "";//ok
+//     _env["SCRIPT_FILENAME"] = "";
+//     _env["SCRIPT_NAME"] = "";//ok
+//     _env["SERVER_ADDR"] = "";
+//     _env["SERVER_SIGNATURE"] = "";
+//     _env["SERVER_ADMIN"] = "clorin@student.42.fr";
+//     _env["SERVER_NAME"] = "webserv";
+//     _env["SERVER_PORT"] = "3000";
+// }
+
+/*
+ Your program should set the follo
+AUTH_TYPE
+CONTENT_LENGTH
+CONTENT_TYPE
+GATEWAY_INTERFACE
+PATH_INFO
+PATH_TRANSLATED
+QUERY_STRING
+REMOTE_ADDR
+REMOTE_IDENT
+REMOTE_USER
+REQUEST_METHOD ok
+REQUEST_URI
+SCRIPT_NAME
+
+*/
+
+	CGIHandler::CGIHandler(Request const *request)
 {
-    _env["REQUEST_METHOD"] = "GET";
-    _env["SERVER_PROTOCOL"] = "HTTP/1.1";
-	_env["SERVER_SOFTWARE"] = "Webserv/1.0";
-    _env["COMSPEC"] = "";
-    _env["DOCUMENT_ROOT"] = "";
-    _env["GATEWAY_INTERFACE"] = "";
-    _env["HTTP_ACCEPT"] = "";
-    _env["HTTP_ACCEPT_ENCODING"] = "";
-    _env["HTTP_ACCEPT_LANGUAGE"] = "";
-    _env["HTTP_CONNECTION"] = "";
-    _env["HTTP_HOST"] = "";
-    _env["HTTP_USER_AGENT"] = "";
-    _env["PATH"] = "";
-	_env["PATH_INFO"] = "";
-    _env["QUERY_STRING"] = "say=Salut&to=Maman";
-    _env["REMOTE_ADDR"] = "";
-    _env["REMOTE_PORT"] = "";
-    _env["REQUEST_URI"] = "";
-    _env["SCRIPT_FILENAME"] = "";
-    _env["SCRIPT_NAME"] = "";
-    _env["SERVER_ADDR"] = "";
-    _env["SERVER_SIGNATURE"] = "";
-    _env["SERVER_ADMIN"] = "clorin@student.42.fr";
-    _env["SERVER_NAME"] = "webserv";
-    _env["SERVER_PORT"] = "3000";
+	_env["REQUEST_METHOD"] = request->getHttpMethod();
+	_env["GATEWAY_INTERFACE"] = "CGI/1.1";
+	_env["AUTH_TYPE"] = "";
 }
 
 char					**CGIHandler::getEnv() const

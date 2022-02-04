@@ -70,6 +70,7 @@ public:
     time_t                              getKeepAliveN() const;
     std::string                         getBody() const;
     std::map<std::string, std::string>  getParams() const;
+    std::string                         getRequestString() const;
 
     void                                setLocation(std::string);
 };
