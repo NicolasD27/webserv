@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/19 22:40:48 by clorin            #+#    #+#             */
-/*   Updated: 2022/02/06 15:07:41 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/06 16:35:10 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,6 +95,8 @@ CGIHandler::~CGIHandler(){}
 	_env["GATEWAY_INTERFACE"] = "CGI/1.1";
 	_env["AUTH_TYPE"] = "";
 	_env["CONTENT_TYPE"] = headers["Content-type"];
+	_env["PATH_INFO"] = response->getRessourcePath();
+	_env["QUERY_STRING"] = request->getQueryString();
 }
 
 char					**CGIHandler::getEnv() const
@@ -150,8 +152,6 @@ std::string		CGIHandler::executeCgi(const char **scriptName, const std::string &
         std::cout << "execution de "<<scriptName[0] << " with ";
         
 		char **env;
-		//pour cgi tester
-		_env["PATH_INFO"] = "/www/html/rep/hello.php";
         env = this->getEnv();		//todo free()
 		size_t i = 1;
         while(scriptName[i])

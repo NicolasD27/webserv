@@ -4,7 +4,7 @@
 const char *HEADERS_IN[] = {"Accept-Language", "Accept", "Keep-Alive", "Authorization", "Via", "Accept-Encoding", "Upgrade", "Expect", "TE", "If-Range", "Range", "Transfer-Encoding", "Content-Type", "Content-Range", "Content-Length", "Referer", "User-Agent", "If-None-Match", "If-Match", "If-Unmodified-Since", "If-Modified-Since", "Connection", "Host", NULL};
 
 
-Request::Request(std::string request_string) : _request_string(request_string), _body(""), _keep_alive_n(0), _location("")
+Request::Request(std::string request_string) : _request_string(request_string), _body(""), _keep_alive_n(0), _location(""), _query_string("")
 {
 }
 
@@ -53,6 +53,7 @@ void Request::handleLocation(std::string location)
     int sep_pos = location.find('?');
     if (sep_pos != std::string::npos)
     {
+        _query_string = location.substr(sep_pos+1);
         std::vector<std::string> params_vec = split(location.substr(sep_pos + 1), "&");
         for (std::vector<std::string>::iterator it = params_vec.begin(); it != params_vec.end(); ++it)
         {
@@ -144,6 +145,11 @@ std::map<std::string, std::string>  Request::getParams() const
 std::string         Request::getRequestString() const
 {
     return this->_request_string;
+}
+
+std::string         Request::getQueryString() const
+{
+    return this->_query_string;
 }
 
 std::map<std::string, std::string>  Request::getHeaders() const
