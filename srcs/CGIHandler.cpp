@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/19 22:40:48 by clorin            #+#    #+#             */
-/*   Updated: 2022/02/04 15:24:21 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/06 10:25:03 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,11 +61,16 @@ SCRIPT_NAME
 
 */
 
-	CGIHandler::CGIHandler(Request const *request)
+	CGIHandler::CGIHandler(Request const *request, std::map<std::string, std::string>&headers)
 {
 	_env["REQUEST_METHOD"] = request->getHttpMethod();
 	_env["GATEWAY_INTERFACE"] = "CGI/1.1";
 	_env["AUTH_TYPE"] = "";
+	std::cout << "HEADERS dans CGI : \n";
+	for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); ++it)
+    {
+        std::cout << "\t"<< C_YELLOW << it->first << C_RESET<<": "<< C_CYAN << it->second << C_RESET<< std::endl;
+    }
 }
 
 char					**CGIHandler::getEnv() const

@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/19 22:36:14 by clorin            #+#    #+#             */
-/*   Updated: 2022/02/04 15:24:42 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/06 10:20:41 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ class CGIHandler
 
     public:
 
-        CGIHandler(Request const *);
+        CGIHandler(Request const *, std::map<std::string, std::string>&);
         ~CGIHandler(void);
 
         //void                    initEnv();
