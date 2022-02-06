@@ -89,6 +89,8 @@ public:
 
     unsigned int    getStatus(void) const;
 
+    std::map<std::string, std::string> getHeaders() const;
+
     void printHeaders(std::ostream &);
 
 };

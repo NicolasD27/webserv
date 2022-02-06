@@ -146,6 +146,11 @@ std::string         Request::getRequestString() const
     return this->_request_string;
 }
 
+std::map<std::string, std::string>  Request::getHeaders() const
+{
+    return this->_headers;
+}
+
 Request::~Request()
 {
 }

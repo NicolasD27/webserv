@@ -71,6 +71,7 @@ public:
     std::string                         getBody() const;
     std::map<std::string, std::string>  getParams() const;
     std::string                         getRequestString() const;
+    std::map<std::string, std::string>  getHeaders() const;
 
     void                                setLocation(std::string);
 };

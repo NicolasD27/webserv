@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/19 22:28:13 by clorin            #+#    #+#             */
-/*   Updated: 2022/02/06 10:25:19 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/06 14:22:50 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -233,7 +233,7 @@ unsigned int Response::readRessource(bool isErrorPage)
     if (_location_block.hasExtension(_ressource_path)  && _location_block.getCgiPath().length() != 0)
     {
         //CGIHandler  cgi;
-        CGIHandler  cgi(_pt_request, _headers);
+        CGIHandler  cgi(_pt_request, this);
         
         std::string     script = _location_block.getCgiPath();
 
@@ -311,6 +311,11 @@ std::string Response::getResponseString() const
 std::string Response::getRessourcePath() const
 {
     return _ressource_path;
+}
+
+std::map<std::string, std::string> Response::getHeaders() const
+{
+    return _headers;
 }
 
 int Response::getRessourceFD() const { return _ressource_fd; }
