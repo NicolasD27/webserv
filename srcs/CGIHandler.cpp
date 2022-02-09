@@ -6,47 +6,97 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/19 22:40:48 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/21 09:39:04 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/06 16:35:10 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "CGIHandler.hpp"
 
-CGIHandler::CGIHandler()
-{
-    initEnv();
-}
-
-
 CGIHandler::~CGIHandler(){}
 
-void    CGIHandler::initEnv()
+// void    CGIHandler::initEnv()
+// {
+//     _env["REQUEST_METHOD"] = "GET";//ok
+//     _env["SERVER_PROTOCOL"] = "HTTP/1.1";
+// 	_env["SERVER_SOFTWARE"] = "Webserv/1.0";
+//     _env["COMSPEC"] = "";
+//     _env["DOCUMENT_ROOT"] = "";
+//     _env["GATEWAY_INTERFACE"] = "CGI/1.1";//ok
+//     _env["HTTP_ACCEPT"] = "";
+//     _env["HTTP_ACCEPT_ENCODING"] = "";
+//     _env["HTTP_ACCEPT_LANGUAGE"] = "";
+//     _env["HTTP_CONNECTION"] = "";
+//     _env["HTTP_HOST"] = "";
+//     _env["HTTP_USER_AGENT"] = "";
+//     _env["PATH"] = "";
+// 	_env["PATH_INFO"] = "";	//ok
+//     _env["QUERY_STRING"] = "say=Salut&to=Maman"; //ok
+//     _env["REMOTE_ADDR"] = "";//ok
+//     _env["REMOTE_PORT"] = "";
+//     _env["REQUEST_URI"] = "";//ok
+//     _env["SCRIPT_FILENAME"] = "";
+//     _env["SCRIPT_NAME"] = "";//ok
+//     _env["SERVER_ADDR"] = "";
+//     _env["SERVER_SIGNATURE"] = "";
+//     _env["SERVER_ADMIN"] = "clorin@student.42.fr";
+//     _env["SERVER_NAME"] = "webserv";
+//     _env["SERVER_PORT"] = "3000";
+// }
+
+/*
+ - Server related variables
+    	SERVER_SOFTWARE
+    	SERVER_NAME
+    	GATEWAY_INTERFACE	
+ - Query-specific variables:
+		SERVER_PROTOCOL
+			Le nom et la révision du protocole dans lequel la requête a été faite (Format : protocole/révision)
+		SERVER_PORT
+			Le numéro de port sur lequel la requête a été envoyée.
+		REQUEST_METHOD
+			La méthode utilisée pour faire la requête. Pour HTTP, elle contient généralement « GET » ou « POST ».
+		PATH_INFO
+			Le chemin supplémentaire du script tel que donné par le client.
+			Par exemple, si le serveur héberge le script « /cgi-bin/monscript.cgi » et que le client demande l'url 
+			« http://serveur.org/cgi-bin/monscript.cgi/marecherche », alors PATH_INFO contiendra « marecherche ».
+		PATH_TRANSLATED
+			Contient le chemin demandé par le client après que les conversions virtuel → physique ont été faites par le serveur.
+		SCRIPT_NAME
+			Le chemin virtuel vers le script étant exécuté. Exemple : « /cgi-bin/script.cgi »
+		QUERY_STRING
+			Contient tout ce qui suit le « ? » dans l'URL envoyée par le client.
+			Toutes les variables provenant d'un formulaire envoyé avec la méthode « GET » seront contenues dans le QUERY_STRING sous la forme
+			« var1=val1&var2=val2&... ».
+		REMOTE_ADDR
+			L'adresse IP du client.
+		AUTH_TYPE
+			Le type d'identification utilisé pour protéger le script (s’il est protégé et si le serveur supporte l'identification).
+		REMOTE_USER
+			Le nom d'utilisateur du client, si le script est protégé et si le serveur supporte l'identification.
+		REMOTE_IDENT
+			Nom d'utilisateur (distant) du client faisant la requête. Le serveur doit supporter l'identification RFC 931.
+			Cette variable devrait être utilisée à des fins de journaux seulement.
+		CONTENT_TYPE
+			Le type de contenu attaché à la requête, si des données sont attachées (comme lorsqu'un formulaire est envoyé avec la méthode « POST »).
+		CONTENT_LENGTH
+			La longueur du contenu envoyé par le client.
+		
+
+		REQUEST_URI
+			dans l'exemple audessus il semblerait que cela soit : /cgi-bin/monscript.cgi/marecherche avec les ?var=DD si GET
+
+*/
+
+	CGIHandler::CGIHandler(Request const *request, Response const *response)
 {
-    _env["REQUEST_METHOD"] = "GET";
-    _env["SERVER_PROTOCOL"] = "HTTP/1.1";
-	_env["SERVER_SOFTWARE"] = "Webserv/1.0";
-    _env["COMSPEC"] = "";
-    _env["DOCUMENT_ROOT"] = "";
-    _env["GATEWAY_INTERFACE"] = "";
-    _env["HTTP_ACCEPT"] = "";
-    _env["HTTP_ACCEPT_ENCODING"] = "";
-    _env["HTTP_ACCEPT_LANGUAGE"] = "";
-    _env["HTTP_CONNECTION"] = "";
-    _env["HTTP_HOST"] = "";
-    _env["HTTP_USER_AGENT"] = "";
-    _env["PATH"] = "";
-	_env["PATH_INFO"] = "";
-    _env["QUERY_STRING"] = "say=Salut&to=Maman";
-    _env["REMOTE_ADDR"] = "";
-    _env["REMOTE_PORT"] = "";
-    _env["REQUEST_URI"] = "";
-    _env["SCRIPT_FILENAME"] = "";
-    _env["SCRIPT_NAME"] = "";
-    _env["SERVER_ADDR"] = "";
-    _env["SERVER_SIGNATURE"] = "";
-    _env["SERVER_ADMIN"] = "clorin@student.42.fr";
-    _env["SERVER_NAME"] = "webserv";
-    _env["SERVER_PORT"] = "3000";
+	std::map<std::string, std::string>	headers = response->getHeaders();
+	_env["SERVER_PROTOCOL"] = "HTTP/1.1";
+	_env["REQUEST_METHOD"] = request->getHttpMethod();
+	_env["GATEWAY_INTERFACE"] = "CGI/1.1";
+	_env["AUTH_TYPE"] = "";
+	_env["CONTENT_TYPE"] = headers["Content-type"];
+	_env["PATH_INFO"] = response->getRessourcePath();
+	_env["QUERY_STRING"] = request->getQueryString();
 }
 
 char					**CGIHandler::getEnv() const
@@ -85,6 +135,11 @@ std::string		CGIHandler::executeCgi(const char **scriptName, const std::string &
 	long	fdOut = fileno(fOut);
 	int		ret = 1;
 
+	std::cout << "Vars dans CGI : \n";
+	for (std::map<std::string, std::string>::iterator it = _env.begin(); it != _env.end(); ++it)
+    {
+        std::cout << "\t"<< C_YELLOW << it->first << C_RESET<<": "<< C_CYAN << it->second << C_RESET<< std::endl;
+    }
 	pid = fork();
 
 	if (pid == -1)
@@ -97,8 +152,6 @@ std::string		CGIHandler::executeCgi(const char **scriptName, const std::string &
         std::cout << "execution de "<<scriptName[0] << " with ";
         
 		char **env;
-		//pour cgi tester
-		_env["PATH_INFO"] = "/www/html/rep/hello.php";
         env = this->getEnv();		//todo free()
 		size_t i = 1;
         while(scriptName[i])

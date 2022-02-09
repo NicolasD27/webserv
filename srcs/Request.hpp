@@ -40,6 +40,7 @@ class Request
 
 private:
     std::string                         _request_string;
+    std::string                         _query_string;
     std::string                         _http_method;
     std::string                         _location;
     time_t                              _keep_alive_n;
@@ -70,6 +71,9 @@ public:
     time_t                              getKeepAliveN() const;
     std::string                         getBody() const;
     std::map<std::string, std::string>  getParams() const;
+    std::string                         getRequestString() const;
+    std::map<std::string, std::string>  getHeaders() const;
+    std::string                         getQueryString() const;
 
     void                                setLocation(std::string);
 };

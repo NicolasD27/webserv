@@ -1,6 +1,4 @@
-<?php
-echo "Hello in php";
-?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -11,7 +9,13 @@ echo "Hello in php";
 		<link rel="stylesheet" href="index.css">
 	</head>
 	<body>
-		<h1> Hello world !</h1>
-
+		<h1><?php
+				echo "Hello in php";
+			?>
+		</h1>
+		<b><?php
+		$date = date('d-m-y h:i:s');
+		echo $date;
+		?></b>
 	</body>
 </html>

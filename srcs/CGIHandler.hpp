@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/19 22:36:14 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/20 16:11:15 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/06 14:20:26 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,17 +17,21 @@
 #include <map>
 
 #include "Request.hpp"
+#include "Response.hpp"
 
 class CGIHandler
 {
     private:
+        CGIHandler(void){};
         std::map<std::string, std::string> _env;
 
     public:
-        CGIHandler(void);
+
+        //CGIHandler(Request const *, std::map<std::string, std::string>&);
+        CGIHandler(Request const *, Response const *);
         ~CGIHandler(void);
 
-        void                    initEnv();
+        //void                    initEnv();
         char					**getEnv() const;
         size_t                  size() const;
 
