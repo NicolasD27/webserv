@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/19 22:40:48 by clorin            #+#    #+#             */
-/*   Updated: 2022/02/11 16:00:55 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/11 16:19:26 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,7 +115,7 @@ CGIHandler::~CGIHandler(){}
 		_env["CONTENT_LENGTH"] = to_string(request->getBody().length());
 	
 	_env["REMOTE_ADDR"] = request->getAddressClient();
-	_env["REMOTE_PORT"] = request->getPortClient();
+	_env["REMOTE_PORT"] = to_string(request->getPortClient());
 	_env["REMOTE_IDENT"] = headers_request["Authorization"]; // a verifier
 	_env["REMOTE_USER"] = headers_request["Authorization"];
 	_env["SCRIPT_NAME"] = response->getCgiPath();
