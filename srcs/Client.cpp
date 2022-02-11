@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 16:33:58 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/05 08:37:39 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/11 15:33:11 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,6 @@ Client::Client()
     _socket = NO_SOCKET;
     _request_in_progress = NULL;
     std::queue<std::string> _response_queue; 
-
 }
 
 Client::Client(Client const &cpy)
@@ -27,7 +26,10 @@ Client::Client(Client const &cpy)
 	}
 }
 
-Client::~Client() {}
+Client::~Client()
+{
+    _client_ipv4_str.clear();
+}
 
 Client      &Client::operator=(Client const &cpy)
 {
@@ -37,7 +39,7 @@ Client      &Client::operator=(Client const &cpy)
         _address = cpy._address;
         _current_sending_byte   = cpy._current_sending_byte;
         _current_receiving_byte = cpy._current_receiving_byte;
-
+        _client_ipv4_str = cpy._client_ipv4_str;
     }
     return *this;
 }
@@ -78,12 +80,13 @@ bool Client::setup(Server * server)
     int new_client_sock = accept(_server->getSocket(), (struct sockaddr *)&address, &client_len);
     if (new_client_sock < 0)
         return false;
-    char client_ipv4_str[INET_ADDRSTRLEN];
-    inet_ntop(AF_INET, &address.sin_addr, client_ipv4_str, INET_ADDRSTRLEN);
-    printf("Incoming connection from %s:%d.\n", client_ipv4_str, address.sin_port);
+    char client_ipv4[INET_ADDRSTRLEN];
+    inet_ntop(AF_INET, &address.sin_addr, client_ipv4, INET_ADDRSTRLEN);
+    this->_client_ipv4_str = client_ipv4;
+    printf("Incoming connection from %s:%d.\n", this->_client_ipv4_str.c_str(), address.sin_port);
     _socket = new_client_sock;
     fcntl(_socket, F_SETFL, O_NONBLOCK);
-    address = address;
+    _address = address;
     _current_sending_byte   = -1;
     _current_receiving_byte = 0;
     return true;
@@ -113,6 +116,10 @@ bool Client::receiveFromClient(std::vector<Server*> servers, int max_body_size)
         request_string = std::string(_receiving_buff);
         request = new Request(request_string);
         request->parseHeaders();
+
+        request->setPortClient(_address.sin_port);
+        request->setAddressClient(_client_ipv4_str);
+        
         offset_newline = 3;
     }
     else

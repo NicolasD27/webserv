@@ -48,7 +48,8 @@ private:
     std::vector<std::string>            _x_forwarded_for;
     std::string                         _body;
     std::map<std::string, std::string>  _params;
-    
+    uint16_t                            _portClient;
+    std::string                         _addressClient;
     void                                handleLocation(std::string);
     
 public:
@@ -65,6 +66,8 @@ public:
     void                                printHeaders(std::ostream &);
     void                                printParams(std::ostream &);
     void                                addToBody(std::string new_elem);
+    void                                setPortClient(uint16_t);
+    void                                setAddressClient(std::string &);
 
     std::string                         getHttpMethod(void) const;
     std::string                         getLocation(void) const;
@@ -74,6 +77,8 @@ public:
     std::string                         getRequestString() const;
     std::map<std::string, std::string>  getHeaders() const;
     std::string                         getQueryString() const;
+    std::string                         getAddressClient() const;
+    uint16_t                            getPortClient() const;
 
     void                                setLocation(std::string);
 };

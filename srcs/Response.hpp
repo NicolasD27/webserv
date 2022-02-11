@@ -86,6 +86,11 @@ public:
     std::string getRessourcePath(void) const;
     int getRessourceFD() const;
     Request const * getRequest() const;
+    int getPort() const;
+    std::string getHost() const;
+    std::string  getCgiPath() const;
+
+
 
     unsigned int    getStatus(void) const;
 
