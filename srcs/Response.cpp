@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/19 22:28:13 by clorin            #+#    #+#             */
-/*   Updated: 2022/02/06 14:22:50 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/11 15:59:41 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -242,7 +242,6 @@ unsigned int Response::readRessource(bool isErrorPage)
 
         return _status;
     }
-
     std::string str;
     std::stringstream buff;
     
@@ -303,6 +302,10 @@ Response      &Response::operator=(Response const &cpy)
 
 Request const * Response::getRequest() const { return _pt_request; }
 
+int         Response::getPort() const { return _pt_server->getPort();}
+
+std::string Response::getHost() const { return _pt_server->getHost();}
+
 std::string Response::getResponseString() const
 {
     return _response_string;
@@ -316,6 +319,11 @@ std::string Response::getRessourcePath() const
 std::map<std::string, std::string> Response::getHeaders() const
 {
     return _headers;
+}
+
+std::string             Response::getCgiPath()const
+{
+    return this->_location_block.getCgiPath();
 }
 
 int Response::getRessourceFD() const { return _ressource_fd; }

@@ -103,3 +103,12 @@ std::string urlDecode(std::string const & str)
     }
     return ret;
 }
+
+std::string	to_string(size_t n)
+{
+	std::stringstream tmp;
+
+	tmp << n;
+
+	return tmp.str();
+}

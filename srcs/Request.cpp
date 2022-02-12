@@ -90,6 +90,16 @@ void Request::storeHeader(std::string key, std::string value)
 
 void Request::addToBody(std::string new_elem) { _body += new_elem;}
 
+void Request::setPortClient(uint16_t port)
+{
+    this->_portClient = port;
+}
+
+void Request::setAddressClient(std::string &address)
+{
+    this->_addressClient = address;
+}
+
 void Request::printHeaders(std::ostream & o)
 {
     o << C_GREEN << "  Headers" << C_RESET <<" :" << std::endl;
@@ -155,6 +165,16 @@ std::string         Request::getQueryString() const
 std::map<std::string, std::string>  Request::getHeaders() const
 {
     return this->_headers;
+}
+
+std::string                         Request::getAddressClient() const
+{
+    return this->_addressClient;
+}
+
+uint16_t                            Request::getPortClient() const
+{
+    return this->_portClient;
 }
 
 Request::~Request()

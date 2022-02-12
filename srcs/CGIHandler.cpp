@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/19 22:40:48 by clorin            #+#    #+#             */
-/*   Updated: 2022/02/06 16:35:10 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/11 16:19:26 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,14 +89,36 @@ CGIHandler::~CGIHandler(){}
 
 	CGIHandler::CGIHandler(Request const *request, Response const *response)
 {
-	std::map<std::string, std::string>	headers = response->getHeaders();
+	std::map<std::string, std::string>	headers_response = response->getHeaders();
+	std::map<std::string, std::string>	headers_request = request->getHeaders();
+	
+	// std::cout << "Header de Request :\n";
+	// for (std::map<std::string, std::string>::iterator it = headers_request.begin(); it != headers_request.end(); ++it)
+    // {
+    //     std::cout << "\t"<< C_YELLOW << it->first << C_RESET<<": "<< C_CYAN << it->second << C_RESET<< std::endl;
+    // }
+
 	_env["SERVER_PROTOCOL"] = "HTTP/1.1";
+	_env["SERVER_SOFTWARE"] = "webserv";
+	_env["SERVER_NAME"] = response->getHost();
+	_env["SERVER_PORT"] = to_string(response->getPort());
 	_env["REQUEST_METHOD"] = request->getHttpMethod();
 	_env["GATEWAY_INTERFACE"] = "CGI/1.1";
 	_env["AUTH_TYPE"] = "";
-	_env["CONTENT_TYPE"] = headers["Content-type"];
+	_env["CONTENT_TYPE"] = headers_request["Content-type"];
 	_env["PATH_INFO"] = response->getRessourcePath();
+	_env["PATH_TRANSLATED"] = response->getRessourcePath(); //same  ?
 	_env["QUERY_STRING"] = request->getQueryString();
+	if(request->getBody().empty())
+		_env["CONTENT_LENGTH"] = "";
+	else
+		_env["CONTENT_LENGTH"] = to_string(request->getBody().length());
+	
+	_env["REMOTE_ADDR"] = request->getAddressClient();
+	_env["REMOTE_PORT"] = to_string(request->getPortClient());
+	_env["REMOTE_IDENT"] = headers_request["Authorization"]; // a verifier
+	_env["REMOTE_USER"] = headers_request["Authorization"];
+	_env["SCRIPT_NAME"] = response->getCgiPath();
 }
 
 char					**CGIHandler::getEnv() const

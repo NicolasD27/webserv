@@ -19,5 +19,6 @@ int HexaToInt(int value);
 std::vector<std::string>    split(std::string const &str, const char *s);
 std::string urlEncode(std::string const &);
 std::string urlDecode(std::string const &);
+std::string	to_string(size_t);
     
 #endif

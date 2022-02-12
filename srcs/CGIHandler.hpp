@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/19 22:36:14 by clorin            #+#    #+#             */
-/*   Updated: 2022/02/06 14:20:26 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/11 14:01:45 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 
 #include "Request.hpp"
 #include "Response.hpp"
+#include "utility.hpp"
 
 class CGIHandler
 {

@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/15 11:27:16 by clorin            #+#    #+#             */
-/*   Updated: 2021/12/17 16:48:28 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/11 15:13:33 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ class Client
 private:
     int     _socket;
     struct sockaddr_in _address;
+    std::string     _client_ipv4_str;
     Request                 *_request_in_progress;
     std::vector<Response*> _responses_to_build;
     std::queue<Response*> _responses_to_send;
