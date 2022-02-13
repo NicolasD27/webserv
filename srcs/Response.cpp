@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/19 22:28:13 by clorin            #+#    #+#             */
-/*   Updated: 2022/02/11 15:59:41 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/13 22:32:33 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,16 +51,24 @@ void Response::buildGetResponse(Request const & request, Server const & server)
         {
             if (!pathIsDir(_ressource_path))
             {
-                _ressource_fd = open(_ressource_path.c_str(), O_NONBLOCK);
-                if (_ressource_fd == -1)
+                if(pathIsFile(_ressource_path))
                 {
-                    _to_send = true;
-                    _status = 404;
+                    _ressource_fd = open(_ressource_path.c_str(), O_NONBLOCK);
+                    if (_ressource_fd == -1)
+                    {
+                        _to_send = true;
+                        _status = 403;
+                    }
+                    else
+                    {
+                        _to_send = false;
+                        _status = 200;
+                    }
                 }
                 else
                 {
-                    _to_send = false;
-                    _status = 200;
+                    _to_send = true;
+                    _status = 404;
                 }
             }
             else
