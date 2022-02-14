@@ -1,0 +1,31 @@
+pour une confgig ; 
+
+cgi .bla essais.cgi;
+location /directory {
+    root www/YoupiBanane;
+    index youpi.bad_extension;
+  }
+
+un appel à :
+http://localhost:8000/directory/youpi.bla
+
+donne :
+
+There is 2 args argv[0] = /Users/clorin/42/solal/cgi-bin/essais.cgi argv[1] = /Users/clorin/42/solal/www/YoupiBanane/youpi.bla
+AUTH_TYPE	Environment variable does not exist.
+CONTENT_LENGTH	Environment variable does not exist.
+CONTENT_TYPE	Environment variable does not exist.
+GATEWAY_INTERFACE	CGI/1.1
+PATH_INFO	/Users/clorin/42/solal/www/YoupiBanane/youpi.bla
+PATH_TRANSLATED	/Users/clorin/42/solal/www/YoupiBanane/youpi.bla
+QUERY_STRING	
+REMOTE_ADDR	.
+REMOTE_IDENT	Environment variable does not exist.
+REMOTE_USER	Environment variable does not exist.
+REQUEST_METHOD	GET
+REQUEST_URI	/Users/clorin/42/solal/www/YoupiBanane/youpi.bla
+SCRIPT_NAME	/Users/clorin/42/solal/cgi-bin/essais.cgi
+SERVER_PORT	8000
+SERVER_PROTOCOL	HTTP/1.1
+SERVER_SOFTWARE	WEBSERV/1.0
+Method GET avec Query_string => ''
