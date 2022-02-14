@@ -32,7 +32,10 @@ void Request::parseHeaders()
             storeHeader(key, value);
         }
         else
+        {
+            std::cout << "more than 1 ':' in line : " << line << std::endl;
             _format_error = true;
+        }
         
     }
     if (_headers.find("Content-Length") != _headers.end() && (StringToInt(_headers["Content-Length"]) < 0 || StringToInt(_headers["Content-Length"]) == 2147483647 || !onlyDigits(_headers["Content-Length"].c_str())))
@@ -58,12 +61,18 @@ void Request::parseMethod(std::string line)
         _http_version = tokens[2];
     }
     else
+    {
+        std::cout << "wrong number of elements in first line :" << tokens.size() << std::endl;
         _format_error = true;
+    }
     int len = 0;
     for (std::vector<std::string>::iterator it = tokens.begin(); it != tokens.end(); ++it)
         len += it->length();
-    if (len + 2 != line.length())
-        _format_error = true;
+    // if (len + 2 != line.length())
+    // {
+    //     std::cout << "space in  first line" << std::endl;
+    //     _format_error = true;
+    // }
 }
 
 void Request::handleLocation(std::string location)
@@ -97,6 +106,7 @@ void Request::storeHeader(std::string key, std::string value)
         }
         if (trim(key) == std::string(HEADERS_IN[i])) // il y a des espaces, devrait revonyer code 400
         {
+            std::cout << "space in header" << std::endl;
             _format_error = true;
             break;
         }

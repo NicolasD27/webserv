@@ -242,7 +242,7 @@ bool        Webserv::run()
                     }
                     if ((*client_it)->getSocket() != NO_SOCKET && FD_ISSET((*client_it)->getSocket(), &write_fds))
                     {
-                         std::cout << "sending..." << std::endl;
+                         std::cout << "sending to ..." << (*client_it)->getSocket() << std::endl;
                         (*client_it)->sendToClient();
                         
                     }
