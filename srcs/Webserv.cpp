@@ -58,6 +58,7 @@ void        Webserv::config(std::string conf_path)
                 delete (*it);
             _servers.clear();
         }
+        
         throw BadConfiguration();
     }
     buff.close();
@@ -65,9 +66,6 @@ void        Webserv::config(std::string conf_path)
     {
         for (const_iterator it = _servers.begin(); it != _servers.end(); ++it)
         {   
-            Location    *loc_default = new Location("/", (*it)->getIndex(), (*it)->getRoot(), (*it)->getAutoIndex(), (*it)->getMethods(), (*it)->getCgiPath());
-            
-            (*it)->addLocation(loc_default);
             (*it)->sortLocations();
             
             if (!checkServer(*(*it)))
@@ -173,7 +171,7 @@ bool Webserv::checkLocations(std::vector<Location> &locations)
 
 bool Webserv::checkServer(Server const & server) const
 {
-    if (server.getPort() == -1 || server.getServerNames().size() == 0 || server.getRoot() == "")
+    if (server.getPort() == -1 || server.getServerNames().size() == 0)
         return false;
     if (server.getPort() <=0 || server.getPort() > 65535)
         return false;
@@ -221,6 +219,7 @@ bool        Webserv::run()
                 {
                     if ((*client_it)->getResponseToBuildSize() > 0)
                     {
+                        std::cout << "response to build : " <<  (*client_it)->getResponseToBuildSize() << std::endl;
                         std::vector<Response*>::iterator to_switch;
                         for (std::vector<Response*>::iterator ite = (*client_it)->getBeginResponseToBuild(); ite != (*client_it)->getEndResponseToBuild(); ++ite)
                         {
@@ -235,7 +234,7 @@ bool        Webserv::run()
                     }
                     if ((*client_it)->getSocket() != NO_SOCKET && FD_ISSET((*client_it)->getSocket(), &read_fds))
                     {
-
+                        std::cout << "receiving from ..." << (*client_it)->getSocket() << std::endl;
                         if (!(*client_it)->receiveFromClient(_servers, (*server_it)->getMaxBodySize()))
                             client_to_remove.push_back(client_it);
                             
@@ -243,6 +242,7 @@ bool        Webserv::run()
                     }
                     if ((*client_it)->getSocket() != NO_SOCKET && FD_ISSET((*client_it)->getSocket(), &write_fds))
                     {
+                         std::cout << "sending..." << std::endl;
                         (*client_it)->sendToClient();
                         
                     }

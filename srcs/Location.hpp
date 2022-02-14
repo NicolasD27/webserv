@@ -31,7 +31,7 @@ class Location
         std::vector<std::string>    _extensions;
 
     public:
-        Location(void){};
+        Location(void);
         Location(std::string path, std::vector<std::string> index, std::string root, bool autoIndex, std::vector<std::string> methods, std::string);
         ~Location(void);
         Location(Location const &);
@@ -48,7 +48,7 @@ class Location
         std::string                 getCgiPath(void)const;
         bool                        isAutoindex(void)const;
     
-        void                        setPath(std::string &);
+        void                        setPath(std::string const &);
         void                        setAutoIndex(bool);
 
         bool                        isValid(void) const;

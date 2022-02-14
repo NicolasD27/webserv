@@ -22,30 +22,7 @@ std::vector<std::string> ParserConfig::form_inst_line(std::ifstream &buff)
     return(split(line, WHITESPACES));
 }
 
-std::string     ParserConfig::removeComments(std::string const &str)
-{
-    std::string     ret = str;
-    size_t          posCharComments;
 
-    posCharComments = str.find('#');
-    if(posCharComments == std::string::npos)
-        return ret;
-    return(ret.substr(0, posCharComments));
-}
-
-std::string     ParserConfig::trim(std::string const &str)
-{
-    std::string     ret = str;
-    size_t          start, end;
-
-    start = ret.find_first_not_of(WHITESPACES);
-    if(start != std::string::npos)
-        ret = ret.substr(start);
-    end = ret.find_last_not_of(WHITESPACES);
-    if(end != std::string::npos)
-        ret = ret.substr(0, end + 1);
-    return ret;
-}
 
 bool                  ParserConfig::removeSemicolon(std::vector<std::string> &tokens)
 {
@@ -69,7 +46,9 @@ bool ParserConfig::check_block(std::ifstream &buff, std::vector<Server*> &server
     std::vector<std::string> tokens;
     bool    closed = false;
     Server *new_server = new Server();
+    Location *default_loc = new Location();
 
+    default_loc->setPath("/");
     //std::cout << "check block\n";
     while(buff)
     {
@@ -99,10 +78,16 @@ bool ParserConfig::check_block(std::ifstream &buff, std::vector<Server*> &server
         {
             if(removeSemicolon(tokens))
             {
-                if(tokens[0] == "index")
-                    new_server->addIndex(tokens);
-                else if (tokens[0] == "server_name")
+                if (tokens[0] == "server_name")
                     new_server->addServerNames(tokens);
+                else if(tokens[0] == "index")
+                    default_loc->addIndex(tokens);
+                else if (tokens[0] == "methods")
+                    default_loc->addMethods(tokens);
+                else if (tokens[0] == "cgi")
+                    default_loc->addCgi(tokens);
+                else if (tokens[0] == "root" || tokens[0] == "autoindex")
+                    default_loc->storeLine(tokens[0], tokens[1]);
                 else
                     new_server->storeLine(tokens[0], tokens[1]);
             }
@@ -120,7 +105,8 @@ bool ParserConfig::check_block(std::ifstream &buff, std::vector<Server*> &server
         std::cerr << "bracket } not found." << std::endl;
         delete new_server;
         return false;
-    }    
+    }
+    new_server->addLocation(default_loc);
     servers.push_back(new_server);
     
     return true;

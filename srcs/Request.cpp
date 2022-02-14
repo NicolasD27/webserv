@@ -4,48 +4,66 @@
 const char *HEADERS_IN[] = {"Accept-Language", "Accept", "Keep-Alive", "Authorization", "Via", "Accept-Encoding", "Upgrade", "Expect", "TE", "If-Range", "Range", "Transfer-Encoding", "Content-Type", "Content-Range", "Content-Length", "Referer", "User-Agent", "If-None-Match", "If-Match", "If-Unmodified-Since", "If-Modified-Since", "Connection", "Host", NULL};
 
 
-Request::Request(std::string request_string) : _request_string(request_string), _body(""), _keep_alive_n(0), _location(""), _query_string("")
+Request::Request(std::string request_string) : _request_string(request_string), _body(""), _keep_alive_n(0), _location(""), _query_string(""), _format_error(false)
 {
 }
 
-std::string & Request::operator[](const char *key) { return _headers[key]; }
+bool Request::headerExist(std::string key) const { return (_headers.find(key) != _headers.end()); }
+std::string & Request::operator[](const char *key) {return _headers[key]; }
 
 void Request::parseHeaders()
 {
     std::stringstream buff(_request_string);
     std::string line;
+    std::string key;
+    std::string value;
     std::getline(buff, line);
     parseMethod(line);
     while(std::getline(buff, line))
     {
         if (line.length() == 0)
             continue;
-        std::string key;
-        std::istringstream iss_line(line);        
-        if( std::getline(iss_line, key, ':') )
+        line = trim(line);
+        std::vector<std::string> tokens = split(line, ":");
+        if (tokens.size() == 2)
         {
-            std::string value;
-            if( std::getline(iss_line, value) )
-            {
-                value = value.substr(1, value.length() - 2);
-                storeHeader(key, value);
-            }
+            key = tokens[0];
+            value = trim(tokens[1]);            
+            storeHeader(key, value);
         }
-
+        else
+            _format_error = true;
+        
     }
+    if (_headers.find("Content-Length") != _headers.end() && (StringToInt(_headers["Content-Length"]) < 0 || StringToInt(_headers["Content-Length"]) == 2147483647 || !onlyDigits(_headers["Content-Length"].c_str())))
+    {
+        std::cout << "content length error" << std::endl;
+        _format_error = true;
+    }
+    
+
 }
 
 void Request::parseMethod(std::string line)
 {
     std::string method;
-    std::istringstream iss_line(line);        
-    if( std::getline(iss_line, method, ' '))
+    std::istringstream iss_line(line); 
+    line = removeComments(line);
+    line = trim(line);
+    std::vector<std::string> tokens = split(line, WHITESPACES);
+    if (tokens.size() == 3)
     {
-        _http_method = method;
-        std::string location;
-        if( std::getline(iss_line, location, ' '))
-            handleLocation(location);
+        _http_method = tokens[0];
+        handleLocation(tokens[1]);
+        _http_version = tokens[2];
     }
+    else
+        _format_error = true;
+    int len = 0;
+    for (std::vector<std::string>::iterator it = tokens.begin(); it != tokens.end(); ++it)
+        len += it->length();
+    if (len + 2 != line.length())
+        _format_error = true;
 }
 
 void Request::handleLocation(std::string location)
@@ -71,21 +89,19 @@ void Request::storeHeader(std::string key, std::string value)
     int i = 0;
     while (HEADERS_IN[i])
     {
-        if (key == std::string(HEADERS_IN[i]) )
+        if (key == std::string(HEADERS_IN[i]))
         {
-           _headers.insert(std::make_pair(key, value));
+            if (!_headers.insert(std::make_pair(key, value)).second)
+                _headers[key] = value;
            break; 
+        }
+        if (trim(key) == std::string(HEADERS_IN[i])) // il y a des espaces, devrait revonyer code 400
+        {
+            _format_error = true;
+            break;
         }
         i++;
     }
-    // for (std::vector<std::string>::iterator it = HEADERS_IN.begin(); it != HEADERS_IN.end(); ++it)
-    // {
-    //     if (key == *it)
-    //     {
-    //         _headers.insert(std::make_pair(key, value));
-    //         break;
-    //     }
-    // }
 }
 
 void Request::addToBody(std::string new_elem) { _body += new_elem;}
@@ -122,6 +138,10 @@ void Request::printParams(std::ostream & o)
     }
 }
 
+std::string        Request::getHttpVersion() const
+{
+    return this->_http_version;
+}
 
 std::string        Request::getHttpMethod() const
 {
@@ -176,6 +196,8 @@ uint16_t                            Request::getPortClient() const
 {
     return this->_portClient;
 }
+
+bool                                Request::getFormatError() const { return _format_error;}
 
 Request::~Request()
 {

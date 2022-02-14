@@ -36,8 +36,8 @@ class Server;
 class Server
 {
 private:
-    int                         _port;
     std::string                 _host;
+    int                         _port;
     std::vector<std::string>    _server_names;
     std::string                 _root;
     int                         _listen_socket;
@@ -64,14 +64,13 @@ public:
     int getPort() const;
     int getSocket() const;
     std::string getHost() const;
-    std::string getRoot() const;
     std::vector<std::string> getIndex() const;
     std::vector<std::string> getServerNames() const;
     std::string getCgiPath() const;
     int getMaxBodySize() const;
 
     Client* getClient(int index) const;
-    std::vector<Location*>       getLocation(void) const;
+    std::vector<Location*>       getLocations(void) const;
     std::vector<std::string>    getMethods(void) const;
     client_const_iterator getBeginClients() const;
     client_const_iterator getEndClients() const;
@@ -85,14 +84,14 @@ public:
     bool isListening() const;
     
     void storeLine(std::string & key, std::string & value);
-    void setMethods(std::vector<std::string> &);
     void handleNewConnection(void);
     void parseErrorPages(std::string & value);
     std::map<std::vector<unsigned int>, std::string> getErrorPages() const;
 
+    void    parseListen(std::string &);
     void    addLocation(Location *);
     void    sortLocations(void);
-    void    addMethods(std::string &);
+    void    addMethods(std::vector<std::string> &methods);
     void    addIndex(std::vector<std::string> &);
     void    addServerNames(std::vector<std::string> &);
 

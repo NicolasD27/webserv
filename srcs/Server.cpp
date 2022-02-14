@@ -61,7 +61,6 @@ int Server::getMaxBodySize() const { return _max_body_size; }
 
 std::string Server::getHost() const { return _host; }
 
-std::string Server::getRoot() const { return _root; }
 
 std::vector<std::string>    Server::getIndex() const { return _index;}
 
@@ -72,7 +71,7 @@ std::vector<std::string>::iterator Server::getEndServerNames() { return _server_
 
 Client* Server::getClient(int i) const { return _clients[i]; }
 
-std::vector<Location*>  Server::getLocation(void)const {return _locations;}
+std::vector<Location*>  Server::getLocations(void)const {return _locations;}
 
 void Server::sortLocations()
 {
@@ -104,8 +103,6 @@ bool        Server::getAutoIndex() const { return _auto_index; }
 
 void Server::storeLine(std::string & key, std::string & value)
 {
-    //_root = "";
-    //_index = "index.html";
     if (key == "listen")
     {
         if (value.find(':') != std::string::npos)
@@ -121,10 +118,6 @@ void Server::storeLine(std::string & key, std::string & value)
             ss >> _port; 
         }
     }
-    else if (key == "root")
-        _root = value;
-    else if (key == "autoindex")
-        _auto_index = (value == "on");
     else if (key == "error_page")
         parseErrorPages(value);
     else if (key == "max_body_size")
@@ -132,9 +125,9 @@ void Server::storeLine(std::string & key, std::string & value)
         std::istringstream ss(value);
         ss >> _max_body_size;
     }
-    else if (key == "cgi_path")
-        _cgi_path = value;
 }
+
+
 void Server::parseErrorPages(std::string & value)
 {
     unsigned int page_number;
@@ -224,16 +217,11 @@ void    Server::addServerNames(std::vector<std::string> &server_names)
     _server_names.assign(server_names.begin() + 1, server_names.end());
 }
 
-void    Server::addMethods(std::string &method)
-{
-    _methods.push_back(method);
-}
-
-void    Server::setMethods(std::vector<std::string> &methods)
+void    Server::addMethods(std::vector<std::string> &methods)
 {
     if(!_methods.empty())
         _methods.clear();
-    _methods.assign(methods.begin(), methods.end());
+    _methods.assign(methods.begin() + 1, methods.end());
 }
 
 void Server::print(void)const

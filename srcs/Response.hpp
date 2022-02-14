@@ -57,46 +57,44 @@ private:
     Request const                       *_pt_request;
     Server    const                     *_pt_server;
     bool                                _to_send;
-    Location                            _location_block;
+    Location                            *_location_block;
+    std::string                         _cgi_path;
 
-    void findLocation(std::string const &, Server const &, Request const &);
-    bool buildRessourcePath(std::string const &, Location const &);
-    void buildErrorResponse(Server const & server);
-    void buildGetResponse(Request const & request, Server const & server);
-    void buildPostResponse(Request const & request, Server const & server);
-    void buildDeleteResponse(Request const & request, Server const & server);
-    
-    std::string		executeCgi(const char **scriptName, const std::string & body, char **env);
-    std::string  _cgi_path;
+    void                                findLocation(std::string const &, Server const &, Request const &);
+    bool                                buildRessourcePath(std::string const &, Location const &);
+    void                                buildErrorResponse(Server const & server);
+    void                                buildGetResponse(Request const & request, Server const & server);
+    void                                buildPostResponse(Request const & request, Server const & server);
+    void                                buildDeleteResponse(Request const & request, Server const & server);
+    void                                addDate();
+    std::string                         executeCgi(const char **scriptName, const std::string & body, char **env);
     
 public:
     Response(Request const & request, Server const & server);
+    Response(unsigned int status, Server const & server);
     Response(Response const &);
     virtual ~Response();
     Response &operator=(Response const &);
 
-    void addDate();
-    std::string buildResponseString();
-    std::string getResponseString() const;
-    bool isToSend() const;
-    unsigned int readRessource(bool isErrorPage = false);
+    std::string                         buildResponseString();
+    unsigned int                        readRessource(bool isErrorPage = false);
+    unsigned int                        buildAutoIndex();
+    void                                parseExtension();
 
-    unsigned int buildAutoIndex();
-    void parseExtension();
-    std::string getRessourcePath(void) const;
-    int getRessourceFD() const;
-    Request const * getRequest() const;
-    int getPort() const;
-    std::string getHost() const;
-    std::string  getCgiPath() const;
+    std::string                         getResponseString() const;
+    std::string                         getBody() const;
+    bool                                isToSend() const;
+    std::string                         getRessourcePath(void) const;
+    int                                 getRessourceFD() const;
+    Request const *                     getRequest() const;
+    int                                 getPort() const;
+    std::string                         getHost() const;
+    std::string                         getCgiPath() const;
+    unsigned int                        getStatus(void) const;
+    std::map<std::string, std::string>  getHeaders() const;
+    Location *                          getLocationBlock() const;
 
-
-
-    unsigned int    getStatus(void) const;
-
-    std::map<std::string, std::string> getHeaders() const;
-
-    void printHeaders(std::ostream &);
+    void                                printHeaders(std::ostream &);
 
 };
 
