@@ -128,6 +128,7 @@ void Response::buildGetResponse(Request const & request, Server const & server)
         {
             if (!pathIsDir(_ressource_path))
             {
+                std::cout << "********" << _ressource_path << std::endl;
                 if(pathIsFile(_ressource_path))
                 {
                     _ressource_fd = open(_ressource_path.c_str(), O_NONBLOCK);
@@ -149,7 +150,10 @@ void Response::buildGetResponse(Request const & request, Server const & server)
                 }
             }
             else
+            {
+                std::cout << "building autoindex..." << std::endl;
                 _status = buildAutoIndex();
+            }
         }
         if (_status != 200)
             buildErrorResponse(server);
