@@ -156,6 +156,8 @@ void Server::parseErrorPages(std::string & value)
         pages_numbers.push_back(page_number);
         pages_numbers_string = pages_numbers_string.substr(pages_numbers_string.find(",") + 1, pages_numbers_string.length() - pages_numbers_string.find(",") - 1);
     }
+    if (error_page.front() == '/')
+        error_page = error_page.substr(1);
     _error_pages.insert(std::make_pair(pages_numbers, error_page));
     // for (std::map<std::vector<unsigned int>, std::string>::iterator it = _error_pages.begin(); it != _error_pages.end(); ++it)
     //     for (std::vector<unsigned int>::const_iterator ite = it->first.begin(); ite != it->first.end(); ++ite)
