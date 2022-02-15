@@ -39,6 +39,7 @@ class Request
 {
 
 private:
+    std::string                         _http_version;
     std::string                         _request_string;
     std::string                         _query_string;
     std::string                         _http_method;
@@ -50,6 +51,7 @@ private:
     std::map<std::string, std::string>  _params;
     uint16_t                            _portClient;
     std::string                         _addressClient;
+    bool                                _format_error;
     void                                handleLocation(std::string);
     
 public:
@@ -79,6 +81,10 @@ public:
     std::string                         getQueryString() const;
     std::string                         getAddressClient() const;
     uint16_t                            getPortClient() const;
+    bool                                getFormatError() const;
+    std::string                         getHttpVersion() const;
+
+    bool                                headerExist(std::string key) const;
 
     void                                setLocation(std::string);
 };

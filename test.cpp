@@ -7,6 +7,7 @@
 #include <netinet/in.h>
 #include <stdlib.h>
 #include <string.h>
+#include "srcs/utility.hpp"
 
 #include "common.h"
 
@@ -136,77 +137,78 @@ int handle_received_message(message_t *message)
 
 int main(int argc, char **argv)
 {
-  if (setup_signals() != 0)
-    exit(EXIT_FAILURE);
+  std::cout << StringToInt("NODIGIT") << std::endl;
+  // if (setup_signals() != 0)
+  //   exit(EXIT_FAILURE);
   
-  char client_name[256];
-  get_client_name(argc, argv, client_name);
-  printf("Client '%s' start.\n", client_name);
+  // char client_name[256];
+  // get_client_name(argc, argv, client_name);
+  // printf("Client '%s' start.\n", client_name);
   
-  create_peer(&server);
-  if (connect_server(&server) != 0)
-    shutdown_properly(EXIT_FAILURE);
+  // create_peer(&server);
+  // if (connect_server(&server) != 0)
+  //   shutdown_properly(EXIT_FAILURE);
   
-  /* Set nonblock for stdin. */
-  int flag = fcntl(STDIN_FILENO, F_GETFL, 0);
-  flag |= O_NONBLOCK;
-  fcntl(STDIN_FILENO, F_SETFL, flag);
+  // /* Set nonblock for stdin. */
+  // int flag = fcntl(STDIN_FILENO, F_GETFL, 0);
+  // flag |= O_NONBLOCK;
+  // fcntl(STDIN_FILENO, F_SETFL, flag);
   
-  fd_set read_fds;
-  fd_set write_fds;
-  fd_set except_fds;
+  // fd_set read_fds;
+  // fd_set write_fds;
+  // fd_set except_fds;
   
-  printf("Waiting for server message or stdin input. Please, type text to send:\n");
+  // printf("Waiting for server message or stdin input. Please, type text to send:\n");
   
-  // server socket always will be greater then STDIN_FILENO
-  int maxfd = server.socket;
+  // // server socket always will be greater then STDIN_FILENO
+  // int maxfd = server.socket;
   
-  while (1) {
-    // Select() updates fd_set's, so we need to build fd_set's before each select()call.
-    build_fd_sets(&server, &read_fds, &write_fds, &except_fds);
+  // while (1) {
+  //   // Select() updates fd_set's, so we need to build fd_set's before each select()call.
+  //   build_fd_sets(&server, &read_fds, &write_fds, &except_fds);
         
-    int activity = select(maxfd + 1, &read_fds, &write_fds, &except_fds, NULL);
+  //   int activity = select(maxfd + 1, &read_fds, &write_fds, &except_fds, NULL);
     
-    switch (activity) {
-      case -1:
-        perror("select()");
-        shutdown_properly(EXIT_FAILURE);
+  //   switch (activity) {
+  //     case -1:
+  //       perror("select()");
+  //       shutdown_properly(EXIT_FAILURE);
 
-      case 0:
-        // you should never get here
-        printf("select() returns 0.\n");
-        shutdown_properly(EXIT_FAILURE);
+  //     case 0:
+  //       // you should never get here
+  //       printf("select() returns 0.\n");
+  //       shutdown_properly(EXIT_FAILURE);
 
-      default:
-        /* All fd_set's should be checked. */
-        if (FD_ISSET(STDIN_FILENO, &read_fds)) {
-          if (handle_read_from_stdin(&server, client_name) != 0)
-            shutdown_properly(EXIT_FAILURE);
-        }
+  //     default:
+  //       /* All fd_set's should be checked. */
+  //       if (FD_ISSET(STDIN_FILENO, &read_fds)) {
+  //         if (handle_read_from_stdin(&server, client_name) != 0)
+  //           shutdown_properly(EXIT_FAILURE);
+  //       }
 
-        if (FD_ISSET(STDIN_FILENO, &except_fds)) {
-          printf("except_fds for stdin.\n");
-          shutdown_properly(EXIT_FAILURE);
-        }
+  //       if (FD_ISSET(STDIN_FILENO, &except_fds)) {
+  //         printf("except_fds for stdin.\n");
+  //         shutdown_properly(EXIT_FAILURE);
+  //       }
 
-        if (FD_ISSET(server.socket, &read_fds)) {
-          if (receive_from_peer(&server, &handle_received_message) != 0)
-            shutdown_properly(EXIT_FAILURE);
-        }
+  //       if (FD_ISSET(server.socket, &read_fds)) {
+  //         if (receive_from_peer(&server, &handle_received_message) != 0)
+  //           shutdown_properly(EXIT_FAILURE);
+  //       }
 
-        if (FD_ISSET(server.socket, &write_fds)) {
-          if (send_to_peer(&server) != 0)
-            shutdown_properly(EXIT_FAILURE);
-        }
+  //       if (FD_ISSET(server.socket, &write_fds)) {
+  //         if (send_to_peer(&server) != 0)
+  //           shutdown_properly(EXIT_FAILURE);
+  //       }
 
-        if (FD_ISSET(server.socket, &except_fds)) {
-          printf("except_fds for server.\n");
-          shutdown_properly(EXIT_FAILURE);
-        }
-    }
+  //       if (FD_ISSET(server.socket, &except_fds)) {
+  //         printf("except_fds for server.\n");
+  //         shutdown_properly(EXIT_FAILURE);
+  //       }
+  //   }
     
-    printf("And we are still waiting for server or stdin activity. You can type something to send:\n");
-  }
+  //   printf("And we are still waiting for server or stdin activity. You can type something to send:\n");
+  // }
   
   return 0;
 }

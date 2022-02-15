@@ -18,14 +18,50 @@ StatusCode STATUS_CODES;
 
 ErrorPages  ERROR_PAGES;
 
-Response::Response(Request const & request, Server const & server):_pt_server(&server), _pt_request(&request), _body(""), _to_send(true), _ressource_fd(-1), _ressource_path(""), _status(0)
+Response::Response(unsigned int status, Server const & server) : _status(status)
 {
-    if (request.getHttpMethod() == "GET")
+    std::cout << "error response" << std::endl;
+    buildErrorResponse(server);
+}
+
+Response::Response(Request const & request, Server const & server):_pt_server(&server), _pt_request(&request), _location_block(NULL), _body(""), _to_send(true), _ressource_fd(-1), _ressource_path(""), _status(0)
+{
+    if (request.getHttpVersion() != "HTTP/1.1")
+    {
+        _status = 505;
+        buildErrorResponse(server);
+    }
+    else if (request.getFormatError())
+    {
+        _status = 400;
+        std::cout << "building error 400..." << std::endl; 
+        buildErrorResponse(server);
+    }
+    else if (request.getHttpMethod() == "GET")
         buildGetResponse(request, server);
-    // else if (request.getHttpMethod() == "POST")
-    //     buildPostResponse();
+    else if (request.getHttpMethod() == "HEAD")
+    {
+        buildGetResponse(request, server);
+        _body = "";
+    }
+    else if (request.getHttpMethod() == "POST")
+        buildPostResponse(request, server);
     else if (request.getHttpMethod() == "DELETE")
         buildDeleteResponse(request, server);   
+}
+Response::Response(Response const & src)
+{
+    
+    for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); ++it)
+        this->_headers.insert(*it);
+    _status = src._status;
+    _response_string = src._response_string;
+    _ressource_path = src._ressource_path;
+    _body = src._body;
+    _pt_request = src._pt_request;
+    _pt_server = src._pt_server;
+    _to_send = src._to_send;
+    _ressource_fd = src._ressource_fd;
 }
 
 void Response::buildDeleteResponse(Request const & request, Server const & server)
@@ -33,10 +69,13 @@ void Response::buildDeleteResponse(Request const & request, Server const & serve
     
 }
 
-void Response::buildGetResponse(Request const & request, Server const & server)
+void Response::buildPostResponse(Request const & request, Server const & server)
 {
     findLocation(request.getLocation(), server, request);
-    _location_block.print();
+    if (!_location_block)
+        _status = 405; // méthode interdite
+    else 
+        _location_block->print();
     _cgi_path = server.getCgiPath();
     // buildRessourcePath(request.getLocation(), block);
     std::cout << "_RessourcePath = " << _ressource_path << "\t _status = " << _status << std::endl;
@@ -47,7 +86,45 @@ void Response::buildGetResponse(Request const & request, Server const & server)
     }
     else
     {
-        if (_status != 404)
+        if (_status == 0)
+        {
+            if (_location_block->hasExtension(_ressource_path)  && _location_block->getCgiPath().length() != 0)
+            {
+                //CGIHandler  cgi;
+                CGIHandler  cgi(_pt_request, this);
+                
+                std::string     script = _location_block->getCgiPath();
+
+                const char *scriptName[3] = {script.c_str(), _ressource_path.c_str() ,NULL};
+                _body = cgi.executeCgi(scriptName,"");
+                _status = 200;
+            }
+        }
+        if (_status != 200)
+            buildErrorResponse(server);
+        else
+            parseExtension();
+    }
+}
+
+void Response::buildGetResponse(Request const & request, Server const & server)
+{
+    findLocation(request.getLocation(), server, request);
+    if (!_location_block)
+        _status = 405; // méthode interdite
+    else 
+        _location_block->print();
+    _cgi_path = server.getCgiPath();
+    // buildRessourcePath(request.getLocation(), block);
+    std::cout << "_RessourcePath = " << _ressource_path << "\t _status = " << _status << std::endl;
+    if(_status == 301)
+    {
+        _headers.insert(std::make_pair("Content-type", "text/html"));
+        _headers.insert(std::make_pair("Location", "http://" + server.getHost() + ":" + NumberToString(server.getPort()) + request.getLocation() + "/"));
+    }
+    else
+    {
+        if (_status == 0)
         {
             if (!pathIsDir(_ressource_path))
             {
@@ -87,25 +164,27 @@ void Response::buildErrorResponse(Server const & server)
     if(error_pages.size() > 0)
     {
         for (std::map<std::vector<unsigned int>, std::string>::iterator it = error_pages.begin(); it != error_pages.end(); ++it)
+        {
             for (std::vector<unsigned int>::const_iterator ite = it->first.begin(); ite != it->first.end(); ++ite)
             {
                 if (*ite == _status)
                 {
-                    _ressource_path = server.getRoot() + it->second;
+                    _ressource_path = server.getLocations().back()->getRoot() + it->second;
+                    std::cout << "error here " << _ressource_path << std::endl;
                     _headers.insert(std::make_pair("Content-type", "text/html"));
                     _to_send = false;
-                    _ressource_fd = open(_ressource_path.c_str(), O_NONBLOCK);
-                    if (_ressource_fd == -1)
+                    _ressource_fd = open(_ressource_path.c_str(), 0);
+                    if (_ressource_fd != -1)
                     {
-                        _body = ERROR_PAGES[_status];
                         _to_send = true;
+                        _body = ERROR_PAGES[_status];
                     }
+                    return;
                 }
-                break;
             }
+        }
     }
-    else
-        _body = ERROR_PAGES[_status];
+    _body = ERROR_PAGES[_status];
 }
 
 std::string Response::buildResponseString()
@@ -121,20 +200,7 @@ std::string Response::buildResponseString()
     return _response_string;
 }
 
-Response::Response(Response const & src)
-{
-    
-    for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); ++it)
-        this->_headers.insert(*it);
-    _status = src._status;
-    _response_string = src._response_string;
-    _ressource_path = src._ressource_path;
-    _body = src._body;
-    _pt_request = src._pt_request;
-    _pt_server = src._pt_server;
-    _to_send = src._to_send;
-    _ressource_fd = src._ressource_fd;
-}
+
 
 
 
@@ -144,7 +210,7 @@ bool Response::buildRessourcePath(std::string const &locRequest, Location const 
     std::string file_testing;
     bool        find_index = false;
 
-    _ressource_path = location.getRoot() + locRequest;
+    _ressource_path = location.getRoot() + "/" + locRequest.substr(location.getPath().length());
     _status = 0;
     if (_ressource_path.back() == '/')
     {
@@ -238,18 +304,18 @@ unsigned int Response::buildAutoIndex()
 unsigned int Response::readRessource(bool isErrorPage)
 {
 /* bloc à decommenter pour essayer l'execution du cgi*/
-    if (_location_block.hasExtension(_ressource_path)  && _location_block.getCgiPath().length() != 0)
-    {
-        //CGIHandler  cgi;
-        CGIHandler  cgi(_pt_request, this);
+    // if (_location_block->hasExtension(_ressource_path)  && _location_block->getCgiPath().length() != 0)
+    // {
+    //     //CGIHandler  cgi;
+    //     CGIHandler  cgi(_pt_request, this);
         
-        std::string     script = _location_block.getCgiPath();
+    //     std::string     script = _location_block->getCgiPath();
 
-        const char *scriptName[3] = {script.c_str(), _ressource_path.c_str() ,NULL};
-        _body = cgi.executeCgi(scriptName,"");
+    //     const char *scriptName[3] = {script.c_str(), _ressource_path.c_str() ,NULL};
+    //     _body = cgi.executeCgi(scriptName,"");
 
-        return _status;
-    }
+    //     return _status;
+    // }
     std::string str;
     std::stringstream buff;
     
@@ -257,15 +323,12 @@ unsigned int Response::readRessource(bool isErrorPage)
     std::ifstream ifs(_ressource_path);
     if(ifs.good() && pathIsFile(_ressource_path))
     {
-        if(!isErrorPage)
-            _status = 200;
-
         while (std::getline(ifs, str))
             buff << str << std::endl;
 	    ifs.close();
         _body = buff.str();
     }
-    else if(isErrorPage)
+    else if(_status != 200)
         _body = ERROR_PAGES[_status];
     else
     {
@@ -331,7 +394,7 @@ std::map<std::string, std::string> Response::getHeaders() const
 
 std::string             Response::getCgiPath()const
 {
-    return this->_location_block.getCgiPath();
+    return _location_block->getCgiPath();
 }
 
 int Response::getRessourceFD() const { return _ressource_fd; }
@@ -340,8 +403,12 @@ bool Response::isToSend() const { return _to_send; }
 
 unsigned int            Response::getStatus() const
 {
-    return this->_status;
+    return _status;
 }
+
+std::string Response::getBody() const { return _body; }
+
+Location * Response::getLocationBlock() const { return _location_block; }
 
 void                    Response::printHeaders(std::ostream & o)
 {
@@ -354,7 +421,7 @@ void                    Response::printHeaders(std::ostream & o)
 
 void Response::findLocation(std::string const & uri, Server const & server, Request const & request)
 {
-    std::vector<Location*> locations = server.getLocation();
+    std::vector<Location*> locations = server.getLocations();
     
     for (std::vector<Location*>::iterator it = locations.begin(); it != locations.end(); ++it)
     {
@@ -362,7 +429,7 @@ void Response::findLocation(std::string const & uri, Server const & server, Requ
         {
             if ((*it)->hasMethod(request.getHttpMethod()))
             {
-                _location_block = **it;
+                _location_block = *it;
                 if (buildRessourcePath(request.getLocation(), **it))
                     findLocation(_ressource_path, server, request);
                 return;

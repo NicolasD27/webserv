@@ -12,6 +12,8 @@
 
 #include "Location.hpp"
 
+Location::Location(void) : _autoIndex(false) {}
+
 Location::Location(Location const &cpy):_path(cpy._path), _index(cpy._index),_root(cpy._root),_autoIndex(cpy._autoIndex),_methods(cpy._methods),_cgi_path(cpy._cgi_path){}
 
 Location::Location(std::string path, std::vector<std::string> index, std::string root, bool autoIndex, std::vector<std::string> methods, std::string cgi_path):
@@ -50,7 +52,7 @@ std::string                 Location::getCgiPath() const {return _cgi_path;}
 bool                        Location::isAutoindex(void) const {return(_autoIndex);}
 
     
-void            Location::setPath(std::string &path)
+void            Location::setPath(std::string const &path)
 {
     this->_path = path;
 }
@@ -66,8 +68,6 @@ void            Location::storeLine(std::string const & key, std::string & value
         _autoIndex = (value == "on");
     else if (key == "root")
         _root = value;
-    else if (key == "cgi_path")
-        _cgi_path = value;
 }
 
 void            Location::addMethods(std::vector<std::string> tokens)

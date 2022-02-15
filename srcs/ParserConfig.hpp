@@ -16,10 +16,10 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-
+#include "utility.hpp"
 #include "Server.hpp"
 
-# define WHITESPACES " \n\r\t\f\v"
+
 
 class ParserConfig
 {
@@ -28,8 +28,6 @@ class ParserConfig
         ParserConfig(ParserConfig const &);
         ParserConfig &operator=(ParserConfig const &);
         
-        static std::string                 removeComments(std::string const &str);
-        static std::string                 trim(std::string const &str);
         static bool                        removeSemicolon(std::vector<std::string> &tokens);
         
 

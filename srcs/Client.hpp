@@ -29,23 +29,26 @@ class Client;
 #include "Base64.hpp"
 
 #define NO_SOCKET -1
-#define MAX_SIZE 400000
+#define MAX_SIZE 32768
 class Client
 {
 private:
-    int     _socket;
-    struct sockaddr_in _address;
-    std::string     _client_ipv4_str;
-    Request                 *_request_in_progress;
-    std::vector<Response*> _responses_to_build;
-    std::queue<Response*> _responses_to_send;
-    char _sending_buff[MAX_SIZE];
-    int _current_sending_byte;
-    char _receiving_buff[MAX_SIZE];
-    int _current_receiving_byte;
-    Server *_server;
+    int                     _socket;
+    struct sockaddr_in      _address;
+    std::string             _client_ipv4_str;
+    Request *               _request_in_progress;
+    std::vector<Response*>  _responses_to_build;
+    std::queue<Response*>   _responses_to_send;
+    char                    _sending_buff[MAX_SIZE];
+    int                     _current_sending_byte;
+    char                    _receiving_buff[MAX_SIZE];
+    int                     _current_receiving_byte;
+    Server *                _server;
+    bool                    _headers_read;
+    bool                    _body_read;
 
     void findMatchingServer(std::vector<Server*>, Request & request);
+    void readChunkedRequest(Request *, int, int, int);
     
 public:
     Client();

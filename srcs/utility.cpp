@@ -30,6 +30,17 @@ int HexaToInt(int x)
 
 }
 
+bool onlyDigits(const char *str)
+{
+    int i = 0;
+    while (str[i])
+    {
+        if (str[i] < 48 || str[i] > 57)
+            return false;
+        i++;
+    }
+    return true;
+}
 std::vector<std::string>   split(std::string const &str, const char *s)
 {
     std::vector<std::string>    ret;
@@ -111,4 +122,28 @@ std::string	to_string(size_t n)
 	tmp << n;
 
 	return tmp.str();
+}
+std::string     removeComments(std::string const &str)
+{
+    std::string     ret = str;
+    size_t          posCharComments;
+
+    posCharComments = str.find('#');
+    if(posCharComments == std::string::npos)
+        return ret;
+    return(ret.substr(0, posCharComments));
+}
+
+std::string     trim(std::string const &str)
+{
+    std::string     ret = str;
+    size_t          start, end;
+
+    start = ret.find_first_not_of(WHITESPACES);
+    if(start != std::string::npos)
+        ret = ret.substr(start);
+    end = ret.find_last_not_of(WHITESPACES);
+    if(end != std::string::npos)
+        ret = ret.substr(0, end + 1);
+    return ret;
 }
