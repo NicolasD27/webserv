@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/19 22:28:13 by clorin            #+#    #+#             */
-/*   Updated: 2022/02/13 22:32:33 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/15 17:14:48 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -307,14 +307,16 @@ unsigned int Response::buildAutoIndex()
 
 unsigned int Response::readRessource(bool isErrorPage)
 {
-/* bloc à decommenter pour essayer l'execution du cgi*/
+
     if (_location_block->hasExtension(_ressource_path)  && _location_block->getCgiPath().length() != 0)
     {
-        //CGIHandler  cgi;
+        std::string     script;
         CGIHandler  cgi(_pt_request, this);
+        if(_location_block->getCgiPath().at(0) == '/')
+            script = _location_block->getCgiPath();
+        else
+            script = getWorkingPath()+"/"+_location_block->getCgiPath();
         
-        std::string     script = _location_block->getCgiPath();
-
         const char *scriptName[3] = {script.c_str(), _ressource_path.c_str() ,NULL};
         _body = cgi.executeCgi(scriptName,"");
 
