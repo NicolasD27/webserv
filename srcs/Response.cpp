@@ -169,7 +169,7 @@ void Response::buildErrorResponse(Server const & server)
             {
                 if (*ite == _status)
                 {
-                    _ressource_path = server.getLocations().back()->getRoot() + it->second;
+                    _ressource_path = it->second;
                     std::cout << "error here " << _ressource_path << std::endl;
                     _headers.insert(std::make_pair("Content-type", "text/html"));
                     _to_send = false;
@@ -210,7 +210,7 @@ bool Response::buildRessourcePath(std::string const &locRequest, Location const 
     std::string file_testing;
     bool        find_index = false;
 
-    _ressource_path = location.getRoot() + "/" + locRequest.substr(location.getPath().length());
+    _ressource_path = location.getRoot() + locRequest;
     _status = 0;
     if (_ressource_path.back() == '/')
     {
@@ -304,18 +304,18 @@ unsigned int Response::buildAutoIndex()
 unsigned int Response::readRessource(bool isErrorPage)
 {
 /* bloc à decommenter pour essayer l'execution du cgi*/
-    // if (_location_block->hasExtension(_ressource_path)  && _location_block->getCgiPath().length() != 0)
-    // {
-    //     //CGIHandler  cgi;
-    //     CGIHandler  cgi(_pt_request, this);
+    if (_location_block->hasExtension(_ressource_path)  && _location_block->getCgiPath().length() != 0)
+    {
+        //CGIHandler  cgi;
+        CGIHandler  cgi(_pt_request, this);
         
-    //     std::string     script = _location_block->getCgiPath();
+        std::string     script = _location_block->getCgiPath();
 
-    //     const char *scriptName[3] = {script.c_str(), _ressource_path.c_str() ,NULL};
-    //     _body = cgi.executeCgi(scriptName,"");
+        const char *scriptName[3] = {script.c_str(), _ressource_path.c_str() ,NULL};
+        _body = cgi.executeCgi(scriptName,"");
 
-    //     return _status;
-    // }
+        return _status;
+    }
     std::string str;
     std::stringstream buff;
     
@@ -327,6 +327,7 @@ unsigned int Response::readRessource(bool isErrorPage)
             buff << str << std::endl;
 	    ifs.close();
         _body = buff.str();
+        _body.pop_back();
     }
     else if(_status != 200)
         _body = ERROR_PAGES[_status];

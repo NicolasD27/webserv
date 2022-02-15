@@ -67,7 +67,11 @@ void            Location::storeLine(std::string const & key, std::string & value
     if (key == "autoindex")
         _autoIndex = (value == "on");
     else if (key == "root")
+    {
+        if (value.back() == '/')
+            value.pop_back();
         _root = value;
+    }
 }
 
 void            Location::addMethods(std::vector<std::string> tokens)

@@ -18,7 +18,7 @@
 #include <vector>
 #include "utility.hpp"
 #include "Server.hpp"
-
+#include "Location.hpp"
 
 
 class ParserConfig
@@ -36,7 +36,7 @@ class ParserConfig
         ~ParserConfig();
         static std::vector<std::string> form_inst_line(std::ifstream &);
         static bool check_block(std::ifstream &, std::vector<Server*> &);
-        static bool check_location_block(std::ifstream &, std::vector<std::string> const &, Server *);
+        static bool check_location_block(std::ifstream &, std::vector<std::string> const &, Server *, Location *);
         
         
 };

@@ -68,7 +68,7 @@ bool ParserConfig::check_block(std::ifstream &buff, std::vector<Server*> &server
         }
         if(tokens[0] == "location")
         {
-            if (!check_location_block(buff, tokens, new_server))
+            if (!check_location_block(buff, tokens, new_server, default_loc))
             {
                 delete new_server;
                 return false;
@@ -112,7 +112,7 @@ bool ParserConfig::check_block(std::ifstream &buff, std::vector<Server*> &server
     return true;
 }
 
-bool ParserConfig::check_location_block(std::ifstream &buff, std::vector<std::string> const &tokens, Server *server)
+bool ParserConfig::check_location_block(std::ifstream &buff, std::vector<std::string> const &tokens, Server *server, Location * default_loc)
 {
     bool                        closed = false;
     std::string                 path;
@@ -125,6 +125,11 @@ bool ParserConfig::check_location_block(std::ifstream &buff, std::vector<std::st
         return false;
     }
     path = tokens[1];
+    if (path == "/")
+    {
+        delete newLocation;
+        newLocation = default_loc;
+    }
     if(tokens[2] != "{")
     {
         std::cerr << "Expected '{' in location block." << std::endl;
