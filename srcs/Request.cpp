@@ -23,18 +23,16 @@ void Request::parseHeaders()
     {
         if (line.length() <= 1)
             break;
-        line = trim(line);
-        std::vector<std::string> tokens = split(line, ":");
-        if (tokens.size() == 2)
+        std::string key;
+        std::istringstream iss_line(line);        
+        if( std::getline(iss_line, key, ':') )
         {
-            key = tokens[0];
-            value = trim(tokens[1]);            
-            storeHeader(key, value);
-        }
-        else
-        {
-            std::cout << "more than 1 ':' in line : " << line << std::endl;
-            _format_error = true;
+            std::string value;
+            if( std::getline(iss_line, value) )
+            {
+                value = value.substr(1, value.length() - 2);
+                storeHeader(key, value);
+            }
         }
         
     }
@@ -96,6 +94,11 @@ void Request::handleLocation(std::string location)
 void Request::storeHeader(std::string key, std::string value)
 {
     int i = 0;
+    if (key.length() == 0)
+    {
+        _format_error = true;
+        return;
+    }
     while (HEADERS_IN[i])
     {
         if (key == std::string(HEADERS_IN[i]))
