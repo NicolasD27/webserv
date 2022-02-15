@@ -214,7 +214,7 @@ bool        Webserv::run()
                         (*server_it)->handleNewConnection();
                     break;
                 }
-                std::vector<std::vector<Client*>::const_iterator> client_to_remove;
+                std::vector<int> client_to_remove;
                 for (std::vector<Client*>::const_iterator client_it = (*server_it)->getBeginClients(); client_it != (*server_it)->getEndClients(); ++client_it)
                 {
                     if ((*client_it)->getResponseToBuildSize() > 0)
@@ -232,23 +232,24 @@ bool        Webserv::run()
                         }
                         (*client_it)->switchToSendQueue(*to_switch);
                     }
-                    if ((*client_it)->getSocket() != NO_SOCKET && FD_ISSET((*client_it)->getSocket(), &read_fds))
-                    {
-                        std::cout << "receiving from ..." << (*client_it)->getSocket() << std::endl;
-                        if (!(*client_it)->receiveFromClient(_servers, (*server_it)->getMaxBodySize()))
-                            client_to_remove.push_back(client_it);
-                            
-                        
-                    }
                     if ((*client_it)->getSocket() != NO_SOCKET && FD_ISSET((*client_it)->getSocket(), &write_fds))
                     {
                          std::cout << "sending to ..." << (*client_it)->getSocket() << std::endl;
                         (*client_it)->sendToClient();
                         
                     }
+                    if ((*client_it)->getSocket() != NO_SOCKET && FD_ISSET((*client_it)->getSocket(), &read_fds))
+                    {
+                        std::cout << "receiving from ..." << (*client_it)->getSocket() << std::endl;
+                        if (!(*client_it)->receiveFromClient(_servers, (*server_it)->getMaxBodySize()))
+                            client_to_remove.push_back((*client_it)->getSocket());
+                            
+                        
+                    }
+                    
 
                 }
-                for (std::vector<std::vector<Client*>::const_iterator>::iterator ite = client_to_remove.begin(); ite != client_to_remove.end(); ++ite)
+                for (std::vector<int>::iterator ite = client_to_remove.begin(); ite != client_to_remove.end(); ++ite)
                     (*server_it)->removeClient(*ite);
 
                 
@@ -280,6 +281,7 @@ void Webserv::buildFDSets(Server const & server, fd_set *read_fds, fd_set *write
         
         for (std::vector<Response*>::iterator ite = (*it)->getBeginResponseToBuild(); ite != (*it)->getEndResponseToBuild(); ++ite)
         {
+            std::cout << "ressource to read : " << (*ite)->getRessourcePath() << std::endl;
             if ((*ite)->getRessourceFD() > *highest_socket)
                 *highest_socket = (*ite)->getRessourceFD();
             FD_SET((*ite)->getRessourceFD(), read_fds);
@@ -287,6 +289,7 @@ void Webserv::buildFDSets(Server const & server, fd_set *read_fds, fd_set *write
         
         if ((*it)->getSocket() != NO_SOCKET)
         {
+            std::cout << "client socket accepted currently : " << (*it)->getSocket() << std::endl;
             if ((*it)->getSocket() > *highest_socket)
                 *highest_socket = (*it)->getSocket();
             FD_SET((*it)->getSocket(), read_fds);

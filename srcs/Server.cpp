@@ -33,9 +33,16 @@ Server::~Server()
     _locations.clear();
 }
 
-void Server::removeClient(std::vector<Client*>::const_iterator it)
+void Server::removeClient(int socket)
 {
-    _clients.erase(it);
+    for(std::vector<Client*>::const_iterator it = _clients.begin(); it != _clients.end(); ++it)
+    {
+        if ((*it)->getSocket() == socket)
+        {
+            _clients.erase(it);
+            return;
+        }
+    }
 }
 
 Server      &Server::operator=(Server const &cpy)
@@ -49,6 +56,12 @@ Server      &Server::operator=(Server const &cpy)
         _listen_socket = cpy._listen_socket;
         _clients = cpy._clients;
         _max_body_size = cpy._max_body_size;
+        _auto_index = cpy._auto_index;
+        _error_pages = cpy._error_pages;
+        _locations = cpy._locations;
+        _methods = cpy._methods;
+        _cgi_path = cpy._cgi_path;
+        _is_listening = cpy._is_listening;
     }
     return *this;
 }
@@ -222,6 +235,11 @@ void    Server::addMethods(std::vector<std::string> &methods)
     if(!_methods.empty())
         _methods.clear();
     _methods.assign(methods.begin() + 1, methods.end());
+}
+
+Server * Server::clone() const
+{
+    return new Server(*this);
 }
 
 void Server::print(void)const

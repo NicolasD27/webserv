@@ -77,7 +77,7 @@ void Client::switchToSendQueue(Response* response)
 
 bool Client::setup(Server * server)
 {
-    _server = server;
+    _server = server->clone();
     struct sockaddr_in address;
     memset(&address, 0, sizeof(address));
     socklen_t client_len = sizeof(address);
@@ -165,6 +165,7 @@ bool Client::receiveFromClient(std::vector<Server*> servers, int max_body_size)
     
     if (request_string.length() == 0)
     {
+        std::cout << "removing client : " << _socket  << std::endl;
         delete request;
         _headers_read = false;
         _current_receiving_byte = 0;
@@ -174,6 +175,7 @@ bool Client::receiveFromClient(std::vector<Server*> servers, int max_body_size)
     if (_body_read)
     {
         std::cout << "request finished : " << request_string << "|" << std::endl;
+        std::cout << "from client : " << _socket  << std::endl;
         _current_receiving_byte = 0;
         _receiving_buff[0] = 0;
         _headers_read = false;

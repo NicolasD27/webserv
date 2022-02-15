@@ -21,8 +21,8 @@ void Request::parseHeaders()
     parseMethod(line);
     while(std::getline(buff, line))
     {
-        if (line.length() == 0)
-            continue;
+        if (line.length() <= 1)
+            break;
         line = trim(line);
         std::vector<std::string> tokens = split(line, ":");
         if (tokens.size() == 2)
@@ -62,17 +62,17 @@ void Request::parseMethod(std::string line)
     }
     else
     {
-        std::cout << "wrong number of elements in first line :" << tokens.size() << std::endl;
+        std::cout << "wrong number of elements in first line : " << line << std::endl;
         _format_error = true;
     }
     int len = 0;
     for (std::vector<std::string>::iterator it = tokens.begin(); it != tokens.end(); ++it)
         len += it->length();
-    // if (len + 2 != line.length())
-    // {
-    //     std::cout << "space in  first line" << std::endl;
-    //     _format_error = true;
-    // }
+    if (len + 2 != line.length())
+    {
+        std::cout << "space in  first line" << std::endl;
+        _format_error = true;
+    }
 }
 
 void Request::handleLocation(std::string location)
