@@ -3,25 +3,6 @@
 #include <string>
 
 #define NB_ENV 16
-/*
-AUTH_TYPE
-CONTENT_LENGTH
-CONTENT_TYPE
-GATEWAY_INTERFACE
-PATH_INFO
-PATH_TRANSLATED
-QUERY_STRING
-REMOTE_ADDR
-REMOTE_IDENT
-REMOTE_USER
-REQUEST_METHOD
-REQUEST_URI
-SCRIPT_NAME
-SERVER_PORT
-SERVER_PROTOCOL
-SERVER_SOFTWARE
-
-*/
 
 const std::string ENV[ NB_ENV ] = {
    "AUTH_TYPE",
@@ -46,12 +27,12 @@ int main (int argc, char **argv) {
 
    std::string method="";
 
-  // std::cout << "Content-type:text/html\r\n\r\n";
    std::cout << "<html>\n";
    std::cout << "<head>\n";
    std::cout << "<title>CGI Environment Variables</title>\n";
    std::cout << "</head>\n";
    std::cout << "<body>\n";
+   std::cout << "Version 1.0\n<br>";
    std::cout << "There is " << argc << " args\n";
    for(int i = 0; argv[i]; i++)
       std::cout << "argv["<<i<<"] = "<<argv[i]<<"\n";
