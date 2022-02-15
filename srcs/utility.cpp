@@ -147,3 +147,39 @@ std::string     trim(std::string const &str)
         ret = ret.substr(0, end + 1);
     return ret;
 }
+
+bool compareStringCI(const char * s1, const char * s2)
+{
+    int i = 0;
+    if (!s1 && !s2)
+        return true;
+    if (!s1)
+        return false;
+    if (!s2)
+        return false;
+    while (s1[i] && s2[i])
+    {
+        if (toupper(s1[i]) != toupper(s2[i]))
+            return false;
+        i++;
+    }
+    if (s1[i] != s2[i])
+        return false;
+    return true;
+}
+
+bool isAlNumHyphen(const char * s)
+{
+    int i = 0;
+    while (s[i])
+    {
+
+        if (!(isalnum(s[i]) || s[i] == '-'))
+        {
+            std::cout << s[i] + 40 << std::endl;
+            return false;
+        }
+        i++;
+    }
+    return true;
+}

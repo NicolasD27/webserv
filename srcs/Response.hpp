@@ -67,6 +67,7 @@ private:
     void                                buildPostResponse(Request const & request, Server const & server);
     void                                buildDeleteResponse(Request const & request, Server const & server);
     void                                addDate();
+    void                                addLastModifiedDate();
     std::string                         executeCgi(const char **scriptName, const std::string & body, char **env);
     
 public:

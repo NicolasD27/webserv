@@ -18,10 +18,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <chrono>
 #include <sys/param.h>
 
 bool		pathIsFile(const std::string &);
 bool        pathIsDir(const std::string &);
 std::string getWorkingPath(void);
+std::string getLastModifiedDate(std::string & filename);
 
 #endif
