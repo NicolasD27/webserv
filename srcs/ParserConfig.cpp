@@ -80,6 +80,8 @@ bool ParserConfig::check_block(std::ifstream &buff, std::vector<Server*> &server
             {
                 if (tokens[0] == "server_name")
                     new_server->addServerNames(tokens);
+                else if (tokens[0] == "return")
+                    default_loc->addRedirection(tokens);
                 else if(tokens[0] == "index")
                     default_loc->addIndex(tokens);
                 else if (tokens[0] == "methods")
@@ -159,6 +161,8 @@ bool ParserConfig::check_location_block(std::ifstream &buff, std::vector<std::st
                 newLocation->addIndex(locationTokens);
             else if (locationTokens[0] == "cgi")
                 newLocation->addCgi(locationTokens);
+            else if (locationTokens[0] == "return")
+                newLocation->addRedirection(locationTokens);
             else
                 newLocation->storeLine(locationTokens[0], locationTokens[1]);
             

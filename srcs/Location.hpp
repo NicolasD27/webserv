@@ -28,6 +28,8 @@ class Location
         bool                        _autoIndex;
         std::vector<std::string>    _methods;
         std::string                 _cgi_path;
+        std::string                 _redir_url;
+        int                         _redir_code;
         std::vector<std::string>    _extensions;
 
     public:
@@ -41,12 +43,15 @@ class Location
         void                        addMethods(std::vector<std::string> );
         void                        addIndex(std::vector<std::string> );
         void                        addCgi(std::vector<std::string> );
+        void                        addRedirection(std::vector<std::string>);
 
-        std::string                 getPath(void)const;
-        std::vector<std::string>    getIndex(void)const;
-        std::string                 getRoot(void)const;
-        std::string                 getCgiPath(void)const;
-        bool                        isAutoindex(void)const;
+        std::string                 getPath(void) const;
+        std::vector<std::string>    getIndex(void) const;
+        std::string                 getRoot(void) const;
+        std::string                 getCgiPath(void) const;
+        bool                        isAutoindex(void) const;
+        int                         getRedirectionCode(void) const;
+        std::string                 getRedirectionURL(void) const;
     
         void                        setPath(std::string const &);
         void                        setAutoIndex(bool);
@@ -56,5 +61,9 @@ class Location
         bool                        hasExtension(std::string) const;
 
         void                        print(void) const;
+
+        class	BadConfiguration: public std::exception{
+			virtual const char	*what() const throw();
+		};
 };
 #endif

@@ -149,9 +149,16 @@ void Response::buildGetResponse(Request const & request, Server const & server)
     _cgi_path = server.getCgiPath();
     // buildRessourcePath(request.getLocation(), block);
     std::cout << "_RessourcePath = " << _ressource_path << "\t _status = " << _status << std::endl;
-    if(_status == 301)
+    if (_location_block->getRedirectionCode() != 0)
     {
-        _headers.insert(std::make_pair("Content-type", "text/html"));
+        _status = _location_block->getRedirectionCode();
+        std::cout << "redirection" << std::endl;
+        // _headers.insert(std::make_pair("Content-type", "text/html"));
+        _headers.insert(std::make_pair("Location", _location_block->getRedirectionURL()));
+    }
+    else if(_status == 301)
+    {
+        // _headers.insert(std::make_pair("Content-type", "text/html"));
         _headers.insert(std::make_pair("Location", "http://" + server.getHost() + ":" + NumberToString(server.getPort()) + request.getLocation() + "/"));
     }
     else
@@ -476,6 +483,8 @@ void Response::findLocation(std::string const & uri, Server const & server, Requ
             if ((*it)->hasMethod(request.getHttpMethod()))
             {
                 _location_block = *it;
+                if (_location_block->getRedirectionCode() != 0)
+                    return;
                 if (buildRessourcePath(request.getLocation(), **it))
                     findLocation(_ressource_path, server, request);
                 return;
