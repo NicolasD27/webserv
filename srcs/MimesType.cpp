@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/10 11:58:58 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/20 19:24:42 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/17 17:17:32 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -380,4 +380,5 @@ MimesType::MimesType()
     _mimeType["yml"] = "text/yaml";
     _mimeType["zip"] = "application/zip";
     _mimeType["php"] = "text/html";
+    _mimeType["bla"] = "text/html";
 }
