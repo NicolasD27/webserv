@@ -66,7 +66,36 @@ Response::Response(Response const & src)
 
 void Response::buildDeleteResponse(Request const & request, Server const & server)
 {
-    
+    findLocation(request.getLocation(), server, request);
+    if (!_location_block)
+        _status = 405; // méthode interdite
+    else 
+        _location_block->print();
+    // _cgi_path = server.getCgiPath();
+    // buildRessourcePath(request.getLocation(), block);
+    std::cout << "_RessourcePath = " << _ressource_path << "\t _status = " << _status << std::endl;
+    if(_status == 301)
+        _status = 404; 
+    if (_status == 0)
+    {
+        if (!pathIsDir(_ressource_path))
+        {
+            if(pathIsFile(_ressource_path))
+            {
+                if (remove(_ressource_path.c_str()) != 0)
+                    _status = 500;
+                else
+                    _status = 204;
+            }
+            else
+                _status = 404;
+        }
+        else
+            _status = 404;
+    }
+    _to_send = true;
+    if (_status != 204)
+        buildErrorResponse(server);
 }
 
 void Response::buildPostResponse(Request const & request, Server const & server)
@@ -211,9 +240,9 @@ bool Response::buildRessourcePath(std::string const &locRequest, Location const 
     std::string file_testing;
     bool        find_index = false;
 
-    _ressource_path = location.getRoot() + "/" + locRequest.substr(location.getPath().length() - ((locRequest.substr(location.getPath().length()).front() == '/') ? 1 : 0));
+    _ressource_path = location.getRoot() + "/" + locRequest.substr(location.getPath().length() + ((locRequest.substr(location.getPath().length()).front() == '/') ? 1 : 0));
     _status = 0;
-    if (_ressource_path.back() == '/')
+    if (locRequest.back() == '/')
     {
         _headers.insert(std::make_pair("Content-type", "text/html; charset=utf-8"));
         std::stack<std::string,std::vector<std::string> > index(location.getIndex());

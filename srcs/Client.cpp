@@ -87,7 +87,7 @@ bool Client::setup(Server * server)
     char client_ipv4[INET_ADDRSTRLEN];
     inet_ntop(AF_INET, &address.sin_addr, client_ipv4, INET_ADDRSTRLEN);
     this->_client_ipv4_str = client_ipv4;
-    printf("Incoming connection from %s:%d.\n", this->_client_ipv4_str.c_str(), address.sin_port);
+    printf("Incoming connection from %s:%d to %s:%d\n", this->_client_ipv4_str.c_str(), address.sin_port, server->getHost().c_str(), server->getPort());
     _socket = new_client_sock;
     fcntl(_socket, F_SETFL, O_NONBLOCK);
     _address = address;
