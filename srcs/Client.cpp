@@ -91,7 +91,7 @@ bool Client::setup(Server * server)
     _socket = new_client_sock;
     fcntl(_socket, F_SETFL, O_NONBLOCK);
     _address = address;
-    _current_sending_byte   = -1;
+    _current_sending_byte   = 0;
     _current_receiving_byte = 0;
     return true;
 }
@@ -196,6 +196,8 @@ bool Client::receiveFromClient(std::vector<Server*> servers, int max_body_size)
     return true;
 } 
 
+
+
 void Client::readChunkedRequest(Request *request, int newline_pos, int offset_newline, int max_body_size)
 {
     int r;
@@ -268,12 +270,14 @@ bool Client::sendToClient()
     Response* response = _responses_to_send.front();
     std::string response_string = response->buildResponseString();
     std::cout << *response << std::endl;
-    int r = write(_socket, response_string.c_str(), response_string.length());
-    if (r == response_string.length())
+    int r = write(_socket, response_string.c_str() + _current_sending_byte, response_string.length() - _current_sending_byte);
+    if (r == response_string.length() - _current_sending_byte)
     {
+        std::cout << "response send" << std::endl;
         delete response;
         _responses_to_send.pop();
     }
-    std::cout << "response send" << std::endl;
+    else if (r >= 0)        
+        _current_receiving_byte += r;
     return true;
 }
