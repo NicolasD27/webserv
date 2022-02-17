@@ -18,6 +18,7 @@ ErrorPages::ErrorPages()
     _errorPage[403] = PAGE403;
     _errorPage[404] = PAGE404;
     _errorPage[405] = PAGE405;
+    _errorPage[414] = PAGE414;
     _errorPage[500] = PAGE500;
 }
 

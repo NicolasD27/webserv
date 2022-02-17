@@ -41,7 +41,11 @@ void Request::parseHeaders()
         std::cout << "content length error" << std::endl;
         _format_error = true;
     }
-    
+    if (_headers.find("Host") == _headers.end())
+    {
+        std::cout << "missing host" << std::endl;
+        _format_error = true;
+    }
 
 }
 
@@ -101,13 +105,18 @@ void Request::storeHeader(std::string key, std::string value)
     }
     while (HEADERS_IN[i])
     {
-        if (key == std::string(HEADERS_IN[i]))
+
+        if (compareStringCI(key.c_str(), HEADERS_IN[i]))
         {
-            if (!_headers.insert(std::make_pair(key, value)).second)
+            if (!_headers.insert(std::make_pair(std::string(HEADERS_IN[i]), value)).second)
+            {
+                if (std::string(HEADERS_IN[i]) == "Host")
+                    _format_error = true;
                 _headers[key] = value;
+            }
            break; 
         }
-        if (trim(key) == std::string(HEADERS_IN[i])) // il y a des espaces, devrait revonyer code 400
+        if (compareStringCI(trim(key).c_str() , HEADERS_IN[i])) // il y a des espaces, devrait revonyer code 400
         {
             std::cout << "space in header" << std::endl;
             _format_error = true;

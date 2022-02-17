@@ -44,3 +44,20 @@ std::string getWorkingPath(void)
 	char temp[MAXPATHLEN];
 	return ((getcwd(temp, sizeof(temp))? std::string(temp) : std::string("")));
 }
+
+
+std::string getLastModifiedDate(std::string & filename)
+{
+	struct stat result;
+	struct tm * mod_time;
+	char buffer [80];
+	
+	if(stat(filename.c_str(), &result)==0)
+	{
+		time_t lmtime = result.st_mtime;
+		mod_time = localtime(&lmtime);
+		strftime (buffer,80,"%a, %d %b %Y %X %Z",mod_time);
+		return std::string(buffer);
+	}
+	return "";
+}

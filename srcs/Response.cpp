@@ -18,7 +18,7 @@ StatusCode STATUS_CODES;
 
 ErrorPages  ERROR_PAGES;
 
-Response::Response(unsigned int status, Server const & server) : _status(status)
+Response::Response(unsigned int status, Server const & server) : _status(status), _to_send(true)
 {
     std::cout << "error response" << std::endl;
     buildErrorResponse(server);
@@ -66,7 +66,39 @@ Response::Response(Response const & src)
 
 void Response::buildDeleteResponse(Request const & request, Server const & server)
 {
-    
+    findLocation(request.getLocation(), server, request);
+    if (!_location_block)
+        _status = 405; // méthode interdite
+    else 
+        _location_block->print();
+    // _cgi_path = server.getCgiPath();
+    // buildRessourcePath(request.getLocation(), block);
+    std::cout << "_RessourcePath = " << _ressource_path << "\t _status = " << _status << std::endl;
+    if(_status == 301)
+        _status = 404; 
+    if (_status == 0)
+    {
+        if (!pathIsDir(_ressource_path))
+        {
+            if(pathIsFile(_ressource_path))
+            {
+                if (remove(_ressource_path.c_str()) != 0)
+                    _status = 500;
+                else
+                {
+                    _body = "<h1>File deleted<h1>";
+                    _status = 200;
+                }
+            }
+            else
+                _status = 404;
+        }
+        else
+            _status = 404;
+    }
+    _to_send = true;
+    if (_status != 200)
+        buildErrorResponse(server);
 }
 
 void Response::buildPostResponse(Request const & request, Server const & server)
@@ -117,9 +149,16 @@ void Response::buildGetResponse(Request const & request, Server const & server)
     _cgi_path = server.getCgiPath();
     // buildRessourcePath(request.getLocation(), block);
     std::cout << "_RessourcePath = " << _ressource_path << "\t _status = " << _status << std::endl;
-    if(_status == 301)
+    if (_location_block->getRedirectionCode() != 0)
     {
-        _headers.insert(std::make_pair("Content-type", "text/html"));
+        _status = _location_block->getRedirectionCode();
+        std::cout << "redirection" << std::endl;
+        // _headers.insert(std::make_pair("Content-type", "text/html"));
+        _headers.insert(std::make_pair("Location", _location_block->getRedirectionURL()));
+    }
+    else if(_status == 301)
+    {
+        // _headers.insert(std::make_pair("Content-type", "text/html"));
         _headers.insert(std::make_pair("Location", "http://" + server.getHost() + ":" + NumberToString(server.getPort()) + request.getLocation() + "/"));
     }
     else
@@ -128,7 +167,6 @@ void Response::buildGetResponse(Request const & request, Server const & server)
         {
             if (!pathIsDir(_ressource_path))
             {
-                std::cout << "********" << _ressource_path << std::endl;
                 if(pathIsFile(_ressource_path))
                 {
                     _ressource_fd = open(_ressource_path.c_str(), O_NONBLOCK);
@@ -150,10 +188,7 @@ void Response::buildGetResponse(Request const & request, Server const & server)
                 }
             }
             else
-            {
-                std::cout << "building autoindex..." << std::endl;
                 _status = buildAutoIndex();
-            }
         }
         if (_status != 200)
             buildErrorResponse(server);
@@ -194,6 +229,7 @@ void Response::buildErrorResponse(Server const & server)
 std::string Response::buildResponseString()
 {
     addDate();
+    addLastModifiedDate();
     _headers.insert(std::make_pair("Cache-Control", "no-store"));
     _headers.insert(std::make_pair("Server", "webserv"));
     _headers.insert(std::make_pair("Content-Length", NumberToString(_body.length())));
@@ -214,9 +250,9 @@ bool Response::buildRessourcePath(std::string const &locRequest, Location const 
     std::string file_testing;
     bool        find_index = false;
 
-    _ressource_path = location.getRoot() + locRequest;
+    _ressource_path = location.getRoot() + "/" + locRequest.substr(location.getPath().length() + ((locRequest.substr(location.getPath().length()).front() == '/') ? 1 : 0));
     _status = 0;
-    if (_ressource_path.back() == '/')
+    if (locRequest.back() == '/')
     {
         _headers.insert(std::make_pair("Content-type", "text/html; charset=utf-8"));
         std::stack<std::string,std::vector<std::string> > index(location.getIndex());
@@ -308,30 +344,37 @@ unsigned int Response::buildAutoIndex()
 unsigned int Response::readRessource(bool isErrorPage)
 {
 /* bloc à decommenter pour essayer l'execution du cgi*/
-    if (_location_block->hasExtension(_ressource_path)  && _location_block->getCgiPath().length() != 0)
-    {
-        //CGIHandler  cgi;
-        CGIHandler  cgi(_pt_request, this);
+    // if (_location_block->hasExtension(_ressource_path)  && _location_block->getCgiPath().length() != 0)
+    // {
+    //     //CGIHandler  cgi;
+    //     CGIHandler  cgi(_pt_request, this);
         
-        std::string     script = _location_block->getCgiPath();
+    //     std::string     script = _location_block->getCgiPath();
 
-        const char *scriptName[3] = {script.c_str(), _ressource_path.c_str() ,NULL};
-        _body = cgi.executeCgi(scriptName,"");
+    //     const char *scriptName[3] = {script.c_str(), _ressource_path.c_str() ,NULL};
+    //     _body = cgi.executeCgi(scriptName,"");
 
-        return _status;
-    }
+    //     return _status;
+    // }
     std::string str;
     std::stringstream buff;
+    int read = false;
     
     std::cout << "ReadRessource ..." << _ressource_path << "...";
     std::ifstream ifs(_ressource_path);
     if(ifs.good() && pathIsFile(_ressource_path))
     {
         while (std::getline(ifs, str))
+        {
+            read = true;
             buff << str << std::endl;
+        }
 	    ifs.close();
-        _body = buff.str();
-        _body.pop_back();
+        if (read)
+        {
+            _body = buff.str();
+            _body.pop_back();
+        }
     }
     else if(_status != 200)
         _body = ERROR_PAGES[_status];
@@ -358,6 +401,11 @@ void Response::addDate()
     timeinfo = localtime (&rawtime);
     strftime (buffer,80,"%a, %d %b %Y %X %Z",timeinfo);
     _headers.insert(std::make_pair("Date", buffer));
+}
+
+void Response::addLastModifiedDate()
+{
+    _headers.insert(std::make_pair("Last-Modified", getLastModifiedDate(_ressource_path)));
 }
 
 Response::~Response()
@@ -435,6 +483,8 @@ void Response::findLocation(std::string const & uri, Server const & server, Requ
             if ((*it)->hasMethod(request.getHttpMethod()))
             {
                 _location_block = *it;
+                if (_location_block->getRedirectionCode() != 0)
+                    return;
                 if (buildRessourcePath(request.getLocation(), **it))
                     findLocation(_ressource_path, server, request);
                 return;

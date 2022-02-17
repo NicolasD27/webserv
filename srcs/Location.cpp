@@ -12,12 +12,12 @@
 
 #include "Location.hpp"
 
-Location::Location(void) : _autoIndex(false) {}
+Location::Location(void) : _autoIndex(false), _redir_code(0) {}
 
-Location::Location(Location const &cpy):_path(cpy._path), _index(cpy._index),_root(cpy._root),_autoIndex(cpy._autoIndex),_methods(cpy._methods),_cgi_path(cpy._cgi_path){}
+Location::Location(Location const &cpy) { *this = cpy;}
 
 Location::Location(std::string path, std::vector<std::string> index, std::string root, bool autoIndex, std::vector<std::string> methods, std::string cgi_path):
-_path(path), _index(index), _root(root), _autoIndex(autoIndex), _methods(methods), _cgi_path(cgi_path)
+_path(path), _index(index), _root(root), _autoIndex(autoIndex), _methods(methods), _cgi_path(cgi_path), _redir_code(0)
 {}
 
 Location &Location::operator=(Location const &cpy)
@@ -31,6 +31,8 @@ Location &Location::operator=(Location const &cpy)
         _methods = cpy._methods;
         _index = cpy._index;
         _extensions = cpy._extensions;
+        _redir_code = cpy._redir_code;
+        _redir_url = cpy._redir_url;
     }
     return *this;
 };
@@ -50,6 +52,9 @@ std::string                 Location::getRoot() const {return _root;};
 std::string                 Location::getCgiPath() const {return _cgi_path;}
 
 bool                        Location::isAutoindex(void) const {return(_autoIndex);}
+
+int                         Location::getRedirectionCode(void) const { return _redir_code;}
+std::string                 Location::getRedirectionURL(void) const { return _redir_url; }
 
     
 void            Location::setPath(std::string const &path)
@@ -96,8 +101,22 @@ void            Location::addCgi(std::vector<std::string> tokens)
         _cgi_path = tokens[1];
         _extensions = split(tokens[2], "|");
     }
+    else
+        throw Location::BadConfiguration();
 }
 
+void             Location::addRedirection(std::vector<std::string> tokens)
+{
+    if (tokens.size() == 3)
+    {
+        _redir_code = StringToInt(tokens[1]);
+        if (!(_redir_code >= 301 && _redir_code <= 303) || _redir_code == 307)
+            throw Location::BadConfiguration();
+        _redir_url = tokens[2];
+    }
+    else
+        throw Location::BadConfiguration();
+}
 bool            Location::hasExtension(std::string uri) const
 {
     for (std::vector<std::string>::const_iterator it = _extensions.begin(); it != _extensions.end(); ++it)
@@ -151,4 +170,8 @@ bool            Location::hasMethod(std::string method) const
         if ((*it) == method)
             return true;
     return false;
+}
+
+const char	*Location::BadConfiguration::what() const throw(){
+	return "Bad configuration";
 }
