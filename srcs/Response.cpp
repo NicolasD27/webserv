@@ -85,7 +85,10 @@ void Response::buildDeleteResponse(Request const & request, Server const & serve
                 if (remove(_ressource_path.c_str()) != 0)
                     _status = 500;
                 else
-                    _status = 204;
+                {
+                    _body = "<h1>File deleted<h1>";
+                    _status = 200;
+                }
             }
             else
                 _status = 404;
@@ -94,7 +97,7 @@ void Response::buildDeleteResponse(Request const & request, Server const & serve
             _status = 404;
     }
     _to_send = true;
-    if (_status != 204)
+    if (_status != 200)
         buildErrorResponse(server);
 }
 
