@@ -6,42 +6,13 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/19 22:40:48 by clorin            #+#    #+#             */
-/*   Updated: 2022/02/11 16:19:26 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/17 18:20:00 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "CGIHandler.hpp"
 
 CGIHandler::~CGIHandler(){}
-
-// void    CGIHandler::initEnv()
-// {
-//     _env["REQUEST_METHOD"] = "GET";//ok
-//     _env["SERVER_PROTOCOL"] = "HTTP/1.1";
-// 	_env["SERVER_SOFTWARE"] = "Webserv/1.0";
-//     _env["COMSPEC"] = "";
-//     _env["DOCUMENT_ROOT"] = "";
-//     _env["GATEWAY_INTERFACE"] = "CGI/1.1";//ok
-//     _env["HTTP_ACCEPT"] = "";
-//     _env["HTTP_ACCEPT_ENCODING"] = "";
-//     _env["HTTP_ACCEPT_LANGUAGE"] = "";
-//     _env["HTTP_CONNECTION"] = "";
-//     _env["HTTP_HOST"] = "";
-//     _env["HTTP_USER_AGENT"] = "";
-//     _env["PATH"] = "";
-// 	_env["PATH_INFO"] = "";	//ok
-//     _env["QUERY_STRING"] = "say=Salut&to=Maman"; //ok
-//     _env["REMOTE_ADDR"] = "";//ok
-//     _env["REMOTE_PORT"] = "";
-//     _env["REQUEST_URI"] = "";//ok
-//     _env["SCRIPT_FILENAME"] = "";
-//     _env["SCRIPT_NAME"] = "";//ok
-//     _env["SERVER_ADDR"] = "";
-//     _env["SERVER_SIGNATURE"] = "";
-//     _env["SERVER_ADMIN"] = "clorin@student.42.fr";
-//     _env["SERVER_NAME"] = "webserv";
-//     _env["SERVER_PORT"] = "3000";
-// }
 
 /*
  - Server related variables
@@ -91,12 +62,6 @@ CGIHandler::~CGIHandler(){}
 {
 	std::map<std::string, std::string>	headers_response = response->getHeaders();
 	std::map<std::string, std::string>	headers_request = request->getHeaders();
-	
-	// std::cout << "Header de Request :\n";
-	// for (std::map<std::string, std::string>::iterator it = headers_request.begin(); it != headers_request.end(); ++it)
-    // {
-    //     std::cout << "\t"<< C_YELLOW << it->first << C_RESET<<": "<< C_CYAN << it->second << C_RESET<< std::endl;
-    // }
 
 	_env["SERVER_PROTOCOL"] = "HTTP/1.1";
 	_env["SERVER_SOFTWARE"] = "webserv";
@@ -118,7 +83,8 @@ CGIHandler::~CGIHandler(){}
 	_env["REMOTE_PORT"] = to_string(request->getPortClient());
 	_env["REMOTE_IDENT"] = headers_request["Authorization"]; // a verifier
 	_env["REMOTE_USER"] = headers_request["Authorization"];
-	_env["SCRIPT_NAME"] = response->getCgiPath();
+	_env["SCRIPT_NAME"] = response->getRessourcePath();
+	_env["REQUEST_URI"] = response->getRessourcePath();
 }
 
 char					**CGIHandler::getEnv() const
