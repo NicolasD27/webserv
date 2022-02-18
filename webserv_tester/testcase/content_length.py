@@ -63,7 +63,7 @@ def test_double_length() -> str:
         config.SERVER_NAME
     )
     http_response = send_request(request_header)
-    if http_response.status != 400:
+    if http_response.status != 200:
         return "Bad status code: {}, expected: {}".format(
             str(http_response.status), "200"
         )
