@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   MimesType.hpp                                      :+:      :+:    :+:   */
+/*   LanguageCodes.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -10,25 +10,26 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef MIMESTYPE_HPP
-# define MIMESTYPE_HPP
+#ifndef LANGUAGE_CODES_HPP
+# define LANGUAGE_CODES_HPP
 
 #include <string>
-#include <map>
+#include <vector>
 
-class MimesType
+class LanguageCodes
 {
     private:
-        MimesType(MimesType const &){};
-        MimesType &operator=(MimesType const &){return *this;};
+        LanguageCodes(LanguageCodes const &){};
+        LanguageCodes &operator=(LanguageCodes const &){return *this;};
         
-        std::map<std::string, std::string>      _mimeType;
+        std::vector<std::string>      _codes;
 
     public:
-        MimesType(void);
-        ~MimesType(void);
+        LanguageCodes(void);
+        ~LanguageCodes(void);
 
-        const std::string     getType(std::string type);
-        bool                  typeExist(std::string type);
+        std::vector<std::string>     getCodes();
+        bool langExist(std::string code);
+
 };
 #endif

@@ -19,6 +19,7 @@ template <typename T>
 
 
 int StringToInt(std::string value);
+float StringToFloat ( std::string value );
 int StringHexaToInt(std::string value);
 bool onlyDigits(const char *);
 int HexaToInt(int value);
