@@ -29,7 +29,7 @@ class Client;
 #include "Base64.hpp"
 
 #define NO_SOCKET -1
-#define MAX_SIZE 32768
+#define MAX_SIZE 1000000
 class Client
 {
 private:

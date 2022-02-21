@@ -160,7 +160,7 @@ bool Client::receiveFromClient(std::vector<Server*> servers, int max_body_size)
             _receiving_buff[_current_receiving_byte] = 0;
         }
         _body_read = (r < 0) ? false : true;
-        request->addToBody(std::string(_receiving_buff).substr(newline_pos + 4));
+        request->addToBody(std::string(_receiving_buff, content_length + newline_pos + 4).substr(newline_pos + 4));
     }
     
     if (request_string.length() == 0)
@@ -174,7 +174,16 @@ bool Client::receiveFromClient(std::vector<Server*> servers, int max_body_size)
     }
     if (_body_read)
     {
-        std::cout << "request finished : " << request_string << "|" << std::endl;
+        request_string = std::string(_receiving_buff, content_length);
+        // std::cout << "request finished : " << request_string << "|" << std::endl;
+        // std::cout << "buffer : " << std::endl;
+        // for (int i = 0; i < content_length; i++)
+        // {
+        //     std::cout << _receiving_buff[i];
+        //     // if (_receiving_buff[i] == 0)
+        //     //     std::cout << "0";
+        // }
+        std::cout << std::endl;
         std::cout << "from client : " << _socket  << std::endl;
         _current_receiving_byte = 0;
         _receiving_buff[0] = 0;
@@ -252,7 +261,6 @@ void Client::findMatchingServer(std::vector<Server*> servers, Request & request)
         {
             for (std::vector<std::string>::iterator ite = (*it)->getBeginServerNames(); ite != (*it)->getEndServerNames(); ++ite)
             {
-                
                 if (*ite == request["Host"])
                 {
                     _server = *it;

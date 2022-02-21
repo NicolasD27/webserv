@@ -52,6 +52,7 @@ class Location
         bool                        isAutoindex(void) const;
         int                         getRedirectionCode(void) const;
         std::string                 getRedirectionURL(void) const;
+        std::vector<std::string>    getMethods() const;
     
         void                        setPath(std::string const &);
         void                        setAutoIndex(bool);
