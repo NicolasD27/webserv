@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 14:44:21 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/06 11:31:35 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/21 11:35:51 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,11 +14,21 @@
 #include "Webserv.hpp"
 #include <signal.h>
 
+Webserv		webserv;
+
+void catchCtrl_C(int dummy) {
+    std::cerr << std::endl << C_RED << "Ctr-C detected "<< C_RESET << "... stopping server ...";
+    webserv.stop();
+    std::cerr << C_GREEN << "ok" << C_RESET << std::endl;
+    exit(EXIT_SUCCESS);
+}
+
 int		main(int ac, char **av)
 {
-    Webserv		webserv;
+    //Webserv		webserv;
 
     signal(SIGPIPE, SIG_IGN);
+    signal(SIGINT, catchCtrl_C);
     try
     {
         if (ac == 2)

@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/15 14:46:42 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/13 15:19:01 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/21 11:35:43 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ private:
 
     bool checkHost(std::string const &host) const;
     bool checkLocations(std::vector<Location> &);
+    bool                    _running;
     
 public:
 
@@ -57,6 +58,7 @@ public:
     void    buildFDSets(Server const & server, fd_set *read_fds, fd_set *write_fds, fd_set *except_fds, int *highest_socket);
     void    initFDSets(fd_set *read_fds, fd_set *write_fds, fd_set *except_fds);
 
+    void    stop();
     class	BadConfiguration: public std::exception{
 			virtual const char	*what() const throw();
 		};

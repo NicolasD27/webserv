@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 15:32:25 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/20 18:12:12 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/21 11:25:59 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -178,6 +178,10 @@ bool Webserv::checkServer(Server const & server) const
     return (this->checkHost(server.getHost()));
 }
 
+void        Webserv::stop()
+{
+    _running = false;
+}
 bool        Webserv::run()
 {
     fd_set read_fds;
@@ -189,8 +193,8 @@ bool        Webserv::run()
         if (!(*it)->setup(_servers))
             throw Server::FailedSetup();
     
-
-    while (1)
+    _running = true;
+    while (_running)
     {
         highest_socket = 0;
         initFDSets(&read_fds, &write_fds, &except_fds);
