@@ -43,7 +43,7 @@ private:
     int                     _current_sending_byte;
     char                    _receiving_buff[MAX_SIZE];
     int                     _current_receiving_byte;
-    Server *                _server;
+    int                     _server_socket;
     bool                    _headers_read;
     bool                    _body_read;
 

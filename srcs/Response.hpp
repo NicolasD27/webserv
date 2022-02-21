@@ -62,7 +62,7 @@ private:
     std::string                         _cgi_path;
 
     void                                                findLocation(Server const &, Request const &);
-    bool                                                buildRessourcePath(std::string const &, Location const &);
+    bool                                                buildRessourcePath(std::string, Location const &);
     void                                                buildErrorResponse(Server const & server);
     void                                                buildGetResponse(Request const & request, Server const & server);
     void                                                buildPostResponse(Request const & request, Server const & server);

@@ -236,7 +236,7 @@ std::string Response::buildResponseString()
 
 
 
-bool Response::buildRessourcePath(std::string const &locRequest, Location const &location)
+bool Response::buildRessourcePath(std::string locRequest, Location const &location)
 {
     std::string current_directory = getWorkingPath();
     std::string file_testing;
@@ -701,6 +701,7 @@ void Response::addLastModifiedDate()
 
 Response::~Response()
 {
+    delete _pt_request;
 }
 
 Response      &Response::operator=(Response const &cpy)
