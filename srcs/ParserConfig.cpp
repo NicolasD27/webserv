@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/11 10:42:37 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/17 09:41:28 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/21 10:36:25 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,7 @@ bool ParserConfig::check_block(std::ifstream &buff, std::vector<Server*> &server
         {
             std::cerr << "bracket } not found." << std::endl;
             delete new_server;
+            delete default_loc;
             return false;
         }
         if(tokens[0] == "location")
@@ -71,6 +72,7 @@ bool ParserConfig::check_block(std::ifstream &buff, std::vector<Server*> &server
             if (!check_location_block(buff, tokens, new_server, default_loc))
             {
                 delete new_server;
+                delete default_loc;
                 return false;
             }
         }
@@ -97,6 +99,7 @@ bool ParserConfig::check_block(std::ifstream &buff, std::vector<Server*> &server
             {
                 std::cerr << "Expected ';' at the end of line." << std::endl;
                 delete new_server;
+                delete default_loc;
                 return false;
             }
             
@@ -106,6 +109,7 @@ bool ParserConfig::check_block(std::ifstream &buff, std::vector<Server*> &server
     {
         std::cerr << "bracket } not found." << std::endl;
         delete new_server;
+        delete default_loc;
         return false;
     }
     new_server->addLocation(default_loc);
@@ -124,6 +128,7 @@ bool ParserConfig::check_location_block(std::ifstream &buff, std::vector<std::st
     if(tokens.size() != 3)
     {
         std::cerr << "Bad format for location block: Usage: 'location [/path/name] {'" << std::endl;
+        delete newLocation;
         return false;
     }
     path = tokens[1];
@@ -135,6 +140,7 @@ bool ParserConfig::check_location_block(std::ifstream &buff, std::vector<std::st
     if(tokens[2] != "{")
     {
         std::cerr << "Expected '{' in location block." << std::endl;
+        delete newLocation;
         return false;
     }
     newLocation->setPath(path);
@@ -151,6 +157,7 @@ bool ParserConfig::check_location_block(std::ifstream &buff, std::vector<std::st
         if(locationTokens[0] == "location")
         {
             std::cerr << "bracket } not found." << std::endl;
+            delete newLocation;
             return false;
         }
         if(removeSemicolon(locationTokens))
@@ -170,12 +177,14 @@ bool ParserConfig::check_location_block(std::ifstream &buff, std::vector<std::st
         else
         {
             std::cerr << "Expected ';' at the end of line." << std::endl;
+            delete newLocation;
             return false;
         }
     }
     if (!closed)
     {
         std::cerr << "bracket } not found." << std::endl;
+        delete newLocation;
         return false;
     }    
     server->addLocation(newLocation);

@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/15 11:27:16 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/20 17:08:56 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/21 10:58:47 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,10 +51,12 @@ private:
     std::string                                         _cgi_path;
     bool                                                _is_listening;
 public:
-    typedef std::vector<Client*>::iterator             client_iterator;
-    typedef std::vector<Client*>::const_iterator       client_const_iterator;
-    typedef std::vector<Server*>::iterator             server_iterator;
-    typedef std::vector<Server*>::const_iterator       server_const_iterator;
+    typedef std::vector<Client*>::iterator              client_iterator;
+    typedef std::vector<Client*>::const_iterator        client_const_iterator;
+    typedef std::vector<Server*>::iterator              server_iterator;
+    typedef std::vector<Server*>::const_iterator        server_const_iterator;
+    typedef std::vector<Location*>::iterator            location_iterator;
+    typedef std::vector<Location*>::const_iterator      location_const_iterator;
 
     Server(void);
     Server(Server const &);

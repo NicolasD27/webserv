@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/19 22:28:13 by clorin            #+#    #+#             */
-/*   Updated: 2022/02/17 16:20:59 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/21 09:40:58 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -143,7 +143,11 @@ void Response::buildGetResponse(Request const & request, Server const & server)
 {
     findLocation(request.getLocation(), server, request);
     if (!_location_block)
+    {
         _status = 405; // méthode interdite
+        return;
+    }
+        
     else 
         _location_block->print();
     _cgi_path = server.getCgiPath();

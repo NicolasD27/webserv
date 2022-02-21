@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/11 14:51:26 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/20 18:13:23 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/21 10:42:53 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ Location::~Location()
 {
     _methods.clear();
     _index.clear();
+    _extensions.clear();
 }
 
 std::string                 Location::getPath() const {return(_path);}
