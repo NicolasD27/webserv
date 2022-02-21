@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/19 22:40:48 by clorin            #+#    #+#             */
-/*   Updated: 2022/02/17 18:20:00 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/18 20:09:58 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ CGIHandler::~CGIHandler(){}
 
 */
 
-	CGIHandler::CGIHandler(Request const *request, Response const *response)
+	CGIHandler::CGIHandler(Request const *request, Response const *response):_body(request->getBody())
 {
 	std::map<std::string, std::string>	headers_response = response->getHeaders();
 	std::map<std::string, std::string>	headers_request = request->getHeaders();
@@ -70,7 +70,7 @@ CGIHandler::~CGIHandler(){}
 	_env["REQUEST_METHOD"] = request->getHttpMethod();
 	_env["GATEWAY_INTERFACE"] = "CGI/1.1";
 	_env["AUTH_TYPE"] = "";
-	_env["CONTENT_TYPE"] = headers_request["Content-type"];
+	_env["CONTENT_TYPE"] = headers_request["Content-Type"];
 	_env["PATH_INFO"] = response->getRessourcePath();
 	_env["PATH_TRANSLATED"] = response->getRessourcePath(); //same  ?
 	_env["QUERY_STRING"] = request->getQueryString();
@@ -128,6 +128,11 @@ std::string		CGIHandler::executeCgi(const char **scriptName, const std::string &
     {
         std::cout << "\t"<< C_YELLOW << it->first << C_RESET<<": "<< C_CYAN << it->second << C_RESET<< std::endl;
     }
+	std::cout << C_CYAN << "\tBody = " << C_RESET << ((_body.empty())? "Empty":_body)<< std::endl;
+	
+	write(fdIn, _body.c_str(), _body.size());
+	lseek(fdIn, 0, SEEK_SET);
+	
 	pid = fork();
 
 	if (pid == -1)
@@ -137,14 +142,14 @@ std::string		CGIHandler::executeCgi(const char **scriptName, const std::string &
 	}
 	else if (pid == 0)
 	{
-        std::cout << "execution de "<<scriptName[0] << " with ";
+       // std::cout << "execution de "<<scriptName[0] << " with ";
         
 		char **env;
         env = this->getEnv();		//todo free()
 		size_t i = 1;
-        while(scriptName[i])
-            std::cout << scriptName[i++] << " ";
-        std::cout << std::endl;
+        //while(scriptName[i])
+          //  std::cout << scriptName[i++] << " ";
+        //std::cout << std::endl;
 		dup2(fdIn, STDIN_FILENO);
 		dup2(fdOut, STDOUT_FILENO);
 		execve(scriptName[0], const_cast<char* const *>(scriptName), env);
