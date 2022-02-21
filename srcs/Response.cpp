@@ -76,8 +76,9 @@ void Response::buildDeleteResponse(Request const & request, Server const & serve
     std::cout << "_RessourcePath = " << _ressource_path << "\t _status = " << _status << std::endl;
     if(_status == 301)
         _status = 404; 
-    if (_status == 0)
+    else if (_status == 0)
     {
+        
         if (!pathIsDir(_ressource_path))
         {
             if(pathIsFile(_ressource_path))
@@ -103,6 +104,8 @@ void Response::buildDeleteResponse(Request const & request, Server const & serve
 
 void Response::buildPostResponse(Request const & request, Server const & server)
 {
+    
+    std::cout << request.getBody();
     findLocation(request.getLocation(), server, request);
     if (!_location_block)
         _status = 405; // méthode interdite
@@ -243,6 +246,8 @@ bool Response::buildRessourcePath(std::string const &locRequest, Location const 
         else
         {
             std::cout << "No\n";
+            // if (tooMuchDots(_ressource_path))
+            //     _status = 404;
             if(pathIsFile(_ressource_path))
             {
                 buildFileFD();
@@ -260,6 +265,20 @@ bool Response::buildRessourcePath(std::string const &locRequest, Location const 
                 _to_send = true;
                 _status = 404;
             }
+        }
+    }
+    return false;
+}
+
+bool Response::tooMuchDots(std::string path)
+{
+    int double_dots = 0;
+    int point_pos = -1;
+    while ((point_pos = path.find_first_of('.') != std::string::npos))
+    {
+        if (point_pos < path.length() - 1 && path[point_pos + 1] == '.' && (point_pos < path.length() - 2 && path[point_pos + 1] == '/') || point_pos == path.length() - 2)
+        {
+            double_dots += 1;
         }
     }
     return false;
@@ -722,14 +741,18 @@ void Response::findLocation(std::string const & uri, Server const & server, Requ
     
     for (std::vector<Location*>::iterator it = locations.begin(); it != locations.end(); ++it)
     {
+            std::cout << "loc path : " << (*it)->getPath() << "  uri : " << uri.substr(0, (*it)->getPath().length()) << std::endl;
         if ((*it)->getPath() == uri.substr(0, (*it)->getPath().length()))
         {
             if ((*it)->hasMethod(request.getHttpMethod()))
             {
+                std::cout << "here" << std::endl;
                 _location_block = *it;
-                if (_location_block->getRedirectionCode() != 0)
+                if (request.getHttpMethod() == "DELETE")
+                    _ressource_path = _location_block->getRoot() + "/" + request.getLocation().substr(_location_block->getPath().length() + ((request.getLocation().substr(_location_block->getPath().length()).front() == '/') ? 1 : 0));
+                else if (_location_block->getRedirectionCode() != 0)
                     return;
-                if (buildRessourcePath(request.getLocation(), **it))
+                else if (buildRessourcePath(request.getLocation(), **it))
                     findLocation(_ressource_path, server, request);
                 return;
             }

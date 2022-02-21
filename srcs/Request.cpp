@@ -126,7 +126,7 @@ void Request::storeHeader(std::string key, std::string value)
     }
 }
 
-void Request::addToBody(std::string new_elem) { _body += new_elem;}
+void Request::addToBody(std::string new_elem) { _body.append(new_elem);}
 
 void Request::setPortClient(uint16_t port)
 {

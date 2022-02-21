@@ -68,6 +68,7 @@ private:
     void                                                buildPostResponse(Request const & request, Server const & server);
     void                                                buildDeleteResponse(Request const & request, Server const & server);
     void                                                buildFileFD();
+    bool                                                tooMuchDots(std::string path);
     bool                                                findIndex(std::string current_directory, Location const &location);
     std::vector<std::string>                            findAlternativeMatches(std::string current_path);
     bool                                                chooseAcceptableFile(std::vector<std::string>);

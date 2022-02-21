@@ -48,6 +48,8 @@ std::string                 Location::getPath() const {return(_path);}
 
 std::vector<std::string>    Location::getIndex() const {return(_index);}
 
+std::vector<std::string>    Location::getMethods() const {return(_methods);}
+
 std::string                 Location::getRoot() const {return _root;};
 
 std::string                 Location::getCgiPath() const {return _cgi_path;}
@@ -147,7 +149,7 @@ void            Location::print() const
     {
         std::cout << "\tMethods : ";
         for(size_t i = 0; i < _methods.size(); i++)
-            std::cout << _methods[i++] << " ";
+            std::cout << _methods[i] << " ";
         std::cout << std::endl;
     }
     std::cout << "Cgi_path = ";
