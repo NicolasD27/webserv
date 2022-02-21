@@ -40,6 +40,7 @@ class Response;
 #include "Location.hpp"
 #include "StatusCode.hpp"
 #include "MimesType.hpp"
+#include "LanguageCodes.hpp"
 #include "ErrorPages.hpp"
 #include "CGIHandler.hpp"
 
@@ -60,15 +61,22 @@ private:
     Location                            *_location_block;
     std::string                         _cgi_path;
 
-    void                                findLocation(std::string const &, Server const &, Request const &);
-    bool                                buildRessourcePath(std::string const &, Location const &);
-    void                                buildErrorResponse(Server const & server);
-    void                                buildGetResponse(Request const & request, Server const & server);
-    void                                buildPostResponse(Request const & request, Server const & server);
-    void                                buildDeleteResponse(Request const & request, Server const & server);
-    void                                addDate();
-    void                                addLastModifiedDate();
-    std::string                         executeCgi(const char **scriptName, const std::string & body, char **env);
+    void                                                findLocation(std::string const &, Server const &, Request const &);
+    bool                                                buildRessourcePath(std::string const &, Location const &);
+    void                                                buildErrorResponse(Server const & server);
+    void                                                buildGetResponse(Request const & request, Server const & server);
+    void                                                buildPostResponse(Request const & request, Server const & server);
+    void                                                buildDeleteResponse(Request const & request, Server const & server);
+    void                                                buildFileFD();
+    bool                                                findIndex(std::string current_directory, Location const &location);
+    std::vector<std::string>                            findAlternativeMatches(std::string current_path);
+    bool                                                chooseAcceptableFile(std::vector<std::string>);
+    std::vector<std::map<std::string, std::string>>     parseAcceptableMIMETypes();
+    std::vector<std::map<std::string, std::string>>     parseAcceptableLanguages();
+    std::vector<std::map<std::string, std::string>>     buildTypeMap(std::vector<std::string> options);
+    void                                                addDate();
+    void                                                addLastModifiedDate();
+    std::string                                         executeCgi(const char **scriptName, const std::string & body, char **env);
     
 public:
     Response(Request const & request, Server const & server);

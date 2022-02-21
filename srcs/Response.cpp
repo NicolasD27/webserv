@@ -163,33 +163,6 @@ void Response::buildGetResponse(Request const & request, Server const & server)
     }
     else
     {
-        if (_status == 0)
-        {
-            if (!pathIsDir(_ressource_path))
-            {
-                if(pathIsFile(_ressource_path))
-                {
-                    _ressource_fd = open(_ressource_path.c_str(), O_NONBLOCK);
-                    if (_ressource_fd == -1)
-                    {
-                        _to_send = true;
-                        _status = 403;
-                    }
-                    else
-                    {
-                        _to_send = false;
-                        _status = 200;
-                    }
-                }
-                else
-                {
-                    _to_send = true;
-                    _status = 404;
-                }
-            }
-            else
-                _status = buildAutoIndex();
-        }
         if (_status != 200)
             buildErrorResponse(server);
         else
@@ -248,35 +221,12 @@ bool Response::buildRessourcePath(std::string const &locRequest, Location const 
 {
     std::string current_directory = getWorkingPath();
     std::string file_testing;
-    bool        find_index = false;
 
     _ressource_path = location.getRoot() + "/" + locRequest.substr(location.getPath().length() + ((locRequest.substr(location.getPath().length()).front() == '/') ? 1 : 0));
     _status = 0;
     if (locRequest.back() == '/')
     {
-        _headers.insert(std::make_pair("Content-type", "text/html; charset=utf-8"));
-        std::stack<std::string,std::vector<std::string> > index(location.getIndex());
-        while (!index.empty())
-        {
-            file_testing = current_directory+"/"+_ressource_path+index.top();
-
-            std::cout << "Testing : "<< file_testing << " ... ";
-            std::ifstream ifs(file_testing);
-            if(ifs.good())
-            {
-                _ressource_path += index.top();
-                find_index = true;
-                std::cout << C_GREEN << "Found" << C_RESET << std::endl;
-                break;
-            }
-            else
-            {
-                std::cout << C_RED << " Not Found" << C_RESET << std::endl;
-            }
-            index.pop();
-        }
-        if(!find_index && !location.isAutoindex())
-            _status = 404;
+        return findIndex(current_directory, location);
     }
     else
     {   
@@ -286,13 +236,305 @@ bool Response::buildRessourcePath(std::string const &locRequest, Location const 
         if(pathIsDir(file_testing))
         {
             std::cout << "Yes\n";
-            _ressource_path += "/";
+            if (_ressource_path.back() != '/')
+                _ressource_path += "/";
             _status = 301;
         }
         else
+        {
             std::cout << "No\n";
+            if(pathIsFile(_ressource_path))
+            {
+                buildFileFD();
+            }
+            else
+            {
+
+                std::vector<std::string> options = findAlternativeMatches(_ressource_path);
+                if (options.size() > 0 && chooseAcceptableFile(options))
+                {
+                    std::cout << "file found !!" << std::endl;
+                    buildFileFD();
+                    return false;
+                }
+                _to_send = true;
+                _status = 404;
+            }
+        }
     }
-    return find_index;
+    return false;
+}
+
+std::vector<std::string> Response::findAlternativeMatches(std::string current_path)
+{
+    int last_slash = current_path.find_last_of('/');
+    std::vector<std::string> options;
+    if (last_slash != std::string::npos)
+    {
+        std::string relative_path = current_path.substr(0, last_slash + 1);
+        std::string abs_path_dir = getWorkingPath() + "/" + relative_path;
+        std::cout << "rel path "<< relative_path << std::endl << "abs path " << abs_path_dir << std::endl;
+        std::string file = current_path.substr(last_slash + 1);
+        DIR *dir;
+        struct dirent *ent;
+        if ((dir = opendir (abs_path_dir.c_str())) != NULL)
+        {
+            while ((ent = readdir (dir)) != NULL)
+            {
+                std::string alternative_file(ent->d_name);
+                if (ent->d_type == DT_REG && alternative_file.length() > file.length()
+                    && file == alternative_file.substr(0, file.length()) && alternative_file.at(file.length()) == '.')
+                    options.push_back(relative_path + alternative_file);
+                
+            }
+            closedir (dir);
+        }
+    }
+    return options;
+}
+
+bool Response::chooseAcceptableFile(std::vector<std::string> options)
+{
+    MimesType mime_types;
+    int fitness;
+    int best_fitness;
+    float best_quality_type = -1;
+    float best_fitness_one_type;
+    float best_quality_lang = -1;
+    float best_fitness_one_lang;
+    float best_quality_one_type;
+    float best_quality_one_lang;
+    std::string best_match;
+    std::string quality;
+    std::vector<std::map<std::string, std::string>> type_map = buildTypeMap(options);
+    
+    // std::vector<std::string> parsed_langs = split(_pt_request->getHeaders()["Accept-Language"], ",");
+
+    std::vector<std::map<std::string, std::string>> target_types = parseAcceptableMIMETypes();
+    std::vector<std::map<std::string, std::string>> target_langs = parseAcceptableLanguages();
+    
+    best_match = "";
+    
+    for (std::vector<std::map<std::string, std::string>>::iterator it = type_map.begin(); it != type_map.end(); ++it)
+    {
+        best_fitness_one_type = -1;
+        best_quality_one_type = -1;
+        for (std::vector<std::map<std::string, std::string>>::iterator ite = target_types.begin(); ite != target_types.end(); ++ite)
+        {
+            fitness = 0;
+            std::cout << "testing : " << it->at("path") << std::endl << it->at("type") << "/" << it->at("subtype") << std::endl;
+            std::cout << "with : " << ite->at("type") << "/" << ite->at("subtype") << " q=" << ite->at("q") << std::endl;
+            if ((it->at("type") == ite->at("type") || ite->at("type") == "*") && (it->at("subtype") == ite->at("subtype") || ite->at("subtype") == "*"))
+            {
+                fitness += (it->at("type") == ite->at("type")) ? 100 : 0;
+                fitness += (it->at("subtype") == ite->at("subtype")) ? 10 : 0;
+                std::cout << "fitness : " << fitness << std::endl;
+                if (fitness > best_fitness_one_type)
+                {
+                    best_fitness_one_type = fitness;
+                    best_quality_one_type = StringToFloat(ite->at("q"));
+                }
+            }
+        }
+        best_fitness_one_lang = -1;
+        best_quality_one_lang = -1;
+        for (std::vector<std::map<std::string, std::string>>::iterator ite = target_langs.begin(); ite != target_langs.end(); ++ite)
+        {
+            fitness = 0;
+            std::cout << "testing : " << it->at("path") << std::endl << it->at("lang")  << std::endl;
+            std::cout << "with : " << ite->at("lang")  << " q=" << ite->at("q") << std::endl;
+            if (it->at("lang") == ite->at("lang") || ite->at("lang") == "*")
+            {
+                fitness += (it->at("lang") == ite->at("lang")) ? 10 : 0;
+                std::cout << "fitness : " << fitness << std::endl;
+                if (fitness > best_fitness_one_lang)
+                {
+                    best_fitness_one_lang = fitness;
+                    best_quality_one_lang = StringToFloat(ite->at("q"));
+                }
+            }
+        }
+        if (best_quality_one_type > best_quality_type)
+        {
+            best_quality_type = best_quality_one_type;
+            best_quality_lang = best_quality_one_lang;
+            best_match = it->at("path");
+        }
+        else if (best_quality_one_type == best_quality_type)
+        {
+            if (best_quality_one_lang > best_quality_lang)
+            {
+                best_quality_lang = best_quality_one_lang;
+                best_match = it->at("path");
+            }
+        }
+    }
+    if (best_quality_type != -1)
+    {
+        _ressource_path = best_match;
+        return true;
+    }
+    return false;
+
+}
+
+std::vector<std::map<std::string, std::string>> Response::parseAcceptableMIMETypes()
+{
+    std::string quality;
+    std::vector<std::map<std::string, std::string>> target_types;
+    std::vector<std::string> parsed_types = split(_pt_request->getHeaders()["Accept"], ",");
+
+    for (std::vector<std::string>::iterator it = parsed_types.begin(); it != parsed_types.end(); ++it)
+    {
+        std::map<std::string, std::string> target_type;
+        std::vector<std::string> type_quality = split(*it, ";");
+        std::vector<std::string> types = split(trim(type_quality.at(0)), "/");
+        target_type.insert(std::make_pair("type", types.at(0)));
+        target_type.insert(std::make_pair("subtype", types.at(1)));
+        if (type_quality.size() >= 2)
+        {
+            for (std::vector<std::string>::iterator ite = type_quality.begin(); ite != type_quality.end(); ++ite)
+            {
+                if (trim(*ite)[0] == 'q')
+                {
+                    std::vector<std::string> params = split(trim(*ite), "=");
+                    if (StringToFloat(params.at(1)) < 0 || StringToFloat(params.at(1)) > 1)
+                        quality = "1";
+                    else
+                        quality = trim(params[1]);
+                }
+            }
+            
+        }
+        else
+            quality = "1";
+        target_type.insert(std::make_pair("q", quality));
+        target_types.push_back(target_type);
+    }
+    return target_types;
+}
+
+std::vector<std::map<std::string, std::string>> Response::parseAcceptableLanguages()
+{
+    std::string quality;
+    std::vector<std::map<std::string, std::string>> target_langs;
+    std::vector<std::string> parsed_langs = split(_pt_request->getHeaders()["Accept-Language"], ",");
+
+    for (std::vector<std::string>::iterator it = parsed_langs.begin(); it != parsed_langs.end(); ++it)
+    {
+        std::map<std::string, std::string> target_lang;
+        std::vector<std::string> lang_quality = split(*it, ";");
+        target_lang.insert(std::make_pair("lang", lang_quality.at(0)));
+        if (lang_quality.size() >= 2)
+        {
+            for (std::vector<std::string>::iterator ite = lang_quality.begin(); ite != lang_quality.end(); ++ite)
+            {
+                if (trim(*ite)[0] == 'q')
+                {
+                    std::vector<std::string> params = split(trim(*ite), "=");
+                    if (StringToFloat(params.at(1)) < 0 || StringToFloat(params.at(1)) > 1)
+                        quality = "1";
+                    else
+                        quality = trim(params[1]);
+                }
+            }
+            
+        }
+        else
+            quality = "1";
+        target_lang.insert(std::make_pair("q", quality));
+        target_langs.push_back(target_lang);
+    }
+    return target_langs;
+}
+
+std::vector<std::map<std::string, std::string>> Response::buildTypeMap(std::vector<std::string> options)
+{
+    std::vector<std::map<std::string, std::string>> type_map;
+    LanguageCodes language_codes;
+    MimesType mime_types;
+    int point_pos;
+    std::string extensions_string;
+    std::vector<std::string> extensions;
+
+
+    for(std::vector<std::string>::iterator it = options.begin(); it != options.end(); ++it)
+    {
+        std::map<std::string, std::string> file_map;
+        file_map.insert(std::make_pair("path", *it));
+        point_pos = it->find_first_of('.');
+        extensions_string = it->substr(point_pos + 1);
+        extensions = split(extensions_string, ".");
+        file_map["lang"] = "";
+        file_map["type"] = "";
+        file_map["subtype"] = "";
+        for (std::vector<std::string>::iterator ite = extensions.begin(); ite != extensions.end(); ++ite)
+        {
+            if (language_codes.langExist(*ite))
+                file_map["lang"] = *ite;
+            if (mime_types.typeExist(*ite))
+            {
+                std::vector<std::string> mime_type = split(mime_types.getType(*ite), "/");
+                file_map["type"] = mime_type.at(0);
+                file_map["subtype"] = mime_type.at(1);
+            }
+
+        }
+        type_map.push_back(file_map);
+    }
+    return type_map;
+}
+
+bool Response::findIndex(std::string current_directory, Location const &location)
+{
+    std::string file_testing;
+
+    std::stack<std::string,std::vector<std::string> > index(location.getIndex());
+    while (!index.empty())
+    {
+        file_testing = current_directory + "/" +_ressource_path + index.top();
+
+        std::cout << "Testing : "<< file_testing << " ... ";
+        std::ifstream ifs(file_testing);
+        if(ifs.good())
+        {
+            _ressource_path += index.top();
+            buildFileFD();
+            std::cout << C_GREEN << "Found" << C_RESET << std::endl;
+            return true;
+        }
+        else
+        {
+            std::cout << C_RED << " Not Found" << C_RESET << std::endl;
+            std::vector<std::string> options = findAlternativeMatches(_ressource_path + index.top());
+            if (options.size() > 0 && chooseAcceptableFile(options))
+            {
+                buildFileFD();
+                return true;
+            }
+        }
+        index.pop();
+    }
+    if(location.isAutoindex())
+        _status = buildAutoIndex();
+    else
+        _status = 404;
+    return false;
+}
+
+void Response::buildFileFD()
+{
+    _ressource_fd = open(_ressource_path.c_str(), O_NONBLOCK);
+    if (_ressource_fd == -1)
+    {
+        _to_send = true;
+        _status = 403;
+    }
+    else
+    {
+        _to_send = false;
+        _status = 200;
+    }
 }
 
 void Response::parseExtension()

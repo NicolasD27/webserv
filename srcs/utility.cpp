@@ -10,6 +10,16 @@ int StringToInt ( std::string value )
     return num;
 }
 
+float StringToFloat ( std::string value )
+{
+    float num;
+    if (value.length() == 0)
+        return 0;
+    std::istringstream ss(value);
+    ss >> num;
+    return num;
+}
+
 int StringHexaToInt( std::string value)
 {
     int y;

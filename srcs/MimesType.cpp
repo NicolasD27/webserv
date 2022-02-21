@@ -30,6 +30,15 @@ MimesType::~MimesType(void)
     _mimeType.clear();
 }
 
+
+bool MimesType::typeExist(std::string type)
+{
+    if(type.length() == 0 || _mimeType.count(type) == 0)
+        return false;
+    else
+        return true;
+}
+
 MimesType::MimesType()
 {
     _mimeType["*3gpp"] = "audio/3gpp";
