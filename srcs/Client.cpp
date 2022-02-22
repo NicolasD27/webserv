@@ -50,7 +50,7 @@ Client      &Client::operator=(Client const &cpy)
 
 int Client::getSocket() const { return _socket; }
 
-Server const & Client::getServer() const { return *_server; }
+// Server const & Client::getServer() const { return *_server; }
 
 std::vector<Response*>::iterator Client::getBeginResponseToBuild() { return _responses_to_build.begin(); }
 std::vector<Response*>::iterator Client::getEndResponseToBuild() { return _responses_to_build.end(); }
@@ -77,11 +77,11 @@ void Client::switchToSendQueue(Response* response)
 
 bool Client::setup(Server * server)
 {
-    _server = server->clone();
+    _server_socket = server->getSocket();
     struct sockaddr_in address;
     memset(&address, 0, sizeof(address));
     socklen_t client_len = sizeof(address);
-    int new_client_sock = accept(_server->getSocket(), (struct sockaddr *)&address, &client_len);
+    int new_client_sock = accept(_server_socket, (struct sockaddr *)&address, &client_len);
     if (new_client_sock < 0)
         return false;
     char client_ipv4[INET_ADDRSTRLEN];
@@ -98,7 +98,7 @@ bool Client::setup(Server * server)
 
 bool Client::receiveFromClient(std::vector<Server*> servers, int max_body_size)
 {
-    int r;
+    int r = 0;
     int content_length;
     int newline_pos = -1;
     int prev_newline_pos;
@@ -108,6 +108,7 @@ bool Client::receiveFromClient(std::vector<Server*> servers, int max_body_size)
     int headers_length;
     Request *request;
     std::string request_string;
+    Response* response;
     
     if (!_headers_read)
     {
@@ -125,7 +126,13 @@ bool Client::receiveFromClient(std::vector<Server*> servers, int max_body_size)
             _current_receiving_byte = 0;
             _receiving_buff[0] = 0;
             _headers_read = false;
-            Response* response = new Response(414, *_server);
+            for (std::vector<Server*>::iterator it = servers.begin(); it != servers.end(); ++it)
+                if ((*it)->getSocket() == _server_socket)
+                {
+                    response = new Response(414, **it);
+                    break;
+                }
+                    
             if (response->isToSend())
                 _responses_to_send.push(response);
             else
@@ -162,7 +169,6 @@ bool Client::receiveFromClient(std::vector<Server*> servers, int max_body_size)
         _body_read = (r < 0) ? false : true;
         request->addToBody(std::string(_receiving_buff, content_length + newline_pos + 4).substr(newline_pos + 4));
     }
-    
     if (request_string.length() == 0)
     {
         std::cout << "removing client : " << _socket  << std::endl;
@@ -174,7 +180,7 @@ bool Client::receiveFromClient(std::vector<Server*> servers, int max_body_size)
     }
     if (_body_read)
     {
-        request_string = std::string(_receiving_buff, content_length);
+        // request_string = std::string(_receiving_buff, content_length);
         // std::cout << "request finished : " << request_string << "|" << std::endl;
         // std::cout << "buffer : " << std::endl;
         // for (int i = 0; i < content_length; i++)
@@ -183,14 +189,19 @@ bool Client::receiveFromClient(std::vector<Server*> servers, int max_body_size)
         //     // if (_receiving_buff[i] == 0)
         //     //     std::cout << "0";
         // }
-        std::cout << std::endl;
-        std::cout << "from client : " << _socket  << std::endl;
+        // std::cout << std::endl;
+        // std::cout << "from client : " << _socket  << std::endl;
         _current_receiving_byte = 0;
         _receiving_buff[0] = 0;
         _headers_read = false;
         findMatchingServer(servers, *request);
         std::cout << *request << std::endl;
-        Response* response = new Response(*request, *_server);
+        for (std::vector<Server*>::iterator it = servers.begin(); it != servers.end(); ++it)
+                if ((*it)->getSocket() == _server_socket)
+                {
+                    response = new Response(*request, **it);
+                    break;
+                }
         if (response->isToSend())
             _responses_to_send.push(response);
         else
@@ -257,13 +268,13 @@ void Client::findMatchingServer(std::vector<Server*> servers, Request & request)
         return;
     for (std::vector<Server*>::iterator it = servers.begin(); it != servers.end(); ++it)
     {
-        if ((*it)->getSocket() == _server->getSocket() )
+        if ((*it)->getSocket() == _server_socket )
         {
             for (std::vector<std::string>::iterator ite = (*it)->getBeginServerNames(); ite != (*it)->getEndServerNames(); ++ite)
             {
                 if (*ite == request["Host"])
                 {
-                    _server = *it;
+                    _server_socket = (*it)->getSocket();
                     if (request.getLocation().substr(0, 7) == "http://")
                         request.setLocation(request.getLocation().substr(7 + request["Host"].length()));
                     return;

@@ -66,7 +66,13 @@ Response::Response(Response const & src)
 
 void Response::buildDeleteResponse(Request const & request, Server const & server)
 {
-    findLocation(request.getLocation(), server, request);
+    if (handleDots(request.getLocation()))
+    {
+        std::cout << "dots error" << std::endl;
+        _status = 404;
+        return;
+    }
+    findLocation(server, request);
     if (!_location_block)
         _status = 405; // méthode interdite
     else 
@@ -105,8 +111,13 @@ void Response::buildDeleteResponse(Request const & request, Server const & serve
 void Response::buildPostResponse(Request const & request, Server const & server)
 {
     
-    std::cout << request.getBody();
-    findLocation(request.getLocation(), server, request);
+    if (handleDots(request.getLocation()))
+    {
+        std::cout << "dots error" << std::endl;
+        _status = 404;
+        return;
+    }
+    findLocation(server, request);
     if (!_location_block)
         _status = 405; // méthode interdite
     else 
@@ -144,9 +155,15 @@ void Response::buildPostResponse(Request const & request, Server const & server)
 
 void Response::buildGetResponse(Request const & request, Server const & server)
 {
-    findLocation(request.getLocation(), server, request);
+    if (handleDots(request.getLocation()))
+    {
+        std::cout << "dots error" << std::endl;
+        _status = 404;
+        return;
+    }
+    findLocation(server, request);
     if (!_location_block)
-        _status = 405; // méthode interdite
+        _status = ( _status == 0) ? 405 : _status; // méthode interdite
     else 
         _location_block->print();
     _cgi_path = server.getCgiPath();
@@ -185,7 +202,6 @@ void Response::buildErrorResponse(Server const & server)
                 if (*ite == _status)
                 {
                     _ressource_path = it->second;
-                    std::cout << "error here " << _ressource_path << std::endl;
                     _headers.insert(std::make_pair("Content-type", "text/html"));
                     _to_send = false;
                     _ressource_fd = open(_ressource_path.c_str(), 0);
@@ -220,7 +236,7 @@ std::string Response::buildResponseString()
 
 
 
-bool Response::buildRessourcePath(std::string const &locRequest, Location const &location)
+bool Response::buildRessourcePath(std::string locRequest, Location const &location)
 {
     std::string current_directory = getWorkingPath();
     std::string file_testing;
@@ -246,8 +262,7 @@ bool Response::buildRessourcePath(std::string const &locRequest, Location const 
         else
         {
             std::cout << "No\n";
-            // if (tooMuchDots(_ressource_path))
-            //     _status = 404;
+            
             if(pathIsFile(_ressource_path))
             {
                 buildFileFD();
@@ -270,19 +285,33 @@ bool Response::buildRessourcePath(std::string const &locRequest, Location const 
     return false;
 }
 
-// bool Response::tooMuchDots(std::string path)
-// {
-//     int double_dots = 0;
-//     int point_pos = -1;
-//     while ((point_pos = path.find_first_of('.') != std::string::npos))
-//     {
-//         if (point_pos < path.length() - 1 && path[point_pos + 1] == '.' && (point_pos < path.length() - 2 && path[point_pos + 1] == '/') || point_pos == path.length() - 2)
-//         {
-//             double_dots += 1;
-//         }
-//     }
-//     return false;
-// }
+bool Response::handleDots(std::string path)
+{
+    int double_dots = 0;
+    int depth = 0;
+    int point_pos = 0;
+    int i;
+    int slash_pos = path.find_first_of('/');
+
+    while ((point_pos = path.find_first_of('.', point_pos)) != std::string::npos)
+    {
+        if (slash_pos + 1 == point_pos)
+        {
+            _ressource_path = path;
+            return true;
+        }
+        if ((point_pos + 2 < path.length() && path.substr(point_pos - 1, 4) == "/../") || (path.substr(point_pos - 1, 3) == "/.." && point_pos + 2 == path.length()))
+        {
+            path = path.substr(0, slash_pos + 1) + path.substr(point_pos + ((point_pos + 2 < path.length()) ? 3 : 2));
+            point_pos = slash_pos + 1;
+        }
+        else
+            point_pos += 2;
+    }
+    _ressource_path = path;
+    return false;
+}
+
 
 std::vector<std::string> Response::findAlternativeMatches(std::string current_path)
 {
@@ -673,6 +702,7 @@ void Response::addLastModifiedDate()
 
 Response::~Response()
 {
+    delete _pt_request;
 }
 
 Response      &Response::operator=(Response const &cpy)
@@ -735,25 +765,24 @@ void                    Response::printHeaders(std::ostream & o)
     }
 }
 
-void Response::findLocation(std::string const & uri, Server const & server, Request const & request)
+void Response::findLocation(Server const & server, Request const & request)
 {
     std::vector<Location*> locations = server.getLocations();
+
     
     for (std::vector<Location*>::iterator it = locations.begin(); it != locations.end(); ++it)
     {
-            std::cout << "loc path : " << (*it)->getPath() << "  uri : " << uri.substr(0, (*it)->getPath().length()) << std::endl;
-        if ((*it)->getPath() == uri.substr(0, (*it)->getPath().length()))
+        if ((*it)->getPath() == _ressource_path.substr(0, (*it)->getPath().length()))
         {
             if ((*it)->hasMethod(request.getHttpMethod()))
             {
-                std::cout << "here" << std::endl;
                 _location_block = *it;
                 if (request.getHttpMethod() == "DELETE")
-                    _ressource_path = _location_block->getRoot() + "/" + request.getLocation().substr(_location_block->getPath().length() + ((request.getLocation().substr(_location_block->getPath().length()).front() == '/') ? 1 : 0));
+                    _ressource_path = _location_block->getRoot() + "/" + _ressource_path.substr(_location_block->getPath().length() + ((_ressource_path.substr(_location_block->getPath().length()).front() == '/') ? 1 : 0));
                 else if (_location_block->getRedirectionCode() != 0)
                     return;
-                else if (buildRessourcePath(request.getLocation(), **it))
-                    findLocation(_ressource_path, server, request);
+                else if (buildRessourcePath(_ressource_path, **it))
+                    findLocation(server, request);
                 return;
             }
         }
