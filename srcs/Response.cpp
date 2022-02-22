@@ -312,7 +312,6 @@ bool Response::handleDots(std::string path)
     return false;
 }
 
-
 std::vector<std::string> Response::findAlternativeMatches(std::string current_path)
 {
     int last_slash = current_path.find_last_of('/');
