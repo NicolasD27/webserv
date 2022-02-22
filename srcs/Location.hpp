@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/11 14:45:49 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/20 18:12:51 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/22 10:57:55 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include <vector>
 #include "Colors.hpp"
 #include "utility.hpp"
+#include "file_utils.hpp"
 
 class Location
 {
@@ -31,6 +32,7 @@ class Location
         std::string                 _redir_url;
         int                         _redir_code;
         std::vector<std::string>    _extensions;
+        std::string                 _uploadDir;
 
     public:
         Location(void);
@@ -49,6 +51,7 @@ class Location
         std::vector<std::string>    getIndex(void) const;
         std::string                 getRoot(void) const;
         std::string                 getCgiPath(void) const;
+        std::string                 getUploadDir(void) const;
         bool                        isAutoindex(void) const;
         int                         getRedirectionCode(void) const;
         std::string                 getRedirectionURL(void) const;
@@ -56,6 +59,7 @@ class Location
     
         void                        setPath(std::string const &);
         void                        setAutoIndex(bool);
+        void                        setUploadDir(std::string const &);
 
         bool                        isValid(void) const;
         bool                        hasMethod(std::string) const;
