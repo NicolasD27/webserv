@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/11 14:51:26 by clorin            #+#    #+#             */
-/*   Updated: 2022/02/21 10:42:53 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/22 10:58:44 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ Location::Location(void) : _autoIndex(false), _redir_code(0) {}
 Location::Location(Location const &cpy) { *this = cpy;}
 
 Location::Location(std::string path, std::vector<std::string> index, std::string root, bool autoIndex, std::vector<std::string> methods, std::string cgi_path):
-_path(path), _index(index), _root(root), _autoIndex(autoIndex), _methods(methods), _cgi_path(cgi_path), _redir_code(0)
+_path(path), _index(index), _root(root), _autoIndex(autoIndex), _methods(methods), _cgi_path(cgi_path), _redir_code(0), _uploadDir(path)
 {}
 
 Location &Location::operator=(Location const &cpy)
@@ -33,6 +33,7 @@ Location &Location::operator=(Location const &cpy)
         _extensions = cpy._extensions;
         _redir_code = cpy._redir_code;
         _redir_url = cpy._redir_url;
+        _uploadDir = cpy._uploadDir;
     }
     return *this;
 };
@@ -54,6 +55,8 @@ std::string                 Location::getRoot() const {return _root;};
 
 std::string                 Location::getCgiPath() const {return _cgi_path;}
 
+std::string                 Location::getUploadDir() const {return _uploadDir;}
+
 bool                        Location::isAutoindex(void) const {return(_autoIndex);}
 
 int                         Location::getRedirectionCode(void) const { return _redir_code;}
@@ -63,6 +66,11 @@ std::string                 Location::getRedirectionURL(void) const { return _re
 void            Location::setPath(std::string const &path)
 {
     this->_path = path;
+}
+
+void            Location::setUploadDir(std::string const &dir)
+{
+    this->_uploadDir = dir;
 }
 
 void            Location::setAutoIndex(bool autoIndex)
@@ -79,6 +87,10 @@ void            Location::storeLine(std::string const & key, std::string & value
         if (value.back() == '/')
             value.pop_back();
         _root = value;
+    }
+    else if (key == "upload_dir")
+    {
+        _uploadDir = getWorkingPath() + "/" + value;
     }
 }
 

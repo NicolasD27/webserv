@@ -1,9 +1,9 @@
 <?php
-$target_dir = "/home/clorin/programmation/42/webserv/uploads/";
-$target_file = $target_dir . basename($_FILES["avatar"]["name"]);
+$target_dir = $_SERVER['UPLOAD_DIR'];
+$target_file = $target_dir."/". basename($_FILES["avatar"]["name"]);
 $uploadOk = 1;
 $imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
-echo $_FILES["avatar"]["tmp_name"]." -> ".$target_file;
+//echo $_FILES["avatar"]["tmp_name"]." -> ".$target_file;
 // Check if file already exists
 
 if (file_exists($target_file)) {

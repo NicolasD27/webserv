@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/19 22:40:48 by clorin            #+#    #+#             */
-/*   Updated: 2022/02/22 09:25:28 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/22 10:50:03 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,8 @@ CGIHandler::~CGIHandler(){}
 {
 	std::map<std::string, std::string>	headers_response = response->getHeaders();
 	std::map<std::string, std::string>	headers_request = request->getHeaders();
+	Location							*location = response->getLocationBlock();
+
 
 	_env["SERVER_PROTOCOL"] = "HTTP/1.1";
 	_env["SERVER_SOFTWARE"] = "webserv";
@@ -86,6 +88,7 @@ CGIHandler::~CGIHandler(){}
 	_env["SCRIPT_NAME"] = response->getRessourcePath();
 	_env["REQUEST_URI"] = response->getRessourcePath();
 	_env["REDIRECT_STATUS"] = "200";
+	_env["UPLOAD_DIR"] = location->getUploadDir();
 }
 
 char					**CGIHandler::getEnv() const
