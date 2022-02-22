@@ -41,8 +41,8 @@
 	<body>
 		<p>Réponse du Formulaire POST ! </p>	
 		<?php
-			//echo "ici".$_POST["say"];
-			phpinfo();
+			echo "<p>".$_POST["say"]." à ".$_POST["to"]."</p>";
+			 phpinfo();
 		?>
 	</body>
 </html>

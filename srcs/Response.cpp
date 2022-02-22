@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/19 22:28:13 by clorin            #+#    #+#             */
-/*   Updated: 2022/02/21 12:25:50 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/21 15:37:27 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -270,19 +270,19 @@ bool Response::buildRessourcePath(std::string const &locRequest, Location const 
     return false;
 }
 
-bool Response::tooMuchDots(std::string path)
-{
-    int double_dots = 0;
-    int point_pos = -1;
-    while ((point_pos = path.find_first_of('.') != std::string::npos))
-    {
-        if (point_pos < path.length() - 1 && path[point_pos + 1] == '.' && (point_pos < path.length() - 2 && path[point_pos + 1] == '/') || point_pos == path.length() - 2)
-        {
-            double_dots += 1;
-        }
-    }
-    return false;
-}
+// bool Response::tooMuchDots(std::string path)
+// {
+//     int double_dots = 0;
+//     int point_pos = -1;
+//     while ((point_pos = path.find_first_of('.') != std::string::npos))
+//     {
+//         if (point_pos < path.length() - 1 && path[point_pos + 1] == '.' && (point_pos < path.length() - 2 && path[point_pos + 1] == '/') || point_pos == path.length() - 2)
+//         {
+//             double_dots += 1;
+//         }
+//     }
+//     return false;
+// }
 
 std::vector<std::string> Response::findAlternativeMatches(std::string current_path)
 {

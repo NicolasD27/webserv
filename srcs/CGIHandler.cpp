@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/19 22:40:48 by clorin            #+#    #+#             */
-/*   Updated: 2022/02/18 20:09:58 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/22 09:25:28 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,6 +85,7 @@ CGIHandler::~CGIHandler(){}
 	_env["REMOTE_USER"] = headers_request["Authorization"];
 	_env["SCRIPT_NAME"] = response->getRessourcePath();
 	_env["REQUEST_URI"] = response->getRessourcePath();
+	_env["REDIRECT_STATUS"] = "200";
 }
 
 char					**CGIHandler::getEnv() const
@@ -129,7 +130,7 @@ std::string		CGIHandler::executeCgi(const char **scriptName, const std::string &
         std::cout << "\t"<< C_YELLOW << it->first << C_RESET<<": "<< C_CYAN << it->second << C_RESET<< std::endl;
     }
 	std::cout << C_CYAN << "\tBody = " << C_RESET << ((_body.empty())? "Empty":_body)<< std::endl;
-	
+
 	write(fdIn, _body.c_str(), _body.size());
 	lseek(fdIn, 0, SEEK_SET);
 	
