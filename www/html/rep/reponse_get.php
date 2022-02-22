@@ -43,7 +43,8 @@
 		<p>Réponse du Formulaire GET ! </p>
 		<?php
 			$query = proper_parse_str($_SERVER['QUERY_STRING']);
-			echo "<p>".$query['say']." à ".$query['to']."</p>";
+			echo "<p>Avec parser perso : ".$query['say']." à ".$query['to']."</p>";
+			echo "<p>Avec variable $_GET : ".$_GET["say"]." à ".$_GET["to"]."</p>";
 		?>
 	</body>
 </html>
