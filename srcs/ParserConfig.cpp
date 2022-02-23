@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/11 10:42:37 by clorin            #+#    #+#             */
-/*   Updated: 2022/02/21 10:36:25 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/23 08:30:44 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,7 @@ bool ParserConfig::check_block(std::ifstream &buff, std::vector<Server*> &server
                     default_loc->addMethods(tokens);
                 else if (tokens[0] == "cgi")
                     default_loc->addCgi(tokens);
-                else if (tokens[0] == "root" || tokens[0] == "autoindex")
+                else if (tokens[0] == "root" || tokens[0] == "autoindex" || tokens[0] == "upload_dir" )
                     default_loc->storeLine(tokens[0], tokens[1]);
                 else
                     new_server->storeLine(tokens[0], tokens[1]);

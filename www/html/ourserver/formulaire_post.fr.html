@@ -1,0 +1,31 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+	<head>
+		<meta charset="UTF-8">
+		<title>Formulaire par méthode POST</title>
+		<link href="css/style.css" rel="stylesheet">
+	</head>
+	<body>
+		<h1>Formulaire par la méthode POST ! </h1>
+		<form action="reponse_post" method="POST">
+			<div>
+				<label for="say">Quelle salutation voulez-vous dire ?</label>
+				<select name="say" id="say">
+    				<option value="">--choisissez votre option--</option>
+    				<option value="Bonjour">Bonjour</option>
+    				<option value="Bonne soirée">Bonne soirée"</option>
+    				<option value="Bonne nuit">Bonne nuit</option>
+    				<option value="Je t'aime">Je t'aime</option>
+				</select>
+			</div>
+			<div>
+			  <label for="to">A qui voulez-vous le dire ?</label>
+			  <input name="to" id="to" value="Maman">
+			</div>
+			<div>
+			  <button>Envoyer mes salutations</button>
+			</div>
+		  </form>		  
+	</body>
+</html>

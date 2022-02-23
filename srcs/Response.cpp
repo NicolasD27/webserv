@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/19 22:28:13 by clorin            #+#    #+#             */
-/*   Updated: 2022/02/21 15:37:27 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/23 13:15:43 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -601,6 +601,7 @@ unsigned int Response::buildAutoIndex()
 {
     DIR *dir;
     struct dirent *ent;
+    _headers.insert(std::make_pair("Content-type", "text/html"));
     std::string current_directory = getWorkingPath();
     //std::cout << "current_directory au départ = " << current_directory<<"\n";
     //current_directory += "/" + _pt_server->getRoot() + "/" + ((_pt_request->getLocation().length() == 1) ? "" : _pt_request->getLocation());

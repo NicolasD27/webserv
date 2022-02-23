@@ -1,13 +1,14 @@
 <?php
 $target_dir = $_SERVER['UPLOAD_DIR'];
-$target_file = $target_dir."/". basename($_FILES["avatar"]["name"]);
+$target_file = $target_dir."/". basename($_FILES["file"]["name"]);
 $uploadOk = 1;
 $imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
-//echo $_FILES["avatar"]["tmp_name"]." -> ".$target_file;
+//echo $_FILES["file"]["tmp_name"]." -> ".$target_file;
 
 if (!file_exists($target_dir) && !is_dir($target_dir)) 
 {
-  echo "<p>Sorry, The directory [".$target_dir."] does not exist.</p>";   
+  echo "<p>Désolé, le répertoire [".$target_dir."] n'existe pas.</p>";   
+  //echo "<p>Sorry, The directory [".$target_dir."] does not exist.</p>";   
   $uploadOk = 0;    
 }
 
@@ -19,7 +20,7 @@ if (file_exists($target_file)) {
 }
 
 // Check file size
-if ($_FILES["avatar"]["size"] > 500000) {
+if ($_FILES["file"]["size"] > 500000) {
   echo "Sorry, your file is too large.";
   $uploadOk = 0;
 }
@@ -37,11 +38,11 @@ if ($uploadOk == 0) {
   echo "Sorry, your file was not uploaded.";
 // if everything is ok, try to upload file
 } else {
-  if (move_uploaded_file($_FILES["avatar"]["tmp_name"], $target_file)) {
-    echo "<p>The file ". htmlspecialchars( basename( $_FILES["avatar"]["name"])). " has been uploaded.</p>";
+  if (move_uploaded_file($_FILES["file"]["tmp_name"], $target_file)) {
+    echo "<p>The file ". htmlspecialchars( basename( $_FILES["file"]["name"])). " has been uploaded.</p>";
   } else {
     echo "Sorry, there was an error uploading your file. ";
-    echo $_FILES["avatar"]["tmp_name"]." -> ".$target_file;
+    echo $_FILES["file"]["tmp_name"]." -> ".$target_file;
   }
 }
 ?>
