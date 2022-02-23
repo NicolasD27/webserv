@@ -1,4 +1,7 @@
 <?php
+	header_remove();
+	header('Content-Type: text/html');
+	header_remove('Content-Type');
 	function proper_parse_str($str) {
 	  # result array
 	  $arr = array();

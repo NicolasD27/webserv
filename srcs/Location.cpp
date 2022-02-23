@@ -40,9 +40,6 @@ Location &Location::operator=(Location const &cpy)
 
 Location::~Location()
 {
-    _methods.clear();
-    _index.clear();
-    _extensions.clear();
 }
 
 std::string                 Location::getPath() const {return(_path);}

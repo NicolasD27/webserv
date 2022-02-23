@@ -113,16 +113,20 @@ bool Client::receiveFromClient(std::vector<Server*> servers, int max_body_size)
     if (!_headers_read)
     {
         std::cout << "reading header..." << std::endl;
-        while ((newline_pos == -1 || newline_pos == std::string::npos) && (r = read(_socket, _receiving_buff + _current_receiving_byte, 1)) > 0 && _current_receiving_byte < MAX_SIZE)
+        while ((newline_pos == -1 || newline_pos == std::string::npos) && (r = read(_socket, _receiving_buff + _current_receiving_byte, 1)) > 0 && _current_receiving_byte < MAX_SIZE_HEADER)
         {
+            // if (_current_receiving_byte % 1000 == 0)
+            //     std::cout << _current_receiving_byte << std::endl;
+            // std::cout << _receiving_buff[_current_receiving_byte];
             _current_receiving_byte += r;
             _receiving_buff[_current_receiving_byte] = 0;
             newline_pos = std::string(_receiving_buff).find("\r\n\r\n");
         }
-        if (_current_receiving_byte >= MAX_SIZE)
+        std::cout << "header read" << std::endl;
+        if (_current_receiving_byte >= MAX_SIZE_HEADER)
         {
             std::cout << "headers too long" << std::endl;
-            while ((r = read(_socket, _receiving_buff , MAX_SIZE)) > 0); // finir de lire
+            // while ((r = read(_socket, _receiving_buff , MAX_SIZE)) > 0); // finir de lire
             _current_receiving_byte = 0;
             _receiving_buff[0] = 0;
             _headers_read = false;
@@ -150,7 +154,7 @@ bool Client::receiveFromClient(std::vector<Server*> servers, int max_body_size)
     }
     else
         newline_pos = _current_receiving_byte - 2;
-    request_string = std::string(_receiving_buff);
+    request_string = std::string(_receiving_buff, _current_receiving_byte);
     request = new Request(request_string);
     request->parseHeaders();
     request->setPortClient(_address.sin_port);
@@ -159,8 +163,9 @@ bool Client::receiveFromClient(std::vector<Server*> servers, int max_body_size)
     _body_read = true;
     if (request->headerExist("Transfer-Encoding") && !((*request)["Transfer-Encoding"].length() == 0 || (*request)["Transfer-Encoding"] == "identity"))
         readChunkedRequest(request, newline_pos, offset_newline, max_body_size);
-    else if (request->headerExist("Content-Length") && (content_length = StringToInt((*request)["Content-Length"])) > 0 && content_length < MAX_SIZE)
+    else if (request->headerExist("Content-Length") && (content_length = StringToInt((*request)["Content-Length"])) > 0 && content_length < MAX_SIZE - MAX_SIZE_HEADER - 4)
     {
+        std::cout << "reading body with content-length" << std::endl;
         while (_current_receiving_byte - headers_length < content_length && (r = recv(_socket, _receiving_buff + _current_receiving_byte, content_length - _current_receiving_byte + headers_length, MSG_DONTWAIT)) > 0)
         {
             _current_receiving_byte += r;

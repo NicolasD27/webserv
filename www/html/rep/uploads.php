@@ -1,4 +1,7 @@
 <?php
+header_remove();
+header('Content-Type: text/html');
+header_remove('Content-Type');
 $target_dir = $_SERVER['UPLOAD_DIR'];
 $target_file = $target_dir."/". basename($_FILES["avatar"]["name"]);
 $uploadOk = 1;
@@ -15,11 +18,11 @@ if (!file_exists($target_dir) && !is_dir($target_dir))
 
 if (file_exists($target_file)) {
   echo "<p>Sorry, file already exists.</p>";
-  $uploadOk = 0;
+  // $uploadOk = 0;
 }
 
 // Check file size
-if ($_FILES["avatar"]["size"] > 500000) {
+if ($_FILES["avatar"]["size"] > 2000000) {
   echo "Sorry, your file is too large.";
   $uploadOk = 0;
 }

@@ -8,4 +8,4 @@ SERVER_NAME3 = "google.com"
 AUTH_KEY = "Basic QWRtaW46YmFzaWNwYXNz"
 
 # if server receive uri longer than max uri length, it should reponse with 414
-MAX_URI_LENGTH = 100000000
+MAX_URI_LENGTH = 1000000

@@ -18,13 +18,13 @@ StatusCode STATUS_CODES;
 
 ErrorPages  ERROR_PAGES;
 
-Response::Response(unsigned int status, Server const & server) : _status(status), _to_send(true)
+Response::Response(unsigned int status, Server const & server) : _status(status), _to_send(true), _cgiReady(false)
 {
     std::cout << "error response" << std::endl;
     buildErrorResponse(server);
 }
 
-Response::Response(Request const & request, Server const & server):_pt_server(&server), _pt_request(&request), _location_block(NULL), _body(""), _to_send(true), _ressource_fd(-1), _ressource_path(""), _status(0)
+Response::Response(Request const & request, Server const & server):_pt_server(&server), _pt_request(&request), _location_block(NULL), _body(""), _to_send(true), _cgiReady(false), _ressource_fd(-1), _ressource_path(""), _status(0)
 {
     if (request.getHttpVersion() != "HTTP/1.1")
     {
@@ -49,6 +49,7 @@ Response::Response(Request const & request, Server const & server):_pt_server(&s
     else if (request.getHttpMethod() == "DELETE")
         buildDeleteResponse(request, server);   
 }
+
 Response::Response(Response const & src)
 {
     
@@ -136,13 +137,12 @@ void Response::buildPostResponse(Request const & request, Server const & server)
         {
             if (_location_block->hasExtension(_ressource_path)  && _location_block->getCgiPath().length() != 0)
             {
-                //CGIHandler  cgi;
-                CGIHandler  cgi(_pt_request, this);
-                
+                std::cout << "building cgi in post" << std::endl;
                 std::string     script = _location_block->getCgiPath();
 
-                const char *scriptName[3] = {script.c_str(), _ressource_path.c_str() ,NULL};
-                _body = cgi.executeCgi(scriptName,"");
+                _cgiHandler = new CGIHandler(_pt_request, this, script, _ressource_path);
+                _to_send = false;
+                _ressource_fd = 0;
                 _status = 200;
             }
         }
@@ -262,7 +262,8 @@ bool Response::buildRessourcePath(std::string locRequest, Location const &locati
         else
         {
             std::cout << "No\n";
-            
+            if (_pt_request->getHttpMethod() == "POST")
+                return false;
             if(pathIsFile(_ressource_path))
             {
                 buildFileFD();
@@ -353,6 +354,8 @@ bool Response::chooseAcceptableFile(std::vector<std::string> options)
     float best_quality_one_lang;
     std::string best_match;
     std::string quality;
+    std::string best_type;
+    std::string best_lang;
     std::vector<std::map<std::string, std::string>> type_map = buildTypeMap(options);
     
     // std::vector<std::string> parsed_langs = split(_pt_request->getHeaders()["Accept-Language"], ",");
@@ -406,6 +409,7 @@ bool Response::chooseAcceptableFile(std::vector<std::string> options)
             best_quality_type = best_quality_one_type;
             best_quality_lang = best_quality_one_lang;
             best_match = it->at("path");
+            best_type = it->at("type") + "/" + it->at("subtype");
         }
         else if (best_quality_one_type == best_quality_type)
         {
@@ -413,12 +417,20 @@ bool Response::chooseAcceptableFile(std::vector<std::string> options)
             {
                 best_quality_lang = best_quality_one_lang;
                 best_match = it->at("path");
+                best_lang = it->at("lang");
             }
         }
     }
     if (best_quality_type != -1)
     {
         _ressource_path = best_match;
+        _headers.insert(std::make_pair("Content-Type", best_type));
+        return true;
+    }
+    if (best_quality_lang != -1)
+    {
+        _ressource_path = best_match;
+        _headers.insert(std::make_pair("Content-Language", best_lang));
         return true;
     }
     return false;
@@ -471,7 +483,7 @@ std::vector<std::map<std::string, std::string>> Response::parseAcceptableLanguag
     {
         std::map<std::string, std::string> target_lang;
         std::vector<std::string> lang_quality = split(*it, ";");
-        target_lang.insert(std::make_pair("lang", lang_quality.at(0)));
+        target_lang.insert(std::make_pair("lang", trim(lang_quality.at(0))));
         if (lang_quality.size() >= 2)
         {
             for (std::vector<std::string>::iterator ite = lang_quality.begin(); ite != lang_quality.end(); ++ite)
@@ -571,6 +583,31 @@ bool Response::findIndex(std::string current_directory, Location const &location
 
 void Response::buildFileFD()
 {
+    std::cout << "building fd..." << std::endl;
+    if (_location_block->hasExtension(_ressource_path)  && _location_block->getCgiPath().length() != 0)
+    {
+        std::string     script;
+        if(_location_block->getCgiPath().at(0) == '/')
+            script = _location_block->getCgiPath();
+        else
+            script = getWorkingPath()+"/"+_location_block->getCgiPath();
+        
+        
+        _cgiHandler = new CGIHandler(_pt_request, this, script, _ressource_path);
+        if (_pt_request->getBody().length() > 0)
+        {
+
+            _to_send = false;
+            _ressource_fd = 0;
+        }
+        else
+        {
+            _to_send = true;
+            executeCgi();    
+        }
+        _status = 200;
+        return;
+    }
     _ressource_fd = open(_ressource_path.c_str(), O_NONBLOCK);
     if (_ressource_fd == -1)
     {
@@ -631,23 +668,39 @@ unsigned int Response::buildAutoIndex()
     return _status;
 }
 
+void Response::executeCgi()
+{
+    _body.append(_cgiHandler->executeCgi());
+}
+
+void Response::CGIReady(long fd, FILE *CGIfOut)
+{
+    std::cout << "cgi ready" << std::endl;
+    _cgiReady = true;
+    _CGIfOut = CGIfOut;
+    _ressource_fd = fd;
+}
+
+void Response::readCGI()
+{
+    std::cout << "reading CGI output..." << std::endl;
+    lseek(_ressource_fd, 0, SEEK_SET);
+    char	buffer[1024] = {0};
+    int ret = 1;
+    while (ret > 0)
+    {
+        memset(buffer, 0, 1024);
+        ret = read(_ressource_fd, buffer, 1024 - 1);
+        _body.append(buffer);
+    }
+    close(_ressource_fd);
+    fclose(_CGIfOut);
+}
+
 unsigned int Response::readRessource(bool isErrorPage)
 {
 
-    if (_location_block->hasExtension(_ressource_path)  && _location_block->getCgiPath().length() != 0)
-    {
-        std::string     script;
-        CGIHandler  cgi(_pt_request, this);
-        if(_location_block->getCgiPath().at(0) == '/')
-            script = _location_block->getCgiPath();
-        else
-            script = getWorkingPath()+"/"+_location_block->getCgiPath();
-        
-        const char *scriptName[3] = {script.c_str(), _ressource_path.c_str() ,NULL};
-        _body = cgi.executeCgi(scriptName,"");
-
-        return _status;
-    }
+    
     std::string str;
     std::stringstream buff;
     int read = false;
@@ -702,7 +755,10 @@ void Response::addLastModifiedDate()
 
 Response::~Response()
 {
-    delete _pt_request;
+    if (_cgiHandler)
+        delete _cgiHandler;
+    if (_status != 414)
+        delete _pt_request;
 }
 
 Response      &Response::operator=(Response const &cpy)
@@ -743,9 +799,11 @@ std::string             Response::getCgiPath()const
     return _location_block->getCgiPath();
 }
 
-int Response::getRessourceFD() const { return _ressource_fd; }
+int     Response::getRessourceFD() const { return _ressource_fd; }
 
-bool Response::isToSend() const { return _to_send; }
+bool    Response::isToSend() const { return _to_send; }
+
+bool    Response::getCGIReady() const { return _cgiReady; }
 
 unsigned int            Response::getStatus() const
 {
