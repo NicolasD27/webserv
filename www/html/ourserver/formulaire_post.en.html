@@ -1,0 +1,31 @@
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>Form by POST method</title>
+		<link href="css/style.css" rel="stylesheet">
+	</head>
+	<body>
+		<h1>Form by POST method ! </h1>
+		<form action="reponse_post" method="POST">
+			<div>
+				<label for="say">What greeting do you want to send</label>
+				<select name="say" id="say">
+    				<option value="">--Please choose an option--</option>
+    				<option value="Hello">Hello</option>
+    				<option value="Have a good evening">Have a good evening</option>
+    				<option value="Good night">Good night</option>
+    				<option value="I love you">I love you</option>
+				</select>
+			</div>
+			<div>
+			  <label for="to">Who do you want to address it to?</label>
+			  <input name="to" id="to" value="Mom">
+			</div>
+			<div>
+			  <button>Send my regards</button>
+			</div>
+		  </form>		  
+	</body>
+</html>
