@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/11 14:51:26 by clorin            #+#    #+#             */
-/*   Updated: 2022/02/22 10:58:44 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/23 08:40:40 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,7 @@ void            Location::storeLine(std::string const & key, std::string & value
     }
     else if (key == "upload_dir")
     {
-        _uploadDir = getWorkingPath() + "/" + value;
+        _uploadDir = getWorkingPath() + "/" +_root + "/" + value;
     }
 }
 
@@ -164,10 +164,14 @@ void            Location::print() const
             std::cout << _methods[i] << " ";
         std::cout << std::endl;
     }
-    std::cout << "Cgi_path = ";
+    std::cout << "\tCgi_path = ";
     std::cout << ((_cgi_path.empty())? "Empty" : _cgi_path) << " for ";
     for (std::vector<std::string>::const_iterator it = _extensions.begin(); it != _extensions.end(); ++it)
         std::cout << *it << "|";
+    std::cout << std::endl;
+
+    std::cout << "\tUpload_dir = " << ((_uploadDir.empty())? "Empty" : _uploadDir) << std::endl;
+    
     std::cout << std::endl;
 }
 
