@@ -253,7 +253,7 @@ bool        Webserv::run()
                     if ((*client_it)->getSocket() != NO_SOCKET && FD_ISSET((*client_it)->getSocket(), &read_fds))
                     {
                         std::cout << "receiving from ..." << (*client_it)->getSocket() << std::endl;
-                        if (!(*client_it)->receiveFromClient(_servers, (*server_it)->getMaxBodySize()))
+                        if (!(*client_it)->receiveFromClient(_servers))
                             client_to_remove.push_back((*client_it)->getSocket());
                             
                         

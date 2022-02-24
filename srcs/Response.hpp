@@ -64,7 +64,6 @@ private:
     CGIHandler                          *_cgiHandler;
     bool                                _cgiReady;
 
-    void                                                findLocation(Server const &, Request const &);
     bool                                                buildRessourcePath(std::string, Location const &);
     void                                                buildErrorResponse(Server const & server);
     void                                                buildGetResponse(Request const & request, Server const & server);
@@ -95,6 +94,7 @@ public:
     void                                CGIReady(long fd, FILE *CGIfOut);
     unsigned int                        buildAutoIndex();
     void                                parseExtension();
+    void                                findLocation(Server const &, Request const &);
 
     std::string                         getResponseString() const;
     std::string                         getBody() const;

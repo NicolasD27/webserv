@@ -102,7 +102,7 @@ bool Client::setup(Server * server)
     return true;
 }
 
-bool Client::receiveFromClient(std::vector<Server*> servers, int max_body_size)
+bool Client::receiveFromClient(std::vector<Server*> servers)
 {
     int r = 0;
     int content_length;
@@ -132,21 +132,8 @@ bool Client::receiveFromClient(std::vector<Server*> servers, int max_body_size)
         if (_current_receiving_byte >= MAX_SIZE_HEADER)
         {
             std::cout << "headers too long" << std::endl;
-            // while ((r = read(_socket, _receiving_buff , MAX_SIZE)) > 0); // finir de lire
-            _current_receiving_byte = 0;
-            _receiving_buff[0] = 0;
-            _headers_read = false;
-            for (std::vector<Server*>::iterator it = servers.begin(); it != servers.end(); ++it)
-                if ((*it)->getSocket() == _server_socket)
-                {
-                    response = new Response(414, **it);
-                    break;
-                }
-                    
-            if (response->isToSend())
-                _responses_to_send.push(response);
-            else
-                _responses_to_build.push_back(response);
+            while ((r = read(_socket, _receiving_buff , MAX_SIZE)) > 0); // finir de lire
+            buildErrorResponse(414, servers);
             return true;
         }
 
@@ -163,13 +150,17 @@ bool Client::receiveFromClient(std::vector<Server*> servers, int max_body_size)
     request_string = std::string(_receiving_buff, _current_receiving_byte);
     request = new Request(request_string);
     request->parseHeaders();
+    
+    
     request->setPortClient(_address.sin_port);
     request->setAddressClient(_client_ipv4_str);
+    int max_body_size = findMatchingServer(servers, *request);
+    std::cout << "max_body_size : " << max_body_size << std::endl;  
     headers_length = request_string.find("\r\n\r\n") + 4;
     _body_read = true;
     if (request->headerExist("Transfer-Encoding") && !((*request)["Transfer-Encoding"].length() == 0 || (*request)["Transfer-Encoding"] == "identity"))
         readChunkedRequest(request, newline_pos, offset_newline, max_body_size);
-    else if (request->headerExist("Content-Length") && (content_length = StringToInt((*request)["Content-Length"])) > 0 && content_length < MAX_SIZE - MAX_SIZE_HEADER - 4)
+    else if (request->headerExist("Content-Length") && (content_length = StringToInt((*request)["Content-Length"])) > 0 && (max_body_size == -1 || content_length <= max_body_size) && content_length < MAX_SIZE - MAX_SIZE_HEADER - 4)
     {
         std::cout << "reading body with content-length" << std::endl;
         while (_current_receiving_byte - headers_length < content_length && (r = recv(_socket, _receiving_buff + _current_receiving_byte, content_length - _current_receiving_byte + headers_length, MSG_DONTWAIT)) > 0)
@@ -180,7 +171,12 @@ bool Client::receiveFromClient(std::vector<Server*> servers, int max_body_size)
         _body_read = (r < 0) ? false : true;
         request->addToBody(std::string(_receiving_buff, content_length + newline_pos + 4).substr(newline_pos + 4));
     }
-    if (request_string.length() == 0)
+    if (max_body_size != -1 && content_length > max_body_size)
+    {
+        buildErrorResponse(413, servers);
+        delete request;
+    }
+    else if (request_string.length() == 0)
     {
         std::cout << "removing client : " << _socket  << std::endl;
         delete request;
@@ -189,30 +185,19 @@ bool Client::receiveFromClient(std::vector<Server*> servers, int max_body_size)
         _receiving_buff[0] = 0;
         return false;
     }
-    if (_body_read)
+    else if (_body_read)
     {
-        // request_string = std::string(_receiving_buff, content_length);
-        // std::cout << "request finished : " << request_string << "|" << std::endl;
-        // std::cout << "buffer : " << std::endl;
-        // for (int i = 0; i < content_length; i++)
-        // {
-        //     std::cout << _receiving_buff[i];
-        //     // if (_receiving_buff[i] == 0)
-        //     //     std::cout << "0";
-        // }
-        // std::cout << std::endl;
-        // std::cout << "from client : " << _socket  << std::endl;
         _current_receiving_byte = 0;
         _receiving_buff[0] = 0;
         _headers_read = false;
-        findMatchingServer(servers, *request);
+        
         std::cout << *request << std::endl;
         for (std::vector<Server*>::iterator it = servers.begin(); it != servers.end(); ++it)
-                if ((*it)->getSocket() == _server_socket)
-                {
-                    response = new Response(*request, **it);
-                    break;
-                }
+            if ((*it)->getSocket() == _server_socket)
+            {
+                response = new Response(*request, **it);
+                break;
+            }
         if (response->isToSend())
             _responses_to_send.push(response);
         else
@@ -226,6 +211,24 @@ bool Client::receiveFromClient(std::vector<Server*> servers, int max_body_size)
     }
     return true;
 } 
+
+void Client::buildErrorResponse(unsigned int status, std::vector<Server*> servers)
+{
+    Response *response;
+    _current_receiving_byte = 0;
+    _receiving_buff[0] = 0;
+    _headers_read = false;
+    for (std::vector<Server*>::iterator it = servers.begin(); it != servers.end(); ++it)
+        if ((*it)->getSocket() == _server_socket)
+        {
+            response = new Response(status, **it);
+            break;
+        }
+    if (response->isToSend())
+        _responses_to_send.push(response);
+    else
+        _responses_to_build.push_back(response);
+}
 
 
 
@@ -273,27 +276,41 @@ void Client::readChunkedRequest(Request *request, int newline_pos, int offset_ne
         }        
 }
 
-void Client::findMatchingServer(std::vector<Server*> servers, Request & request)
+int Client::findMatchingServer(std::vector<Server*> servers, Request & request)
 {
+    int max_body_size = -1;
     if (request["Host"].length() == 0)
-        return;
+        return max_body_size;
     for (std::vector<Server*>::iterator it = servers.begin(); it != servers.end(); ++it)
     {
         if ((*it)->getSocket() == _server_socket )
         {
             for (std::vector<std::string>::iterator ite = (*it)->getBeginServerNames(); ite != (*it)->getEndServerNames(); ++ite)
             {
-                if (*ite == request["Host"])
+                std::cout << "server name : " << *ite + ":" + to_string((*it)->getPort()) << "host : " << request["Host"] << std::endl;
+                if (*ite == request["Host"] || *ite + ":" + to_string((*it)->getPort()) == request["Host"])
                 {
+                    std::cout << "here erfze" << std::endl;
                     _server_socket = (*it)->getSocket();
                     if (request.getLocation().substr(0, 7) == "http://")
                         request.setLocation(request.getLocation().substr(7 + request["Host"].length()));
-                    return;
+                    Request *cloneRequest = new Request(request);
+                    Response *response = new Response(*cloneRequest, **it);
+                    response->findLocation(**it, *cloneRequest);
+                    if (response->getLocationBlock())
+                    {
+                        max_body_size = response->getLocationBlock()->getMaxBodySize();
+                    }
+                    delete response;
+                    return max_body_size;
                 }
             }
         }
     }
+    return max_body_size;
 }
+
+
 
 bool Client::sendToClient()
 {

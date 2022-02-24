@@ -20,7 +20,7 @@ ErrorPages  ERROR_PAGES;
 
 Response::Response(unsigned int status, Server const & server) : _status(status), _to_send(true), _cgiReady(false), _cgiHandler(NULL)
 {
-    std::cout << "error response" << std::endl;
+    std::cout << "error response : " << status << std::endl;
     buildErrorResponse(server);
 }
 
@@ -137,7 +137,7 @@ void Response::buildPostResponse(Request const & request, Server const & server)
     }
     else
     {
-        if (_status != 200)
+        if (_status != 201)
             buildErrorResponse(server);
         else
             parseExtension();
@@ -232,6 +232,7 @@ bool Response::buildRessourcePath(std::string locRequest, Location const &locati
     std::string current_directory = getWorkingPath();
     std::string file_testing;
 
+    std::cout << "**********" << std::endl;
     _ressource_path = location.getRoot() + "/" + locRequest.substr(location.getPath().length() + ((locRequest.substr(location.getPath().length()).front() == '/') ? 1 : 0));
     _status = 0;
     if (locRequest.back() == '/')

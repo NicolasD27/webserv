@@ -116,15 +116,15 @@ def run() -> None:
     # run_test("POST /a/long.txt", test_big_post)
 
     # print(r"{}{}### TESTING POST ###{}".format(C_B_WHITE, B_GRAY, RESET))
-    run_test("POST /", test_wrong_post)
+    # run_test("POST /", test_wrong_post)
     # run_test("/", test_post_not_allowed)
     # run_test("/post/tmp/a.html * 2", test_post)
     # run_test("POST /post/test too big payload", test_too_big_request)
     # run_test("POST /test.cgi ", test_cgi_headers)
     # run_test("GET /protected/print.cgi ", test_cgi_auth_headers)
 
-    # print(r"{}{}### TESTING CHUNKED ###{}".format(C_B_WHITE, B_GRAY, RESET))
-    # run_test("Testing read content & trailer", test_chunked_w_trailer)
+    print(r"{}{}### TESTING CHUNKED ###{}".format(C_B_WHITE, B_GRAY, RESET))
+    run_test("Testing read content & trailer", test_chunked_w_trailer)
     # run_test("00000", test_chunked_multiplezeros)
     # run_test("000;dude", test_ChunkExtensionNoValue)
     # run_test("000;dude", test_ChunkExtensionUnquotedValue)

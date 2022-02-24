@@ -55,7 +55,7 @@ def test_wrong_post() -> str:
 
 def test_too_big_request() -> str:
     payload = "a" * 1025
-    req = requests.post(get_base_url() + "post/test", data=payload)
+    req = requests.post(get_base_url() + "post", data=payload)
     if req.status_code != 413:
         return "Bad status code: {}, expected: {}".format(req.status_code, 413)
     return ""

@@ -8,6 +8,28 @@ Request::Request(std::string request_string) : _request_string(request_string), 
 {
 }
 
+Request::Request(Request const & src)
+{
+    *this = src;
+}
+
+Request & Request::operator=(Request const & src)
+{
+    _http_version = src._http_version;
+    _request_string = src._request_string;
+    _query_string = src._query_string;
+    _http_method = src._http_method;
+    _location = src._location;
+    _headers = src._headers;
+    _body = src._body;
+    _keep_alive_n = src._keep_alive_n;
+    _params = src._params;
+    _portClient = src._portClient;
+    _addressClient = src._addressClient;
+    _format_error = src._format_error;
+    return *this;
+}
+
 bool Request::headerExist(std::string key) const { return (_headers.find(key) != _headers.end()); }
 std::string & Request::operator[](const char *key) {return _headers[key]; }
 
