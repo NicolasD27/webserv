@@ -90,7 +90,7 @@ bool ParserConfig::check_block(std::ifstream &buff, std::vector<Server*> &server
                     default_loc->addMethods(tokens);
                 else if (tokens[0] == "cgi")
                     default_loc->addCgi(tokens);
-                else if (tokens[0] == "root" || tokens[0] == "autoindex" || tokens[0] == "upload_dir" )
+                else if (tokens[0] == "root" || tokens[0] == "autoindex" || tokens[0] == "upload_dir" || tokens[0] == "max_body_size")
                     default_loc->storeLine(tokens[0], tokens[1]);
                 else
                     new_server->storeLine(tokens[0], tokens[1]);
