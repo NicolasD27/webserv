@@ -584,16 +584,10 @@ void Response::buildFileFD()
         
         _cgiHandler = new CGIHandler(_pt_request, this, script, _ressource_path);
         if (_pt_request->getBody().length() > 0)
-        {
-
-            _to_send = false;
             _ressource_fd = 0;
-        }
         else
-        {
-            _to_send = false;
             executeCgi();    
-        }
+        _to_send = false;
         _status = 200;
         return;
     }
