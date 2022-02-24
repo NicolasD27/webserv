@@ -18,13 +18,13 @@ StatusCode STATUS_CODES;
 
 ErrorPages  ERROR_PAGES;
 
-Response::Response(unsigned int status, Server const & server) : _status(status), _to_send(true), _cgiReady(false)
+Response::Response(unsigned int status, Server const & server) : _status(status), _to_send(true), _cgiReady(false), _cgiHandler(NULL)
 {
     std::cout << "error response" << std::endl;
     buildErrorResponse(server);
 }
 
-Response::Response(Request const & request, Server const & server):_pt_server(&server), _pt_request(&request), _location_block(NULL), _body(""), _to_send(true), _cgiReady(false), _ressource_fd(-1), _ressource_path(""), _status(0)
+Response::Response(Request const & request, Server const & server):_pt_server(&server), _pt_request(&request), _location_block(NULL), _cgiHandler(NULL), _body(""), _to_send(true), _cgiReady(false), _ressource_fd(-1), _ressource_path(""), _status(0)
 {
     if (request.getHttpVersion() != "HTTP/1.1")
     {
@@ -53,8 +53,7 @@ Response::Response(Request const & request, Server const & server):_pt_server(&s
 Response::Response(Response const & src)
 {
     
-    for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); ++it)
-        this->_headers.insert(*it);
+    _headers = src._headers;
     _status = src._status;
     _response_string = src._response_string;
     _ressource_path = src._ressource_path;
@@ -63,6 +62,11 @@ Response::Response(Response const & src)
     _pt_server = src._pt_server;
     _to_send = src._to_send;
     _ressource_fd = src._ressource_fd;
+    _cgiHandler = src._cgiHandler;
+    _cgiReady = src._cgiReady;
+    _CGIfOut = src._CGIfOut;
+    _cgi_path = src._cgi_path;
+    _location_block = src._location_block;
 }
 
 void Response::buildDeleteResponse(Request const & request, Server const & server)
