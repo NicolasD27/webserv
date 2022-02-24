@@ -39,7 +39,6 @@ private:
     int                     _socket;
     struct sockaddr_in      _address;
     std::string             _client_ipv4_str;
-    Request *               _request_in_progress;
     std::vector<Response*>  _responses_to_build;
     std::queue<Response*>   _responses_to_send;
     char                    _sending_buff[MAX_SIZE];

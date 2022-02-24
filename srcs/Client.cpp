@@ -16,7 +16,6 @@ Client::Client()
 {
     _headers_read = false;
     _socket = NO_SOCKET;
-    _request_in_progress = NULL;
     std::vector<Response*>  _responses_to_build;
     std::queue<Response*>   _responses_to_send;
 }
@@ -31,6 +30,13 @@ Client::Client(Client const &cpy)
 Client::~Client()
 {
     _client_ipv4_str.clear();
+    for (std::vector<Response *>::iterator it = _responses_to_build.begin(); it != _responses_to_build.end(); ++it)
+        delete *it;
+    while (!_responses_to_send.empty())
+    {
+        delete _responses_to_send.front();
+        _responses_to_send.pop();
+    }
 }
 
 Client      &Client::operator=(Client const &cpy)

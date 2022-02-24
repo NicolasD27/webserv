@@ -137,19 +137,6 @@ void Response::buildPostResponse(Request const & request, Server const & server)
     }
     else
     {
-        if (_status == 0)
-        {
-            if (_location_block->hasExtension(_ressource_path)  && _location_block->getCgiPath().length() != 0)
-            {
-                std::cout << "building cgi in post" << std::endl;
-                std::string     script = _location_block->getCgiPath();
-
-                _cgiHandler = new CGIHandler(_pt_request, this, script, _ressource_path);
-                _to_send = false;
-                _ressource_fd = 0;
-                _status = 200;
-            }
-        }
         if (_status != 200)
             buildErrorResponse(server);
         else
@@ -266,8 +253,6 @@ bool Response::buildRessourcePath(std::string locRequest, Location const &locati
         else
         {
             std::cout << "No\n";
-            if (_pt_request->getHttpMethod() == "POST")
-                return false;
             if(pathIsFile(_ressource_path))
             {
                 buildFileFD();
@@ -606,7 +591,7 @@ void Response::buildFileFD()
         }
         else
         {
-            _to_send = true;
+            _to_send = false;
             executeCgi();    
         }
         _status = 200;

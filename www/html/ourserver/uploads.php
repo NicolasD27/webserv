@@ -1,4 +1,7 @@
 <?php
+header_remove();
+header('Content-Type: text/html');
+header_remove('Content-Type');
 $target_dir = $_SERVER['UPLOAD_DIR'];
 $target_file = $target_dir."/". basename($_FILES["file"]["name"]);
 $uploadOk = 1;
