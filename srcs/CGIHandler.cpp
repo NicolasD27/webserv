@@ -14,6 +14,19 @@
 
 CGIHandler::~CGIHandler(){}
 
+CGIHandler::CGIHandler()
+{
+	std::map<std::string, std::string> _env;
+}
+
+CGIHandler & CGIHandler::operator=(CGIHandler const & src)
+{
+	_body = src._body;
+	_env = src._env;
+	_script = src._script;
+	_file = src._file;
+	return *this;
+}
 /*
  - Server related variables
     	SERVER_SOFTWARE
@@ -58,12 +71,13 @@ CGIHandler::~CGIHandler(){}
 
 */
 
-	CGIHandler::CGIHandler(Request const *request, Response const *response):_body(request->getBody())
+	CGIHandler::CGIHandler(Request const *request, Response *response, std::string script, std::string file): _response(response), _body(request->getBody()), _script(script), _file(file)
 {
 	std::map<std::string, std::string>	headers_response = response->getHeaders();
 	std::map<std::string, std::string>	headers_request = request->getHeaders();
 	Location							*location = response->getLocationBlock();
 
+	
 
 	_env["SERVER_PROTOCOL"] = "HTTP/1.1";
 	_env["SERVER_SOFTWARE"] = "webserv";
@@ -89,7 +103,7 @@ CGIHandler::~CGIHandler(){}
 	_env["REQUEST_URI"] = response->getRessourcePath();
 	_env["REDIRECT_STATUS"] = "200";
 	_env["UPLOAD_DIR"] = location->getUploadDir();
-}
+ }
 
 char					**CGIHandler::getEnv() const
 {
@@ -110,13 +124,13 @@ size_t                  CGIHandler::size() const
     return this->_env.size();
 }
 
-std::string		CGIHandler::executeCgi(const char **scriptName, const std::string & body)
+std::string		CGIHandler::executeCgi()
 {
 	pid_t		pid;
 	int			saveStdin;
 	int			saveStdout;
-	std::string	newBody = body;
-
+	std::string newBody = "";
+	const char *scriptName[3] = {_script.c_str(), _file.c_str() ,NULL};
 	// SAVING STDIN AND STDOUT IN ORDER TO TURN THEM BACK TO NORMAL LATER
 	saveStdin = dup(STDIN_FILENO);
 	saveStdout = dup(STDOUT_FILENO);
@@ -132,11 +146,12 @@ std::string		CGIHandler::executeCgi(const char **scriptName, const std::string &
     {
         std::cout << "\t"<< C_YELLOW << it->first << C_RESET<<": "<< C_CYAN << it->second << C_RESET<< std::endl;
     }
-	std::cout << C_CYAN << "\tBody = " << C_RESET << ((_body.empty())? "Empty":_body)<< std::endl;
+	// std::cout << C_CYAN << "\tBody = " << C_RESET << ((_body.empty())? "Empty":_body)<< std::endl;
 
 	write(fdIn, _body.c_str(), _body.size());
 	lseek(fdIn, 0, SEEK_SET);
-	
+	std::cout << "execution de "<< scriptName[0] << " with " << scriptName[1] << std::endl;
+    
 	pid = fork();
 
 	if (pid == -1)
@@ -146,42 +161,27 @@ std::string		CGIHandler::executeCgi(const char **scriptName, const std::string &
 	}
 	else if (pid == 0)
 	{
-       // std::cout << "execution de "<<scriptName[0] << " with ";
         
 		char **env;
         env = this->getEnv();		//todo free()
-		size_t i = 1;
-        //while(scriptName[i])
-          //  std::cout << scriptName[i++] << " ";
-        //std::cout << std::endl;
+		
+        std::cout << std::endl;
 		dup2(fdIn, STDIN_FILENO);
 		dup2(fdOut, STDOUT_FILENO);
 		execve(scriptName[0], const_cast<char* const *>(scriptName), env);
 		std::cerr << "Execve crashed." << std::endl;
-		write(STDOUT_FILENO, "Status: 500\r\n\r\n", 15);
     }
 	else
 	{
-		char	buffer[1024] = {0};
-
 		waitpid(-1, NULL, 0);
-		lseek(fdOut, 0, SEEK_SET);
-
-		ret = 1;
-		while (ret > 0)
-		{
-			memset(buffer, 0, 1024);
-			ret = read(fdOut, buffer, 1024 - 1);
-			newBody += buffer;
-		}
+		_response->CGIReady(fdOut, fOut);
 	}
 
 	dup2(saveStdin, STDIN_FILENO);
 	dup2(saveStdout, STDOUT_FILENO);
 	fclose(fIn);
-	fclose(fOut);
 	close(fdIn);
-	close(fdOut);
+	
 	close(saveStdin);
 	close(saveStdout);
 	if (!pid)

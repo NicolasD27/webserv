@@ -25,11 +25,14 @@ class Client;
 
 #include "Server.hpp"
 #include "Request.hpp"
+#include "CGIHandler.hpp"
 #include "Response.hpp"
 #include "Base64.hpp"
 
 #define NO_SOCKET -1
-#define MAX_SIZE 1000000
+#define MAX_SIZE 1000000000
+#define MAX_SIZE_HEADER 8000
+
 class Client
 {
 private:

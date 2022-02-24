@@ -22,7 +22,6 @@ Webserv::~Webserv(void)
         {
             for(iterator it = _servers.begin(); it != _servers.end(); ++it)
                 delete (*it);
-            _servers.clear();
         }
 }
 
@@ -224,17 +223,26 @@ bool        Webserv::run()
                     if ((*client_it)->getResponseToBuildSize() > 0)
                     {
                         std::cout << "response to build : " <<  (*client_it)->getResponseToBuildSize() << std::endl;
-                        std::vector<Response*>::iterator to_switch;
+                        Response *to_switch = NULL;
                         for (std::vector<Response*>::iterator ite = (*client_it)->getBeginResponseToBuild(); ite != (*client_it)->getEndResponseToBuild(); ++ite)
                         {
                             if (FD_ISSET((*ite)->getRessourceFD(), &read_fds))
                             {
-                                (*ite)->readRessource();
-                                to_switch = ite;
+                                if ((*ite)->getCGIReady())
+                                    (*ite)->readCGI();
+                                else
+                                    (*ite)->readRessource();
+                                to_switch = *ite;
+                                
+                            }
+                            if (FD_ISSET((*ite)->getRessourceFD(), &write_fds))
+                            {
+                                (*ite)->executeCgi();
                                 
                             }
                         }
-                        (*client_it)->switchToSendQueue(*to_switch);
+                        if (to_switch)
+                            (*client_it)->switchToSendQueue(to_switch);
                     }
                     if ((*client_it)->getSocket() != NO_SOCKET && FD_ISSET((*client_it)->getSocket(), &write_fds))
                     {
@@ -288,7 +296,12 @@ void Webserv::buildFDSets(Server const & server, fd_set *read_fds, fd_set *write
             std::cout << "ressource to read : " << (*ite)->getRessourcePath() << std::endl;
             if ((*ite)->getRessourceFD() > *highest_socket)
                 *highest_socket = (*ite)->getRessourceFD();
-            FD_SET((*ite)->getRessourceFD(), read_fds);
+            if ((*ite)->getCGIReady())
+                FD_SET((*ite)->getRessourceFD(), read_fds);
+            else if ((*ite)->getRessourceFD() != 0)
+                FD_SET((*ite)->getRessourceFD(), read_fds);
+            else
+                FD_SET((*ite)->getRessourceFD(), write_fds);
         }
         
         if ((*it)->getSocket() != NO_SOCKET)

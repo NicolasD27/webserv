@@ -53,13 +53,16 @@ private:
     // std::string                         _status_string;
     std::string                         _response_string;
     std::string                         _ressource_path;
-    int                                 _ressource_fd;
+    long                                _ressource_fd;
+    FILE                                *_CGIfOut;
     std::string                         _body;
     Request const                       *_pt_request;
     Server    const                     *_pt_server;
     bool                                _to_send;
     Location                            *_location_block;
     std::string                         _cgi_path;
+    CGIHandler                          *_cgiHandler;
+    bool                                _cgiReady;
 
     void                                                findLocation(Server const &, Request const &);
     bool                                                buildRessourcePath(std::string, Location const &);
@@ -77,7 +80,6 @@ private:
     std::vector<std::map<std::string, std::string>>     buildTypeMap(std::vector<std::string> options);
     void                                                addDate();
     void                                                addLastModifiedDate();
-    std::string                                         executeCgi(const char **scriptName, const std::string & body, char **env);
     
 public:
     Response(Request const & request, Server const & server);
@@ -88,12 +90,16 @@ public:
 
     std::string                         buildResponseString();
     unsigned int                        readRessource(bool isErrorPage = false);
+    void                                readCGI();
+    void                                executeCgi();
+    void                                CGIReady(long fd, FILE *CGIfOut);
     unsigned int                        buildAutoIndex();
     void                                parseExtension();
 
     std::string                         getResponseString() const;
     std::string                         getBody() const;
     bool                                isToSend() const;
+    bool                                getCGIReady() const;
     std::string                         getRessourcePath(void) const;
     int                                 getRessourceFD() const;
     Request const *                     getRequest() const;

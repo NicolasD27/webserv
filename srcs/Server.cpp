@@ -28,11 +28,8 @@ Server::~Server()
 {
     for (client_iterator it = _clients.begin(); it != _clients.end(); ++it)
         delete (*it);
-    // _clients.clear();
-    _error_pages.clear();
     for (location_iterator it = _locations.begin(); it != _locations.end(); ++it)
         delete (*it);
-    // _locations.clear();
 }
 
 void Server::removeClient(int socket)

@@ -135,7 +135,7 @@ bool ParserConfig::check_location_block(std::ifstream &buff, std::vector<std::st
     if (path == "/")
     {
         delete newLocation;
-        newLocation = default_loc;
+        newLocation = new Location(*default_loc);
     }
     if(tokens[2] != "{")
     {

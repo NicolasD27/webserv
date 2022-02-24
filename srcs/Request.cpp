@@ -29,10 +29,7 @@ void Request::parseHeaders()
         {
             std::string value;
             if( std::getline(iss_line, value) )
-            {
-                value = value.substr(1, value.length() - 2);
-                storeHeader(key, value);
-            }
+                storeHeader(key, trim(value));
         }
         
     }
