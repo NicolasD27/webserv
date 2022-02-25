@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/10 11:58:58 by clorin            #+#    #+#             */
-/*   Updated: 2022/02/17 17:17:32 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/25 09:52:20 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,7 +154,9 @@ MimesType::MimesType()
     _mimeType["jls"] = "image/jls";
     _mimeType["jp2"] = "image/jp2";
     _mimeType["jpe"] = "image/jpeg";
+    _mimeType["JPG"] = "image/jpeg";
     _mimeType["jpeg"] = "image/jpeg";
+    _mimeType["JPEG"] = "image/jpeg";
     _mimeType["jpf"] = "image/jpx";
     _mimeType["jpg"] = "image/jpeg";
     _mimeType["jpg2"] = "image/jp2";
