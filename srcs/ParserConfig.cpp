@@ -90,7 +90,7 @@ bool ParserConfig::check_block(std::ifstream &buff, std::vector<Server*> &server
                     default_loc->addMethods(tokens);
                 else if (tokens[0] == "cgi")
                     default_loc->addCgi(tokens);
-                else if (tokens[0] == "root" || tokens[0] == "autoindex" || tokens[0] == "upload_dir" )
+                else if (tokens[0] == "root" || tokens[0] == "autoindex" || tokens[0] == "upload_dir" || tokens[0] == "max_body_size")
                     default_loc->storeLine(tokens[0], tokens[1]);
                 else
                     new_server->storeLine(tokens[0], tokens[1]);
@@ -112,7 +112,8 @@ bool ParserConfig::check_block(std::ifstream &buff, std::vector<Server*> &server
         delete default_loc;
         return false;
     }
-    new_server->addLocation(default_loc);
+    if (default_loc)
+        new_server->addLocation(default_loc);
     servers.push_back(new_server);
     
     return true;
@@ -134,8 +135,11 @@ bool ParserConfig::check_location_block(std::ifstream &buff, std::vector<std::st
     path = tokens[1];
     if (path == "/")
     {
+        
         delete newLocation;
-        newLocation = new Location(*default_loc);
+        newLocation = default_loc;
+        // delete default_loc;
+        // default_loc = NULL;
     }
     if(tokens[2] != "{")
     {
@@ -187,6 +191,9 @@ bool ParserConfig::check_location_block(std::ifstream &buff, std::vector<std::st
         delete newLocation;
         return false;
     }    
-    server->addLocation(newLocation);
+    if (path == "/")
+        default_loc = newLocation;
+    else
+        server->addLocation(newLocation);
     return true;
 }

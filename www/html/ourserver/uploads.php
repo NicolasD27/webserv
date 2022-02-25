@@ -2,18 +2,6 @@
 header_remove();
 header('Content-Type: text/html');
 header_remove('Content-Type');
-?>
-<!DOCTYPE html>
-<html lang="fr">
-	<head>
-		<meta charset="UTF-8">
-		<title>42 - Webserv Téléchargements</title>
-		<link href="css/style.css" rel="stylesheet">
-	</head>
-	<body>
-    <div id="main">
-		<h1>Téléchargement ! </h1>
-		<?php
 $target_dir = $_SERVER['UPLOAD_DIR'];
 $target_file = $target_dir."/". basename($_FILES["file"]["name"]);
 $uploadOk = 1;
@@ -30,35 +18,34 @@ if (!file_exists($target_dir) && !is_dir($target_dir))
 // Check if file already exists
 
 if (file_exists($target_file)) {
-  echo "<p>Désolé le fichier existe déjà.</p>";
+  echo "<p>Sorry, file already exists.</p>";
   $uploadOk = 0;
 }
 
 // Check file size
-if ($_FILES["file"]["size"] > 5*1048576) {
-  echo "Désolé, le fichier est trop gros.";
+if ($_FILES["file"]["size"] > 500000) {
+  echo "Sorry, your file is too large.";
+  $uploadOk = 0;
+}
+
+// Allow certain file formats
+if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg"
+&& $imageFileType != "gif" ) {
+  echo "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
   $uploadOk = 0;
 }
 
 
 // Check if $uploadOk is set to 0 by an error
 if ($uploadOk == 0) {
-  echo "Désolé votre fichier n'a pas pu être téléchargé.";
+  echo "Sorry, your file was not uploaded.";
 // if everything is ok, try to upload file
 } else {
   if (move_uploaded_file($_FILES["file"]["tmp_name"], $target_file)) {
-    echo "<p>Le fichier <span style='color:red'>";
-    echo htmlspecialchars( basename( $_FILES["file"]["name"])). "</span> a été téléchargé dans ";
-    echo "<a href='img/download/'>Répertoire</a></p>";
+    echo "<p>The file ". htmlspecialchars( basename( $_FILES["file"]["name"])). " has been uploaded.</p>";
   } else {
-    echo "Désolé, il y a eu une erreur pendant le téléchargement. ";
+    echo "Sorry, there was an error uploading your file. ";
     echo $_FILES["file"]["tmp_name"]." -> ".$target_file;
   }
 }
 ?>
-  </div>
-  <hr>
-			<h3><a href="/">retour vers répertoire racine.</a></h3>
-	</body>
-</html>
-			

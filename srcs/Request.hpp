@@ -46,7 +46,6 @@ private:
     std::string                         _location;
     time_t                              _keep_alive_n;
     std::map<std::string, std::string>  _headers;
-    std::vector<std::string>            _x_forwarded_for;
     std::string                         _body;
     std::map<std::string, std::string>  _params;
     uint16_t                            _portClient;

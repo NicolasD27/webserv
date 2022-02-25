@@ -57,6 +57,9 @@ std::string                 Location::getUploadDir() const {return _uploadDir;}
 bool                        Location::isAutoindex(void) const {return(_autoIndex);}
 
 int                         Location::getRedirectionCode(void) const { return _redir_code;}
+
+int                         Location::getMaxBodySize(void) const { return _max_body_size;}
+
 std::string                 Location::getRedirectionURL(void) const { return _redir_url; }
 
     
@@ -84,6 +87,10 @@ void            Location::storeLine(std::string const & key, std::string & value
         if (value.back() == '/')
             value.pop_back();
         _root = value;
+    }
+    else if (key == "max_body_size")
+    {
+        _max_body_size = StringToInt(value);
     }
     else if (key == "upload_dir")
     {
@@ -152,7 +159,9 @@ void            Location::print() const
         for(size_t i = 0; i < _index.size(); i++)
             std::cout <<_index[i] << " ";
     }
-    std::cout << std::endl << "\tautoIndex = ";
+    std::cout << std::endl;
+    std::cout << "max_body_size : " << _max_body_size << std::endl;
+    std::cout << "\tautoIndex = ";
     std::cout << ((_autoIndex)? "true":"false") << std::endl;
     if(!_methods.empty())
     {

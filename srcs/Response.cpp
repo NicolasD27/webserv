@@ -18,13 +18,13 @@ StatusCode STATUS_CODES;
 
 ErrorPages  ERROR_PAGES;
 
-Response::Response(unsigned int status, Server const & server) : _status(status), _to_send(true), _cgiReady(false)
+Response::Response(unsigned int status, Server const & server) : _status(status), _to_send(true), _cgiReady(false), _cgiHandler(NULL)
 {
-    std::cout << "error response" << std::endl;
+    std::cout << "error response : " << status << std::endl;
     buildErrorResponse(server);
 }
 
-Response::Response(Request const & request, Server const & server):_pt_server(&server), _pt_request(&request), _location_block(NULL), _body(""), _to_send(true), _cgiReady(false), _ressource_fd(-1), _ressource_path(""), _status(0)
+Response::Response(Request const & request, Server const & server):_pt_server(&server), _pt_request(&request), _location_block(NULL), _cgiHandler(NULL), _body(""), _to_send(true), _cgiReady(false), _ressource_fd(-1), _ressource_path(""), _status(0)
 {
     if (request.getHttpVersion() != "HTTP/1.1")
     {
@@ -53,8 +53,7 @@ Response::Response(Request const & request, Server const & server):_pt_server(&s
 Response::Response(Response const & src)
 {
     
-    for (std::map<std::string, std::string>::iterator it = _headers.begin(); it != _headers.end(); ++it)
-        this->_headers.insert(*it);
+    _headers = src._headers;
     _status = src._status;
     _response_string = src._response_string;
     _ressource_path = src._ressource_path;
@@ -63,6 +62,11 @@ Response::Response(Response const & src)
     _pt_server = src._pt_server;
     _to_send = src._to_send;
     _ressource_fd = src._ressource_fd;
+    _cgiHandler = src._cgiHandler;
+    _cgiReady = src._cgiReady;
+    _CGIfOut = src._CGIfOut;
+    _cgi_path = src._cgi_path;
+    _location_block = src._location_block;
 }
 
 void Response::buildDeleteResponse(Request const & request, Server const & server)
@@ -133,20 +137,7 @@ void Response::buildPostResponse(Request const & request, Server const & server)
     }
     else
     {
-        if (_status == 0)
-        {
-            if (_location_block->hasExtension(_ressource_path)  && _location_block->getCgiPath().length() != 0)
-            {
-                std::cout << "building cgi in post" << std::endl;
-                std::string     script = _location_block->getCgiPath();
-
-                _cgiHandler = new CGIHandler(_pt_request, this, script, _ressource_path);
-                _to_send = false;
-                _ressource_fd = 0;
-                _status = 200;
-            }
-        }
-        if (_status != 200)
+        if (_status != 201)
             buildErrorResponse(server);
         else
             parseExtension();
@@ -241,6 +232,7 @@ bool Response::buildRessourcePath(std::string locRequest, Location const &locati
     std::string current_directory = getWorkingPath();
     std::string file_testing;
 
+    std::cout << "**********" << std::endl;
     _ressource_path = location.getRoot() + "/" + locRequest.substr(location.getPath().length() + ((locRequest.substr(location.getPath().length()).front() == '/') ? 1 : 0));
     _status = 0;
     if (locRequest.back() == '/')
@@ -262,8 +254,6 @@ bool Response::buildRessourcePath(std::string locRequest, Location const &locati
         else
         {
             std::cout << "No\n";
-            if (_pt_request->getHttpMethod() == "POST")
-                return false;
             if(pathIsFile(_ressource_path))
             {
                 buildFileFD();
@@ -595,16 +585,10 @@ void Response::buildFileFD()
         
         _cgiHandler = new CGIHandler(_pt_request, this, script, _ressource_path);
         if (_pt_request->getBody().length() > 0)
-        {
-
-            _to_send = false;
             _ressource_fd = 0;
-        }
         else
-        {
-            _to_send = true;
             executeCgi();    
-        }
+        _to_send = false;
         _status = 200;
         return;
     }

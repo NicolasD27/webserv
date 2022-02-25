@@ -39,10 +39,8 @@ private:
     int                     _socket;
     struct sockaddr_in      _address;
     std::string             _client_ipv4_str;
-    Request *               _request_in_progress;
     std::vector<Response*>  _responses_to_build;
     std::queue<Response*>   _responses_to_send;
-    char                    _sending_buff[MAX_SIZE];
     int                     _current_sending_byte;
     char                    _receiving_buff[MAX_SIZE];
     int                     _current_receiving_byte;
@@ -50,8 +48,9 @@ private:
     bool                    _headers_read;
     bool                    _body_read;
 
-    void findMatchingServer(std::vector<Server*>, Request & request);
+    int findMatchingServer(std::vector<Server*>, Request & request);
     void readChunkedRequest(Request *, int, int, int);
+    void buildErrorResponse(unsigned int status, std::vector<Server*> servers);
     
 public:
     Client();
@@ -68,7 +67,7 @@ public:
     size_t getResponseToBuildSize() const;
     void switchToSendQueue(Response* response);
 
-    bool receiveFromClient(std::vector<Server*>, int max_body_size);
+    bool receiveFromClient(std::vector<Server*>);
     bool sendToClient();
 
 

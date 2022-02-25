@@ -1,9 +1,10 @@
 <?php
-	header_remove();
-    header('Content-Type: text/html');
-    header_remove('Content-Type');
+header_remove();
+header('Content-Type: text/html');
+header_remove('Content-Type');
 ?>
-!DOCTYPE html>
+
+<!DOCTYPE html>
 <html lang="en">
 	<head>
 		<meta charset="UTF-8">
