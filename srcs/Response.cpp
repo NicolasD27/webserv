@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/19 22:28:13 by clorin            #+#    #+#             */
-/*   Updated: 2022/02/23 13:15:43 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/25 08:46:33 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -589,7 +589,7 @@ void Response::buildFileFD()
         else
             executeCgi();    
         _to_send = false;
-        _status = 200;
+        //_status = 200;
         return;
     }
     _ressource_fd = open(_ressource_path.c_str(), O_NONBLOCK);
@@ -654,7 +654,8 @@ unsigned int Response::buildAutoIndex()
 
 void Response::executeCgi()
 {
-    _body.append(_cgiHandler->executeCgi());
+    _body.append(_cgiHandler->executeCgi(&_status));
+    std::cout << "_status après en _cgiHandler->executeCgi() : "<<C_RED<< _status << C_RESET<< std::endl;
 }
 
 void Response::CGIReady(long fd, FILE *CGIfOut)

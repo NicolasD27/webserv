@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/19 22:36:14 by clorin            #+#    #+#             */
-/*   Updated: 2022/02/18 19:43:32 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/25 08:55:51 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ class CGIHandler
         char					**getEnv() const;
         size_t                  size() const;
 
-        std::string		        executeCgi();
+        std::string		        executeCgi(unsigned int *);
 };
 
 #endif
