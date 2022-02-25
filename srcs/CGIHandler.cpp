@@ -6,13 +6,19 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/19 22:40:48 by clorin            #+#    #+#             */
-/*   Updated: 2022/02/25 08:57:39 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/25 09:24:04 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "CGIHandler.hpp"
 
-CGIHandler::~CGIHandler(){}
+CGIHandler::~CGIHandler()
+{
+	size_t i = 0;
+	while(_envChar[i])
+		free(_envChar[i++]);
+	free (_envChar);
+}
 
 CGIHandler::CGIHandler()
 {
@@ -25,6 +31,7 @@ CGIHandler & CGIHandler::operator=(CGIHandler const & src)
 	_env = src._env;
 	_script = src._script;
 	_file = src._file;
+	this->setEnvChar();
 	return *this;
 }
 /*
@@ -71,7 +78,12 @@ CGIHandler & CGIHandler::operator=(CGIHandler const & src)
 
 */
 
-	CGIHandler::CGIHandler(Request const *request, Response *response, std::string script, std::string file): _response(response), _body(request->getBody()), _script(script), _file(file)
+	CGIHandler::CGIHandler(Request const *request, Response *response, std::string script, std::string file):
+	_response(response),
+	_body(request->getBody()),
+	_script(script),
+	_file(file),
+	_envChar(NULL)
 {
 	std::map<std::string, std::string>	headers_response = response->getHeaders();
 	std::map<std::string, std::string>	headers_request = request->getHeaders();
@@ -103,20 +115,20 @@ CGIHandler & CGIHandler::operator=(CGIHandler const & src)
 	_env["REQUEST_URI"] = response->getRessourcePath();
 	_env["REDIRECT_STATUS"] = "200";
 	_env["UPLOAD_DIR"] = location->getUploadDir();
+	this->setEnvChar();
  }
 
-char					**CGIHandler::getEnv() const
+void					CGIHandler::setEnvChar()
 {
-	char	**env = new char*[this->_env.size() + 1];
+	_envChar = new char*[this->_env.size() + 1];
 	int	j = 0;
 	for (std::map<std::string, std::string>::const_iterator i = this->_env.begin(); i != this->_env.end(); i++) {
 		std::string	element = i->first + "=" + i->second;
-		env[j] = new char[element.size() + 1];
-		env[j] = strcpy(env[j], (const char*)element.c_str());
+		_envChar[j] = new char[element.size() + 1];
+		_envChar[j] = strcpy(_envChar[j], (const char*)element.c_str());
 		j++;
 	}
-	env[j] = NULL;
-	return env;
+	_envChar[j] = NULL;
 }
 
 size_t                  CGIHandler::size() const
@@ -165,13 +177,13 @@ std::string		CGIHandler::executeCgi(unsigned int *status)
 	else if (pid == 0)
 	{
         
-		char **env;
-        env = this->getEnv();		//todo free()
+		//char **env;
+        //env = this->getEnv();		//todo free()
 		
         std::cout << std::endl;
 		dup2(fdIn, STDIN_FILENO);
 		dup2(fdOut, STDOUT_FILENO);
-		execve(scriptName[0], const_cast<char* const *>(scriptName), env);
+		execve(scriptName[0], const_cast<char* const *>(scriptName), _envChar);
 		std::cerr << "Execve crashed." << std::endl;
 		exit_status = -1;
     }
