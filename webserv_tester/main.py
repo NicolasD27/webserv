@@ -94,8 +94,8 @@ def run() -> None:
     """
     # print(r"{}{}### TESTINst: google.cG HEAD ###{}".format(C_B_WHITE, B_GRAY, RESET))
     # run_test("HEAD /", test_head)
-    # print(r"{}{}### TESTING GET ###{}".format(C_B_WHITE, B_GRAY, RESET))
-    # run_test("GET /", test_get)
+    print(r"{}{}### TESTING GET ###{}".format(C_B_WHITE, B_GRAY, RESET))
+    run_test("GET /", test_get)
     # run_test("GET /a/", test_get_dir_index)
     # run_test("GET /virtual/a/", test_get_dir_not_allowed)
     # run_test("GET /b, checking custom 404 page", test_custom_404)
@@ -123,8 +123,8 @@ def run() -> None:
     # run_test("POST /test.cgi ", test_cgi_headers)
     # run_test("GET /protected/print.cgi ", test_cgi_auth_headers)
 
-    print(r"{}{}### TESTING CHUNKED ###{}".format(C_B_WHITE, B_GRAY, RESET))
-    run_test("Testing read content & trailer", test_chunked_w_trailer)
+    # print(r"{}{}### TESTING CHUNKED ###{}".format(C_B_WHITE, B_GRAY, RESET))
+    # run_test("Testing read content & trailer", test_chunked_w_trailer)
     # run_test("00000", test_chunked_multiplezeros)
     # run_test("000;dude", test_ChunkExtensionNoValue)
     # run_test("000;dude", test_ChunkExtensionUnquotedValue)

@@ -30,7 +30,7 @@ class Client;
 #include "Base64.hpp"
 
 #define NO_SOCKET -1
-#define MAX_SIZE 1000000000
+#define MAX_SIZE 2008000
 #define MAX_SIZE_HEADER 8000
 
 class Client

@@ -33,7 +33,6 @@ class Location
         int                         _redir_code;
         std::vector<std::string>    _extensions;
         std::string                 _uploadDir;
-        int                         _max_body_size;
 
     public:
         Location(void);
@@ -57,7 +56,6 @@ class Location
         int                         getRedirectionCode(void) const;
         std::string                 getRedirectionURL(void) const;
         std::vector<std::string>    getMethods() const;
-        int                         getMaxBodySize() const;
     
         void                        setPath(std::string const &);
         void                        setAutoIndex(bool);

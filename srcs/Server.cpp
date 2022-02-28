@@ -38,6 +38,7 @@ void Server::removeClient(int socket)
     {
         if ((*it)->getSocket() == socket)
         {
+            delete *it;
             _clients.erase(it);
             return;
         }

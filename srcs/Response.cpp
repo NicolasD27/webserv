@@ -232,7 +232,6 @@ bool Response::buildRessourcePath(std::string locRequest, Location const &locati
     std::string current_directory = getWorkingPath();
     std::string file_testing;
 
-    std::cout << "**********" << std::endl;
     _ressource_path = location.getRoot() + "/" + locRequest.substr(location.getPath().length() + ((locRequest.substr(location.getPath().length()).front() == '/') ? 1 : 0));
     _status = 0;
     if (locRequest.back() == '/')
@@ -311,7 +310,6 @@ std::vector<std::string> Response::findAlternativeMatches(std::string current_pa
     {
         std::string relative_path = current_path.substr(0, last_slash + 1);
         std::string abs_path_dir = getWorkingPath() + "/" + relative_path;
-        std::cout << "rel path "<< relative_path << std::endl << "abs path " << abs_path_dir << std::endl;
         std::string file = current_path.substr(last_slash + 1);
         DIR *dir;
         struct dirent *ent;
