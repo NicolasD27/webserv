@@ -18,6 +18,7 @@ Webserv::Webserv(void):_conf_path(PATH_CONF){
 
 Webserv::~Webserv(void)
 {
+    std::cout << "deleting servers..." << std::endl;
     if(!_servers.empty())
         {
             for(iterator it = _servers.begin(); it != _servers.end(); ++it)
@@ -268,7 +269,7 @@ bool        Webserv::run()
             }
         }
     }
-    return true;
+    return false;
 }
 
 
@@ -306,7 +307,6 @@ void Webserv::buildFDSets(Server const & server, fd_set *read_fds, fd_set *write
         
         if ((*it)->getSocket() != NO_SOCKET)
         {
-            std::cout << "client socket accepted currently : " << (*it)->getSocket() << std::endl;
             if ((*it)->getSocket() > *highest_socket)
                 *highest_socket = (*it)->getSocket();
             FD_SET((*it)->getSocket(), read_fds);
@@ -319,6 +319,7 @@ void Webserv::buildFDSets(Server const & server, fd_set *read_fds, fd_set *write
 
 void Webserv::shutdownServers()
 {
+    
     for (iterator it = _servers.begin(); it != _servers.end(); ++it)
         delete *it;
     exit(EXIT_FAILURE);

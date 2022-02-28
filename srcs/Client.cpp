@@ -32,6 +32,7 @@ Client::~Client()
     _client_ipv4_str.clear();
     for (std::vector<Response *>::iterator it = _responses_to_build.begin(); it != _responses_to_build.end(); ++it)
         delete *it;
+    _responses_to_build.clear();
     while (!_responses_to_send.empty())
     {
         delete _responses_to_send.front();
@@ -105,7 +106,7 @@ bool Client::setup(Server * server)
 bool Client::receiveFromClient(std::vector<Server*> servers)
 {
     int r = 0;
-    int content_length;
+    int content_length = 0;
     int newline_pos = -1;
     int prev_newline_pos;
     int offset_newline = 1;
@@ -121,9 +122,6 @@ bool Client::receiveFromClient(std::vector<Server*> servers)
         std::cout << "reading header..." << std::endl;
         while ((newline_pos == -1 || newline_pos == std::string::npos) && (r = read(_socket, _receiving_buff + _current_receiving_byte, 1)) > 0 && _current_receiving_byte < MAX_SIZE_HEADER)
         {
-            // if (_current_receiving_byte % 1000 == 0)
-            //     std::cout << _current_receiving_byte << std::endl;
-            // std::cout << _receiving_buff[_current_receiving_byte];
             _current_receiving_byte += r;
             _receiving_buff[_current_receiving_byte] = 0;
             newline_pos = std::string(_receiving_buff).find("\r\n\r\n");
@@ -150,8 +148,6 @@ bool Client::receiveFromClient(std::vector<Server*> servers)
     request_string = std::string(_receiving_buff, _current_receiving_byte);
     request = new Request(request_string);
     request->parseHeaders();
-    
-    
     request->setPortClient(_address.sin_port);
     request->setAddressClient(_client_ipv4_str);
     int max_body_size = findMatchingServer(servers, *request);
@@ -173,6 +169,8 @@ bool Client::receiveFromClient(std::vector<Server*> servers)
     }
     if (max_body_size != -1 && content_length > max_body_size)
     {
+        std::cout << *request << std::endl;
+        while ((r = read(_socket, _receiving_buff , MAX_SIZE)) > 0); // finir de lire
         buildErrorResponse(413, servers);
         delete request;
     }
@@ -287,22 +285,14 @@ int Client::findMatchingServer(std::vector<Server*> servers, Request & request)
         {
             for (std::vector<std::string>::iterator ite = (*it)->getBeginServerNames(); ite != (*it)->getEndServerNames(); ++ite)
             {
-                std::cout << "server name : " << *ite + ":" + to_string((*it)->getPort()) << "host : " << request["Host"] << std::endl;
+                std::cout << *ite + ":" + to_string((*it)->getPort()) << " " << request["Host"] << std::endl;
+                std::cout << "mbs : " << (*it)->getMaxBodySize();
                 if (*ite == request["Host"] || *ite + ":" + to_string((*it)->getPort()) == request["Host"])
                 {
-                    std::cout << "here erfze" << std::endl;
                     _server_socket = (*it)->getSocket();
                     if (request.getLocation().substr(0, 7) == "http://")
                         request.setLocation(request.getLocation().substr(7 + request["Host"].length()));
-                    Request *cloneRequest = new Request(request);
-                    Response *response = new Response(*cloneRequest, **it);
-                    response->findLocation(**it, *cloneRequest);
-                    if (response->getLocationBlock())
-                    {
-                        max_body_size = response->getLocationBlock()->getMaxBodySize();
-                    }
-                    delete response;
-                    return max_body_size;
+                    return (*it)->getMaxBodySize();
                 }
             }
         }
