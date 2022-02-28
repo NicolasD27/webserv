@@ -61,7 +61,7 @@ public:
     Request &                           operator=(Request const &);
     std::string &                       operator[](const char *key);
 
-    void                                parseHeaders();
+    void                                parseHeaders(std::string request_string);
     void                                storeHeader(std::string key, std::string value);
     void                                parseMethod(std::string line);
     void                                printHeaders(std::ostream &);

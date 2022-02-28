@@ -71,13 +71,15 @@ int enqueue(message_queue_t *queue, message_t *message)
   if (queue->current == queue->size)
     return -1;
   
-  memcpy(&queue->data[queue->current], "0\r\n\r\n", 6);
+  //  memcpy(&queue->data[queue->current], "Accept-Language: fr\r\n\r\n", 24);
+  // queue->current++;
+  // memcpy(&queue->data[queue->current], "000000\r\n\r\n",11);
+  // queue->current++;
+  memcpy(&queue->data[queue->current], "F\r\nHello, World!!!\r\n7\r\nIt's me\r\n0\r\n\r\n", 38);
   queue->current++;
-  memcpy(&queue->data[queue->current], "7\r\nNetwork\r\n", 13);
-  queue->current++;
-  memcpy(&queue->data[queue->current], "9\r\nDeveloper\r\n", 15);
-  queue->current++;
-  memcpy(&queue->data[queue->current], "GET / HTTP/1.1\r\nHost: localhost:3000\r\nTransfer-Encoding: chunked\r\n\r\n7\r\nMozilla\r\n", 82);
+  // memcpy(&queue->data[queue->current], "9\r\nDeveloper\r\n", 15);
+  // queue->current++;
+  memcpy(&queue->data[queue->current], "GET / HTTP/1.1\r\nHost: localhost:3000\r\nTransfer-Encoding: chunked\r\n\r\n", 69);
   queue->current++;
     return 0;
 }

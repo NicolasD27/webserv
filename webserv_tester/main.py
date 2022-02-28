@@ -94,8 +94,8 @@ def run() -> None:
     """
     # print(r"{}{}### TESTINst: google.cG HEAD ###{}".format(C_B_WHITE, B_GRAY, RESET))
     # run_test("HEAD /", test_head)
-    print(r"{}{}### TESTING GET ###{}".format(C_B_WHITE, B_GRAY, RESET))
-    run_test("GET /", test_get)
+    # print(r"{}{}### TESTING GET ###{}".format(C_B_WHITE, B_GRAY, RESET))
+    # run_test("GET /", test_get)
     # run_test("GET /a/", test_get_dir_index)
     # run_test("GET /virtual/a/", test_get_dir_not_allowed)
     # run_test("GET /b, checking custom 404 page", test_custom_404)
@@ -105,12 +105,12 @@ def run() -> None:
     # run_test("GET with different index", test_different_index)
     # run_test("GET / on port 8080 and 8081", test_multiple_ports)
     # # run_test("     /auto, Host: default_server", test_get_dir_no_index) // on ignore car on renvoie 301 quand c'est un dossier
-    # # run_test("     /auto, Host: google.com", test_get_dir_autoindex)
+    # # run_test("     /auto, Host: google.com", test_get_dir_autoindex)  // ignoré
     # run_test("         /, Hoom", test_get_dir_index)
     # run_test("/auto/file, Accept-Language: fr", test_content_neg_lang)
     # run_test("/auto/file, Accept-Language: en-US, fr", test_content_neg_lang_double)
-    # run_test("/auto/file, Accept-Charset: ", test_content_neg_charset)
-    # run_test("/auto/file, Accept-Charset: utf-8", test_content_neg_charset_utf8)
+    # # run_test("/auto/file, Accept-Charset: ", test_content_neg_charset)  // ignoré
+    # # run_test("/auto/file, Accept-Charset: utf-8", test_content_neg_charset_utf8)  // ignoré
 
     # run_test("PUT /a/long.txt", test_big_put)
     # run_test("POST /a/long.txt", test_big_post)
@@ -118,21 +118,21 @@ def run() -> None:
     # print(r"{}{}### TESTING POST ###{}".format(C_B_WHITE, B_GRAY, RESET))
     # run_test("POST /", test_wrong_post)
     # run_test("/", test_post_not_allowed)
-    # run_test("/post/tmp/a.html * 2", test_post)
+    # # run_test("/post/tmp/a.html * 2", test_post) // ignoré
     # run_test("POST /post/test too big payload", test_too_big_request)
-    # run_test("POST /test.cgi ", test_cgi_headers)
-    # run_test("GET /protected/print.cgi ", test_cgi_auth_headers)
+    # # run_test("POST /test.cgi ", test_cgi_headers) // ignoré
+    # # run_test("GET /protected/print.cgi ", test_cgi_auth_headers) // ignoré
 
-    # print(r"{}{}### TESTING CHUNKED ###{}".format(C_B_WHITE, B_GRAY, RESET))
-    # run_test("Testing read content & trailer", test_chunked_w_trailer)
-    # run_test("00000", test_chunked_multiplezeros)
-    # run_test("000;dude", test_ChunkExtensionNoValue)
-    # run_test("000;dude", test_ChunkExtensionUnquotedValue)
-    # run_test("000;Foo=Bar", test_MultipleChunkExtensions)
-    # run_test("0", test_DecodeEmptyBodyInPieces)
-    # run_test("0\\r\\n\\r\\nHello!", test_DecodeEmptyBodyWithExtraStuffAfter)
-    # run_test("F\\r\\nHello, World!!!", test_DecodeThreeChunksOnePiece)
-    # run_test("0\\r\\nX-Foo Bar", test_DecodeBadTrailer)
+    print(r"{}{}### TESTING CHUNKED ###{}".format(C_B_WHITE, B_GRAY, RESET))
+    # run_test("Testing read content & trailer", test_chunked_w_trailer) #testé autrement
+    # run_test("00000", test_chunked_multiplezeros) #testé autrement
+    # run_test("000;dude", test_ChunkExtensionNoValue)  #testé autrement
+    # run_test("000;dude", test_ChunkExtensionUnquotedValue)  #testé autrement
+    # run_test("000;Foo=Bar", test_MultipleChunkExtensions) #testé autrement
+    # run_test("0", test_DecodeEmptyBodyInPieces) #testé autrement
+    # run_test("0\\r\\n\\r\\nHello!", test_DecodeEmptyBodyWithExtraStuffAfter) #testé autrement
+    # run_test("F\\r\\nHello, World!!!", test_DecodeThreeChunksOnePiece) #testé autrement
+    # run_test("0\\r\\nX-Foo Bar", test_DecodeBadTrailer) #ignoré
 
     # print(r"{}{}### TESTING PUT ###{}".format(C_B_WHITE, B_GRAY, RESET))
     # run_test("/", test_put_not_allowed)

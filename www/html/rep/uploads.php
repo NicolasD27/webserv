@@ -3,7 +3,7 @@ header_remove();
 header('Content-Type: text/html');
 header_remove('Content-Type');
 $target_dir = $_SERVER['UPLOAD_DIR'];
-$target_file = $target_dir."/". basename($_FILES["avatar"]["name"]);
+$target_file = $target_dir."/". basename(utf8_decode($_FILES["avatar"]["name"]));
 $uploadOk = 1;
 $imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
 //echo $_FILES["avatar"]["tmp_name"]." -> ".$target_file;
