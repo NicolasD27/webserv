@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/19 22:28:13 by clorin            #+#    #+#             */
-/*   Updated: 2022/02/28 09:25:59 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/28 11:13:47 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -628,11 +628,34 @@ unsigned int Response::buildAutoIndex()
     //std::cout << "current_directory au départ = " << current_directory<<"\n";
     //current_directory += "/" + _pt_server->getRoot() + "/" + ((_pt_request->getLocation().length() == 1) ? "" : _pt_request->getLocation());
     current_directory += "/" + _ressource_path;
+   
     //std::cout << "current_directory = " << current_directory << "\n";
     if ((dir = opendir (current_directory.c_str())) != NULL)
     {
+        std::map<std::string, std::string> sorting =  _pt_request->getParams();
         _body += "<h1>Index of " + _pt_request->getLocation() + "</h1>";
-        _body += "<table><tbody><tr><th valign='top'><img src='/icons/blank.gif'></th><th>Name</th><th>Size</th><th>Last Modified</th></tr>";
+        _body += "<table><tbody><tr><th valign='top'><img src='/icons/blank.gif'></th>";
+        // Name with sort
+        _body += "<th><a href='?C=N";
+        if(sorting.empty() || sorting["O"] == "" || sorting["O"] == "D")
+            _body += "&O=A";
+        else if(sorting["O"] == "A")
+            _body += "&O=D";
+        _body += "'>Name</a></th>";
+        // Size with sort
+        _body += "<th><a href='?C=S";
+        if(sorting.empty() || sorting["O"] == "" || sorting["O"] == "D")
+            _body += "&O=A";
+        else if(sorting["O"] == "A")
+            _body += "&O=D";
+        _body += "'>Size</a></th>";
+        //modifierd with sort
+        _body += "<th><a href='?C=M";
+        if(sorting.empty() || sorting["O"] == "" || sorting["O"] == "D")
+            _body += "&O=A";
+        else if(sorting["O"] == "A")
+            _body += "&O=D";
+        _body += "'>Last Modified</a></th></tr>";
         _body += "<tr><th colspan='5'><hr></th></tr>";
         _body += "<tr><td valign='top'><img src='/icons/back.gif'></td><td><a href='../'>Parent Directory</a></td></tr>";
         std::vector<t_file> vectorFile;
@@ -650,8 +673,29 @@ unsigned int Response::buildAutoIndex()
                 vectorFile.push_back(file);
         }
         closedir (dir);
-
-        std::sort(vectorFile.begin(), vectorFile.end(), compareByName);
+        
+        // sorting 
+        if(sorting.empty() || sorting["C"]=="N")
+        {
+            if(sorting.empty() || sorting["O"] == "" || sorting["O"] == "A")
+                std::sort(vectorFile.begin(), vectorFile.end(), compareByNameA);
+            else
+                std::sort(vectorFile.begin(), vectorFile.end(), compareByNameD);
+        }
+        else if (sorting["C"] == "S")
+        {
+            if(sorting.empty() || sorting["O"] == "" || sorting["O"] == "A")
+                std::sort(vectorFile.begin(), vectorFile.end(), compareBySizeA);
+            else
+                std::sort(vectorFile.begin(), vectorFile.end(), compareBySizeD);
+        }
+        else if(sorting["C"] == "M")
+        {
+            if(sorting.empty() || sorting["O"] == "" || sorting["O"] == "A")
+                std::sort(vectorFile.begin(), vectorFile.end(), compareByModifA);
+            else
+                std::sort(vectorFile.begin(), vectorFile.end(), compareByModifD);
+        }
         for(size_t i = 0; i < vectorFile.size(); i++)
         {
             _body += "<tr><td valign='top'><img src='/icons/";
@@ -663,7 +707,16 @@ unsigned int Response::buildAutoIndex()
             }
             _body += "'></td><td><a href=\"" + vectorFile[i].name + "\" >"+ vectorFile[i].name + "</a></td>";
             if(vectorFile[i].type != S_IFDIR)
-                _body += "<td align='right'>"+to_string(vectorFile[i].size)+"</td>";
+            {
+                if(vectorFile[i].size > 10000)
+                {
+                    _body += "<td align='right'>"+to_string(vectorFile[i].size / 1000)+"K</td>";
+                }
+                else
+                    _body += "<td align='right'>"+to_string(vectorFile[i].size)+"&nbsp</td>";
+                    
+                
+            }
             else
                 _body += "<td>-</td>";
             _body += "<td align='right'>"+vectorFile[i].modif+"</td></tr>\n" ;

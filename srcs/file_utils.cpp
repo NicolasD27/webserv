@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/06 09:35:45 by clorin            #+#    #+#             */
-/*   Updated: 2022/02/28 09:07:49 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/28 11:03:48 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,9 +62,34 @@ std::string getLastModifiedDate(std::string & filename)
 	return "";
 }
 
-bool  compareByName(t_file &a, t_file &b)
+bool  compareByNameA(t_file &a, t_file &b)
 {
     return (a.name < b.name);
+}
+
+bool  compareByNameD(t_file &a, t_file &b)
+{
+    return (a.name > b.name);
+}
+
+bool  compareBySizeA(t_file &a, t_file &b)
+{
+    return (a.size < b.size);
+}
+
+bool  compareBySizeD(t_file &a, t_file &b)
+{
+    return (a.size > b.size);
+}
+
+bool  compareByModifA(t_file &a, t_file &b)
+{
+    return (a.modif < b.modif);
+}
+
+bool  compareByModifD(t_file &a, t_file &b)
+{
+    return (a.modif > b.modif);
 }
 
 t_file		info(std::string const & path)
