@@ -824,7 +824,7 @@ Response::~Response()
 {
     if (_cgiHandler)
         delete _cgiHandler;
-    if (_status != 414)
+    if (_status != 414 && _status != 413)
         delete _pt_request;
 }
 

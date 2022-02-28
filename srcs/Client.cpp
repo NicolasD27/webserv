@@ -29,7 +29,6 @@ Client::Client(Client const &cpy)
 
 Client::~Client()
 {
-    std::cout << "destroying client..." << std::endl;
     _client_ipv4_str.clear();
     for (std::vector<Response *>::iterator it = _responses_to_build.begin(); it != _responses_to_build.end(); ++it)
         delete *it;
@@ -171,6 +170,7 @@ bool Client::receiveFromClient(std::vector<Server*> servers)
     if (max_body_size != -1 && content_length > max_body_size)
     {
         std::cout << *request << std::endl;
+        while ((r = read(_socket, _receiving_buff , MAX_SIZE)) > 0); // finir de lire
         buildErrorResponse(413, servers);
         delete request;
     }
@@ -285,6 +285,8 @@ int Client::findMatchingServer(std::vector<Server*> servers, Request & request)
         {
             for (std::vector<std::string>::iterator ite = (*it)->getBeginServerNames(); ite != (*it)->getEndServerNames(); ++ite)
             {
+                std::cout << *ite + ":" + to_string((*it)->getPort()) << " " << request["Host"] << std::endl;
+                std::cout << "mbs : " << (*it)->getMaxBodySize();
                 if (*ite == request["Host"] || *ite + ":" + to_string((*it)->getPort()) == request["Host"])
                 {
                     _server_socket = (*it)->getSocket();
