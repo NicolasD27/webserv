@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/19 22:28:13 by clorin            #+#    #+#             */
-/*   Updated: 2022/02/25 08:46:33 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/28 09:25:59 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -622,25 +622,56 @@ unsigned int Response::buildAutoIndex()
 {
     DIR *dir;
     struct dirent *ent;
+
     _headers.insert(std::make_pair("Content-type", "text/html"));
     std::string current_directory = getWorkingPath();
     //std::cout << "current_directory au départ = " << current_directory<<"\n";
     //current_directory += "/" + _pt_server->getRoot() + "/" + ((_pt_request->getLocation().length() == 1) ? "" : _pt_request->getLocation());
     current_directory += "/" + _ressource_path;
-    std::cout << "current_directory = " << current_directory << "\n";
+    //std::cout << "current_directory = " << current_directory << "\n";
     if ((dir = opendir (current_directory.c_str())) != NULL)
     {
-        _body += "<h1>Index of " + _pt_request->getLocation() + "</h1></br><hr>";
-        while ((ent = readdir (dir)) != NULL)
+        _body += "<h1>Index of " + _pt_request->getLocation() + "</h1>";
+        _body += "<table><tbody><tr><th valign='top'><img src='/icons/blank.gif'></th><th>Name</th><th>Size</th><th>Last Modified</th></tr>";
+        _body += "<tr><th colspan='5'><hr></th></tr>";
+        _body += "<tr><td valign='top'><img src='/icons/back.gif'></td><td><a href='../'>Parent Directory</a></td></tr>";
+        std::vector<t_file> vectorFile;
+        while((ent = readdir(dir)) != NULL)
         {
+            std::string path = current_directory; 
             std::string dir_name(ent->d_name);
             if (ent->d_type == DT_DIR)
                 dir_name += "/";
-            _body += "<a href=\"" + dir_name + "\" >"+ dir_name + "</a></br>\n" ;
+            path += dir_name;
+            t_file file = info(path);
+            file.name = dir_name;
+
+            if(dir_name != "./" && dir_name != "../")
+                vectorFile.push_back(file);
         }
-        _body += "<hr>";
-        _status = 200;
         closedir (dir);
+
+        std::sort(vectorFile.begin(), vectorFile.end(), compareByName);
+        for(size_t i = 0; i < vectorFile.size(); i++)
+        {
+            _body += "<tr><td valign='top'><img src='/icons/";
+            switch (vectorFile[i].type)
+            {
+                case S_IFDIR: _body += "folder.gif";    break;
+                case S_IFREG: _body += "text.gif";              break;
+                default:      _body += "unknown.gif";           break;
+            }
+            _body += "'></td><td><a href=\"" + vectorFile[i].name + "\" >"+ vectorFile[i].name + "</a></td>";
+            if(vectorFile[i].type != S_IFDIR)
+                _body += "<td align='right'>"+to_string(vectorFile[i].size)+"</td>";
+            else
+                _body += "<td>-</td>";
+            _body += "<td align='right'>"+vectorFile[i].modif+"</td></tr>\n" ;
+        }
+        _body += "<tr><th colspan='5'><hr></th></tr></tbody></table>";
+        _body += "<adress><em>Webserv Server at ";
+        _body += this->getHost()+" PORT "+ to_string(this->getPort())+"</em></adress>";
+        _status = 200;
     }
     else 
     {

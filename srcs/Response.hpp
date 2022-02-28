@@ -30,6 +30,9 @@
 #include <sys/wait.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <algorithm>
+#include "file_utils.hpp"
+
 class Response;
 
 
@@ -115,5 +118,5 @@ public:
 };
 
 std::ostream &operator <<(std::ostream &, Response &);
-
+bool  compareByName(t_file &a, t_file &b);
 #endif

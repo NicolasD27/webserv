@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/06 09:35:45 by clorin            #+#    #+#             */
-/*   Updated: 2022/01/10 11:53:22 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/28 09:07:49 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,4 +60,28 @@ std::string getLastModifiedDate(std::string & filename)
 		return std::string(buffer);
 	}
 	return "";
+}
+
+bool  compareByName(t_file &a, t_file &b)
+{
+    return (a.name < b.name);
+}
+
+t_file		info(std::string const & path)
+{
+	struct stat sb;
+	t_file 		file;
+
+	if (stat(path.c_str(), &sb) == -1)
+	{
+       perror("stat");
+	   return file;
+    }
+	else
+	{
+		file.type = sb.st_mode & S_IFMT;
+		file.size = sb.st_size;
+		file.modif = ctime(&sb.st_mtime);
+	}
+	return file;
 }
