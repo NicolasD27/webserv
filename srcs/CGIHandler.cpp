@@ -6,13 +6,19 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/19 22:40:48 by clorin            #+#    #+#             */
-/*   Updated: 2022/02/22 10:50:03 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/25 09:24:04 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "CGIHandler.hpp"
 
-CGIHandler::~CGIHandler(){}
+CGIHandler::~CGIHandler()
+{
+	size_t i = 0;
+	while(_envChar[i])
+		free(_envChar[i++]);
+	free (_envChar);
+}
 
 CGIHandler::CGIHandler()
 {
@@ -25,6 +31,7 @@ CGIHandler & CGIHandler::operator=(CGIHandler const & src)
 	_env = src._env;
 	_script = src._script;
 	_file = src._file;
+	this->setEnvChar();
 	return *this;
 }
 /*
@@ -71,7 +78,12 @@ CGIHandler & CGIHandler::operator=(CGIHandler const & src)
 
 */
 
-	CGIHandler::CGIHandler(Request const *request, Response *response, std::string script, std::string file): _response(response), _body(request->getBody()), _script(script), _file(file)
+	CGIHandler::CGIHandler(Request const *request, Response *response, std::string script, std::string file):
+	_response(response),
+	_body(request->getBody()),
+	_script(script),
+	_file(file),
+	_envChar(NULL)
 {
 	std::map<std::string, std::string>	headers_response = response->getHeaders();
 	std::map<std::string, std::string>	headers_request = request->getHeaders();
@@ -103,20 +115,20 @@ CGIHandler & CGIHandler::operator=(CGIHandler const & src)
 	_env["REQUEST_URI"] = response->getRessourcePath();
 	_env["REDIRECT_STATUS"] = "200";
 	_env["UPLOAD_DIR"] = location->getUploadDir();
+	this->setEnvChar();
  }
 
-char					**CGIHandler::getEnv() const
+void					CGIHandler::setEnvChar()
 {
-	char	**env = new char*[this->_env.size() + 1];
+	_envChar = new char*[this->_env.size() + 1];
 	int	j = 0;
 	for (std::map<std::string, std::string>::const_iterator i = this->_env.begin(); i != this->_env.end(); i++) {
 		std::string	element = i->first + "=" + i->second;
-		env[j] = new char[element.size() + 1];
-		env[j] = strcpy(env[j], (const char*)element.c_str());
+		_envChar[j] = new char[element.size() + 1];
+		_envChar[j] = strcpy(_envChar[j], (const char*)element.c_str());
 		j++;
 	}
-	env[j] = NULL;
-	return env;
+	_envChar[j] = NULL;
 }
 
 size_t                  CGIHandler::size() const
@@ -124,7 +136,7 @@ size_t                  CGIHandler::size() const
     return this->_env.size();
 }
 
-std::string		CGIHandler::executeCgi()
+std::string		CGIHandler::executeCgi(unsigned int *status)
 {
 	pid_t		pid;
 	int			saveStdin;
@@ -140,6 +152,8 @@ std::string		CGIHandler::executeCgi()
 	long	fdIn = fileno(fIn);
 	long	fdOut = fileno(fOut);
 	int		ret = 1;
+	int		exit_status = 0;
+	*status = 200;
 
 	std::cout << "Vars dans CGI : \n";
 	for (std::map<std::string, std::string>::iterator it = _env.begin(); it != _env.end(); ++it)
@@ -157,23 +171,31 @@ std::string		CGIHandler::executeCgi()
 	if (pid == -1)
 	{
 		std::cerr << "Fork crashed." << std::endl;
+		*status = 500;
 		return ("Status: 500\r\n\r\n");
 	}
 	else if (pid == 0)
 	{
         
-		char **env;
-        env = this->getEnv();		//todo free()
+		//char **env;
+        //env = this->getEnv();		//todo free()
 		
         std::cout << std::endl;
 		dup2(fdIn, STDIN_FILENO);
 		dup2(fdOut, STDOUT_FILENO);
-		execve(scriptName[0], const_cast<char* const *>(scriptName), env);
+		execve(scriptName[0], const_cast<char* const *>(scriptName), _envChar);
 		std::cerr << "Execve crashed." << std::endl;
+		exit_status = -1;
     }
 	else
 	{
-		waitpid(-1, NULL, 0);
+		int			status_exited;
+		waitpid(-1, &status_exited, 0);
+		if (WIFEXITED(status_exited))
+		{
+				if(WEXITSTATUS(status_exited))
+					*status = 500;
+		}
 		_response->CGIReady(fdOut, fOut);
 	}
 
@@ -185,7 +207,6 @@ std::string		CGIHandler::executeCgi()
 	close(saveStdin);
 	close(saveStdout);
 	if (!pid)
-		exit(0);
-
+		exit(exit_status);
 	return (newBody);
 }

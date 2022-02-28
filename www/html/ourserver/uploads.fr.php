@@ -15,8 +15,16 @@ header_remove('Content-Type');
 		<h1>Téléchargement ! </h1>
 		<?php
 $target_dir = $_SERVER['UPLOAD_DIR'];
-$target_file = $target_dir."/". basename($_FILES["file"]["name"]);
-$uploadOk = 1;
+if(isset($_FILES["file"]))
+{
+    $target_file = $target_dir."/". basename($_FILES["file"]["name"]);
+    $uploadOk = 1;
+}
+else
+{
+  echo "<p>Désolé, la variable \$_FILES n'a pas été trouvé.</p>";
+  $uploadOk = 0;
+}
 $imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
 //echo $_FILES["file"]["tmp_name"]." -> ".$target_file;
 

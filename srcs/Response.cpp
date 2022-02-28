@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/19 22:28:13 by clorin            #+#    #+#             */
-/*   Updated: 2022/02/23 13:15:43 by clorin           ###   ########.fr       */
+/*   Updated: 2022/02/28 11:13:47 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -589,7 +589,7 @@ void Response::buildFileFD()
         else
             executeCgi();    
         _to_send = false;
-        _status = 200;
+        //_status = 200;
         return;
     }
     _ressource_fd = open(_ressource_path.c_str(), O_NONBLOCK);
@@ -622,25 +622,109 @@ unsigned int Response::buildAutoIndex()
 {
     DIR *dir;
     struct dirent *ent;
+
     _headers.insert(std::make_pair("Content-type", "text/html"));
     std::string current_directory = getWorkingPath();
     //std::cout << "current_directory au départ = " << current_directory<<"\n";
     //current_directory += "/" + _pt_server->getRoot() + "/" + ((_pt_request->getLocation().length() == 1) ? "" : _pt_request->getLocation());
     current_directory += "/" + _ressource_path;
-    std::cout << "current_directory = " << current_directory << "\n";
+   
+    //std::cout << "current_directory = " << current_directory << "\n";
     if ((dir = opendir (current_directory.c_str())) != NULL)
     {
-        _body += "<h1>Index of " + _pt_request->getLocation() + "</h1></br><hr>";
-        while ((ent = readdir (dir)) != NULL)
+        std::map<std::string, std::string> sorting =  _pt_request->getParams();
+        _body += "<h1>Index of " + _pt_request->getLocation() + "</h1>";
+        _body += "<table><tbody><tr><th valign='top'><img src='/icons/blank.gif'></th>";
+        // Name with sort
+        _body += "<th><a href='?C=N";
+        if(sorting.empty() || sorting["O"] == "" || sorting["O"] == "D")
+            _body += "&O=A";
+        else if(sorting["O"] == "A")
+            _body += "&O=D";
+        _body += "'>Name</a></th>";
+        // Size with sort
+        _body += "<th><a href='?C=S";
+        if(sorting.empty() || sorting["O"] == "" || sorting["O"] == "D")
+            _body += "&O=A";
+        else if(sorting["O"] == "A")
+            _body += "&O=D";
+        _body += "'>Size</a></th>";
+        //modifierd with sort
+        _body += "<th><a href='?C=M";
+        if(sorting.empty() || sorting["O"] == "" || sorting["O"] == "D")
+            _body += "&O=A";
+        else if(sorting["O"] == "A")
+            _body += "&O=D";
+        _body += "'>Last Modified</a></th></tr>";
+        _body += "<tr><th colspan='5'><hr></th></tr>";
+        _body += "<tr><td valign='top'><img src='/icons/back.gif'></td><td><a href='../'>Parent Directory</a></td></tr>";
+        std::vector<t_file> vectorFile;
+        while((ent = readdir(dir)) != NULL)
         {
+            std::string path = current_directory; 
             std::string dir_name(ent->d_name);
             if (ent->d_type == DT_DIR)
                 dir_name += "/";
-            _body += "<a href=\"" + dir_name + "\" >"+ dir_name + "</a></br>\n" ;
+            path += dir_name;
+            t_file file = info(path);
+            file.name = dir_name;
+
+            if(dir_name != "./" && dir_name != "../")
+                vectorFile.push_back(file);
         }
-        _body += "<hr>";
-        _status = 200;
         closedir (dir);
+        
+        // sorting 
+        if(sorting.empty() || sorting["C"]=="N")
+        {
+            if(sorting.empty() || sorting["O"] == "" || sorting["O"] == "A")
+                std::sort(vectorFile.begin(), vectorFile.end(), compareByNameA);
+            else
+                std::sort(vectorFile.begin(), vectorFile.end(), compareByNameD);
+        }
+        else if (sorting["C"] == "S")
+        {
+            if(sorting.empty() || sorting["O"] == "" || sorting["O"] == "A")
+                std::sort(vectorFile.begin(), vectorFile.end(), compareBySizeA);
+            else
+                std::sort(vectorFile.begin(), vectorFile.end(), compareBySizeD);
+        }
+        else if(sorting["C"] == "M")
+        {
+            if(sorting.empty() || sorting["O"] == "" || sorting["O"] == "A")
+                std::sort(vectorFile.begin(), vectorFile.end(), compareByModifA);
+            else
+                std::sort(vectorFile.begin(), vectorFile.end(), compareByModifD);
+        }
+        for(size_t i = 0; i < vectorFile.size(); i++)
+        {
+            _body += "<tr><td valign='top'><img src='/icons/";
+            switch (vectorFile[i].type)
+            {
+                case S_IFDIR: _body += "folder.gif";    break;
+                case S_IFREG: _body += "text.gif";              break;
+                default:      _body += "unknown.gif";           break;
+            }
+            _body += "'></td><td><a href=\"" + vectorFile[i].name + "\" >"+ vectorFile[i].name + "</a></td>";
+            if(vectorFile[i].type != S_IFDIR)
+            {
+                if(vectorFile[i].size > 10000)
+                {
+                    _body += "<td align='right'>"+to_string(vectorFile[i].size / 1000)+"K</td>";
+                }
+                else
+                    _body += "<td align='right'>"+to_string(vectorFile[i].size)+"&nbsp</td>";
+                    
+                
+            }
+            else
+                _body += "<td>-</td>";
+            _body += "<td align='right'>"+vectorFile[i].modif+"</td></tr>\n" ;
+        }
+        _body += "<tr><th colspan='5'><hr></th></tr></tbody></table>";
+        _body += "<adress><em>Webserv Server at ";
+        _body += this->getHost()+" PORT "+ to_string(this->getPort())+"</em></adress>";
+        _status = 200;
     }
     else 
     {
@@ -654,7 +738,8 @@ unsigned int Response::buildAutoIndex()
 
 void Response::executeCgi()
 {
-    _body.append(_cgiHandler->executeCgi());
+    _body.append(_cgiHandler->executeCgi(&_status));
+    std::cout << "_status après en _cgiHandler->executeCgi() : "<<C_RED<< _status << C_RESET<< std::endl;
 }
 
 void Response::CGIReady(long fd, FILE *CGIfOut)
