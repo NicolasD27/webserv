@@ -116,7 +116,7 @@ void Request::handleLocation(std::string location)
         _location = location.substr(0, sep_pos);
     }
     else
-        _location = location;
+        _location = urlDecode(location);
 }
 
 void Request::storeHeader(std::string key, std::string value)

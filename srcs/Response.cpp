@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/19 22:28:13 by clorin            #+#    #+#             */
-/*   Updated: 2022/02/28 11:13:47 by clorin           ###   ########.fr       */
+/*   Updated: 2022/03/01 10:13:35 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -626,7 +626,7 @@ unsigned int Response::buildAutoIndex()
     //std::cout << "current_directory au départ = " << current_directory<<"\n";
     //current_directory += "/" + _pt_server->getRoot() + "/" + ((_pt_request->getLocation().length() == 1) ? "" : _pt_request->getLocation());
     current_directory += "/" + _ressource_path;
-   
+    _body += "<head><meta charset='utf8'></head>";
     //std::cout << "current_directory = " << current_directory << "\n";
     if ((dir = opendir (current_directory.c_str())) != NULL)
     {
@@ -666,7 +666,7 @@ unsigned int Response::buildAutoIndex()
             path += dir_name;
             t_file file = info(path);
             file.name = dir_name;
-
+            
             if(dir_name != "./" && dir_name != "../")
                 vectorFile.push_back(file);
         }
@@ -703,7 +703,11 @@ unsigned int Response::buildAutoIndex()
                 case S_IFREG: _body += "text.gif";              break;
                 default:      _body += "unknown.gif";           break;
             }
-            _body += "'></td><td><a href=\"" + vectorFile[i].name + "\" >"+ vectorFile[i].name + "</a></td>";
+            _body.append("'></td><td><a href=\"");
+            _body.append(vectorFile[i].name);
+            _body.append("\" >");
+            _body.append(vectorFile[i].name);
+            _body += "</a></td>";
             if(vectorFile[i].type != S_IFDIR)
             {
                 if(vectorFile[i].size > 10000)
