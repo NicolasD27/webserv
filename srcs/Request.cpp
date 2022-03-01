@@ -33,14 +33,19 @@ Request & Request::operator=(Request const & src)
 bool Request::headerExist(std::string key) const { return (_headers.find(key) != _headers.end()); }
 std::string & Request::operator[](const char *key) {return _headers[key]; }
 
-void Request::parseHeaders()
+void Request::parseHeaders(std::string request_string)
 {
-    std::stringstream buff(_request_string);
+    std::stringstream buff;
+    if (request_string == "")
+        buff = std::stringstream(_request_string);
+    else 
+        buff = std::stringstream(request_string);
     std::string line;
     std::string key;
     std::string value;
     std::getline(buff, line);
-    parseMethod(line);
+    if (request_string == "")
+        parseMethod(line);
     while(std::getline(buff, line))
     {
         if (line.length() <= 1)

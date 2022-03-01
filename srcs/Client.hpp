@@ -39,6 +39,7 @@ private:
     int                     _socket;
     struct sockaddr_in      _address;
     std::string             _client_ipv4_str;
+    Request *               _request_in_progress;
     std::vector<Response*>  _responses_to_build;
     std::queue<Response*>   _responses_to_send;
     int                     _current_sending_byte;
@@ -47,6 +48,7 @@ private:
     int                     _server_socket;
     bool                    _headers_read;
     bool                    _body_read;
+    bool                    _awaiting_trailer;
 
     int findMatchingServer(std::vector<Server*>, Request & request);
     void readChunkedRequest(Request *, int, int, int);
