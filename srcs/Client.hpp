@@ -50,9 +50,9 @@ private:
     bool                    _body_read;
     bool                    _awaiting_trailer;
 
-    int findMatchingServer(std::vector<Server*>, Request & request);
+    Server * findMatchingServer(std::vector<Server*>, Request & request);
     void readChunkedRequest(Request *, int, int, int);
-    void buildErrorResponse(unsigned int status, std::vector<Server*> servers);
+    void buildErrorResponse(unsigned int status, Server * server);
     
 public:
     Client();

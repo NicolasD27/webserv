@@ -360,13 +360,10 @@ bool Response::chooseAcceptableFile(std::vector<std::string> options)
         for (std::vector<std::map<std::string, std::string>>::iterator ite = target_types.begin(); ite != target_types.end(); ++ite)
         {
             fitness = 0;
-            std::cout << "testing : " << it->at("path") << std::endl << it->at("type") << "/" << it->at("subtype") << std::endl;
-            std::cout << "with : " << ite->at("type") << "/" << ite->at("subtype") << " q=" << ite->at("q") << std::endl;
             if ((it->at("type") == ite->at("type") || ite->at("type") == "*") && (it->at("subtype") == ite->at("subtype") || ite->at("subtype") == "*"))
             {
                 fitness += (it->at("type") == ite->at("type")) ? 100 : 0;
                 fitness += (it->at("subtype") == ite->at("subtype")) ? 10 : 0;
-                std::cout << "fitness : " << fitness << std::endl;
                 if (fitness > best_fitness_one_type)
                 {
                     best_fitness_one_type = fitness;
@@ -379,12 +376,9 @@ bool Response::chooseAcceptableFile(std::vector<std::string> options)
         for (std::vector<std::map<std::string, std::string>>::iterator ite = target_langs.begin(); ite != target_langs.end(); ++ite)
         {
             fitness = 0;
-            std::cout << "testing : " << it->at("path") << std::endl << it->at("lang")  << std::endl;
-            std::cout << "with : " << ite->at("lang")  << " q=" << ite->at("q") << std::endl;
             if (it->at("lang") == ite->at("lang") || ite->at("lang") == "*")
             {
                 fitness += (it->at("lang") == ite->at("lang")) ? 10 : 0;
-                std::cout << "fitness : " << fitness << std::endl;
                 if (fitness > best_fitness_one_lang)
                 {
                     best_fitness_one_lang = fitness;
