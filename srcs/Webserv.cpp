@@ -202,7 +202,6 @@ bool        Webserv::run()
             buildFDSets(**it, &read_fds, &write_fds, &except_fds, &highest_socket);
         std::cout << "before select" << std::endl;
         int select_res = select(highest_socket + 1, &read_fds, &write_fds, &except_fds, NULL);
-        std::cout << "select_res : " << select_res << std::endl;
         if (select_res <= 0)
             return false;
         else
@@ -223,7 +222,6 @@ bool        Webserv::run()
                 {
                     if ((*client_it)->getResponseToBuildSize() > 0)
                     {
-                        std::cout << "response to build : " <<  (*client_it)->getResponseToBuildSize() << std::endl;
                         Response *to_switch = NULL;
                         for (std::vector<Response*>::iterator ite = (*client_it)->getBeginResponseToBuild(); ite != (*client_it)->getEndResponseToBuild(); ++ite)
                         {

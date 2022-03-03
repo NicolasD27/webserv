@@ -133,7 +133,7 @@ bool Client::receiveFromClient(std::vector<Server*> servers)
         {
             std::cout << "headers too long" << std::endl;
             while ((r = read(_socket, _receiving_buff , MAX_SIZE)) > 0); // finir de lire
-            buildErrorResponse(414, servers);
+            buildErrorResponse(414, servers.front());
             return true;
         }
 
@@ -154,7 +154,8 @@ bool Client::receiveFromClient(std::vector<Server*> servers)
         newline_pos = _current_receiving_byte - 2;
     
     
-    int max_body_size = findMatchingServer(servers, *_request_in_progress);
+    Server *server = findMatchingServer(servers, *_request_in_progress);
+    int max_body_size = server->getMaxBodySize();
     headers_length = request_string.find("\r\n\r\n") + 4;
     _body_read = true;
     if (_awaiting_trailer)
@@ -193,7 +194,7 @@ bool Client::receiveFromClient(std::vector<Server*> servers)
     {
         std::cout << *_request_in_progress << std::endl;
         while ((r = read(_socket, _receiving_buff , MAX_SIZE)) > 0); // finir de lire
-        buildErrorResponse(413, servers);
+        buildErrorResponse(413, server);
         delete _request_in_progress;
     }
     else if (request_string.length() == 0)
@@ -212,12 +213,7 @@ bool Client::receiveFromClient(std::vector<Server*> servers)
         _headers_read = false;
         
         std::cout << *_request_in_progress << std::endl;
-        for (std::vector<Server*>::iterator it = servers.begin(); it != servers.end(); ++it)
-            if ((*it)->getSocket() == _server_socket)
-            {
-                response = new Response(*_request_in_progress, **it);
-                break;
-            }
+        response = new Response(*_request_in_progress, *server);
         if (response->isToSend())
             _responses_to_send.push(response);
         else
@@ -231,22 +227,19 @@ bool Client::receiveFromClient(std::vector<Server*> servers)
     return true;
 } 
 
-void Client::buildErrorResponse(unsigned int status, std::vector<Server*> servers)
+void Client::buildErrorResponse(unsigned int status, Server * server)
 {
     Response *response;
+
     _current_receiving_byte = 0;
     _receiving_buff[0] = 0;
     _headers_read = false;
-    for (std::vector<Server*>::iterator it = servers.begin(); it != servers.end(); ++it)
-        if ((*it)->getSocket() == _server_socket)
-        {
-            response = new Response(status, **it);
-            break;
-        }
+    response = new Response(status, *server);
     if (response->isToSend())
         _responses_to_send.push(response);
     else
         _responses_to_build.push_back(response);
+    
 }
 
 
@@ -311,11 +304,12 @@ void Client::readChunkedRequest(Request *request, int newline_pos, int offset_ne
         }        
 }
 
-int Client::findMatchingServer(std::vector<Server*> servers, Request & request)
+Server * Client::findMatchingServer(std::vector<Server*> servers, Request & request)
 {
-    int max_body_size = -1;
+    if (request.getLocation().substr(0, 7) == "http://")
+        request.setLocation(request.getLocation().substr(7 + request["Host"].length()));
     if (request["Host"].length() == 0)
-        return max_body_size;
+        return servers.front();
     for (std::vector<Server*>::iterator it = servers.begin(); it != servers.end(); ++it)
     {
         if ((*it)->getSocket() == _server_socket )
@@ -325,14 +319,12 @@ int Client::findMatchingServer(std::vector<Server*> servers, Request & request)
                 if (*ite == request["Host"] || *ite + ":" + to_string((*it)->getPort()) == request["Host"])
                 {
                     _server_socket = (*it)->getSocket();
-                    if (request.getLocation().substr(0, 7) == "http://")
-                        request.setLocation(request.getLocation().substr(7 + request["Host"].length()));
-                    return (*it)->getMaxBodySize();
+                    return (*it);
                 }
             }
         }
     }
-    return max_body_size;
+    return servers.front();
 }
 
 
