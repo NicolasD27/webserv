@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/19 22:40:48 by clorin            #+#    #+#             */
-/*   Updated: 2022/02/25 09:24:04 by clorin           ###   ########.fr       */
+/*   Updated: 2022/03/03 12:20:08 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,8 +89,6 @@ CGIHandler & CGIHandler::operator=(CGIHandler const & src)
 	std::map<std::string, std::string>	headers_request = request->getHeaders();
 	Location							*location = response->getLocationBlock();
 
-	
-
 	_env["SERVER_PROTOCOL"] = "HTTP/1.1";
 	_env["SERVER_SOFTWARE"] = "webserv";
 	_env["SERVER_NAME"] = response->getHost();
@@ -100,16 +98,12 @@ CGIHandler & CGIHandler::operator=(CGIHandler const & src)
 	_env["AUTH_TYPE"] = "";
 	_env["CONTENT_TYPE"] = headers_request["Content-Type"];
 	_env["PATH_INFO"] = response->getRessourcePath();
-	_env["PATH_TRANSLATED"] = response->getRessourcePath(); //same  ?
+	_env["PATH_TRANSLATED"] = response->getRessourcePath(); 
 	_env["QUERY_STRING"] = request->getQueryString();
-	if(request->getBody().empty())
-		_env["CONTENT_LENGTH"] = "";
-	else
-		_env["CONTENT_LENGTH"] = to_string(request->getBody().length());
-	
+	_env["CONTENT_LENGTH"] = headers_request["Content-Length"];
 	_env["REMOTE_ADDR"] = request->getAddressClient();
 	_env["REMOTE_PORT"] = to_string(request->getPortClient());
-	_env["REMOTE_IDENT"] = headers_request["Authorization"]; // a verifier
+	_env["REMOTE_IDENT"] = headers_request["Authorization"];
 	_env["REMOTE_USER"] = headers_request["Authorization"];
 	_env["SCRIPT_NAME"] = response->getRessourcePath();
 	_env["REQUEST_URI"] = response->getRessourcePath();
@@ -155,13 +149,11 @@ std::string		CGIHandler::executeCgi(unsigned int *status)
 	int		exit_status = 0;
 	*status = 200;
 
-	std::cout << "Vars dans CGI : \n";
-	for (std::map<std::string, std::string>::iterator it = _env.begin(); it != _env.end(); ++it)
-    {
-        std::cout << "\t"<< C_YELLOW << it->first << C_RESET<<": "<< C_CYAN << it->second << C_RESET<< std::endl;
-    }
-	// std::cout << C_CYAN << "\tBody = " << C_RESET << ((_body.empty())? "Empty":_body)<< std::endl;
-
+	// std::cout << "Vars dans CGI : \n";
+	// for (std::map<std::string, std::string>::iterator it = _env.begin(); it != _env.end(); ++it)
+    // {
+    //     std::cout << "\t"<< C_YELLOW << it->first << C_RESET<<": "<< C_CYAN << it->second << C_RESET<< std::endl;
+    // }
 	write(fdIn, _body.c_str(), _body.size());
 	lseek(fdIn, 0, SEEK_SET);
 	std::cout << "execution de "<< scriptName[0] << " with " << scriptName[1] << std::endl;
@@ -176,11 +168,6 @@ std::string		CGIHandler::executeCgi(unsigned int *status)
 	}
 	else if (pid == 0)
 	{
-        
-		//char **env;
-        //env = this->getEnv();		//todo free()
-		
-        std::cout << std::endl;
 		dup2(fdIn, STDIN_FILENO);
 		dup2(fdOut, STDOUT_FILENO);
 		execve(scriptName[0], const_cast<char* const *>(scriptName), _envChar);

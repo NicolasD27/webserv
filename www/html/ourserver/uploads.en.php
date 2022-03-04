@@ -1,7 +1,5 @@
 <?php
-header_remove();
-header('Content-Type: text/html');
-header_remove('Content-Type');
+  include "upload_utils.php"
 ?>
 
 <!DOCTYPE html>
@@ -16,10 +14,13 @@ header_remove('Content-Type');
 		<h1>Upload ! </h1>
 		<?php
 $target_dir = $_SERVER['UPLOAD_DIR'];
-$target_file = $target_dir."/". basename($_FILES["file"]["name"]);
-$uploadOk = 1;
+$target_file = "";
+if(isset($_FILES["file"]))
+{
+    $target_file = $target_dir."/". basename($_FILES["file"]["name"]);
+    $uploadOk = 1;
+}
 $imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
-//echo $_FILES["file"]["tmp_name"]." -> ".$target_file;
 
 if (!file_exists($target_dir) && !is_dir($target_dir)) 
 {
@@ -35,8 +36,8 @@ if (file_exists($target_file)) {
 }
 
 // Check file size
-if ($_FILES["file"]["size"] > 2*1048576) {
-    echo "Sorry, your file is too large.";
+if ($_SERVER["CONTENT_LENGTH"] > return_bytes( ini_get('upload_max_filesize'))) {
+    echo "Sorry, your file is too large.</br>upload_max_filesize (php.ini) = ".ini_get('upload_max_filesize')."</p>";
     $uploadOk = 0;
 }
 

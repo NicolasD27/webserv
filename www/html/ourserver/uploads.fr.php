@@ -1,8 +1,7 @@
 <?php
-header_remove();
-header('Content-Type: text/html');
-header_remove('Content-Type');
+  include "upload_utils.php";
 ?>
+
 <!DOCTYPE html>
 <html lang="fr">
 	<head>
@@ -15,23 +14,17 @@ header_remove('Content-Type');
 		<h1>Téléchargement ! </h1>
 		<?php
 $target_dir = $_SERVER['UPLOAD_DIR'];
+$target_file = "";
 if(isset($_FILES["file"]))
 {
     $target_file = $target_dir."/". basename($_FILES["file"]["name"]);
     $uploadOk = 1;
 }
-else
-{
-  echo "<p>Désolé, la variable \$_FILES n'a pas été trouvé.</p>";
-  $uploadOk = 0;
-}
 $imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
-//echo $_FILES["file"]["tmp_name"]." -> ".$target_file;
 
 if (!file_exists($target_dir) && !is_dir($target_dir)) 
 {
   echo "<p>Désolé, le répertoire [".$target_dir."] n'existe pas.</p>";   
-  //echo "<p>Sorry, The directory [".$target_dir."] does not exist.</p>";   
   $uploadOk = 0;    
 }
 
@@ -43,8 +36,8 @@ if (file_exists($target_file)) {
 }
 
 // Check file size
-if ($_FILES["file"]["size"] > 5*1048576) {
-  echo "Désolé, le fichier est trop gros.";
+if ($_SERVER["CONTENT_LENGTH"] > return_bytes( ini_get('upload_max_filesize'))) {
+  echo "<p>Désolé, le fichier est trop gros.</br>upload_max_filesize (php.ini) = ".ini_get('upload_max_filesize')."</p>";
   $uploadOk = 0;
 }
 
