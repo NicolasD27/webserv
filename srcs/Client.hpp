@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/15 11:27:16 by clorin            #+#    #+#             */
-/*   Updated: 2022/03/03 11:23:12 by clorin           ###   ########.fr       */
+/*   Updated: 2022/03/04 09:33:59 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ class Client;
 #include "Base64.hpp"
 
 #define NO_SOCKET -1
-#define MAX_SIZE 2000000
+#define MAX_SIZE 2008000
 #define MAX_SIZE_HEADER 8000
 
 class Client
