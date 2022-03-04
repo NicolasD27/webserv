@@ -255,7 +255,7 @@ std::ostream &operator<<(std::ostream & o, Request & request)
     o << C_YELLOW << "\tLocation "<< C_RESET << ": " << request.getLocation() << "\n";
     request.printHeaders(o);
     o << C_YELLOW << "\tKeep alive " << C_RESET << ": " << request.getKeepAliveN()<<"\n";
-    o << C_YELLOW << "\tbody " << C_RESET << ": <"<< C_GRAY << request.getBody() << C_RESET <<">\n";
+    //o << C_YELLOW << "\tbody " << C_RESET << ": <"<< C_GRAY << request.getBody() << C_RESET <<">\n";
     request.printParams(o);
     return o;
 }

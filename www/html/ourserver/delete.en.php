@@ -41,7 +41,7 @@ header_remove('Content-Type');
     $scandir = scandir("img/download/");
     
     foreach($scandir as $fichier){
-      if(preg_match("#\.(jpg|jpeg|png|gif|bmp|tif)$#",strtolower($fichier))){
+      if(preg_match("#\.(jpg|jpeg|png|gif|bmp|tif|pdf|txt)$#",strtolower($fichier))){
             echo "<tr><th>$fichier</th>"."<td><button onclick=\"makeDELETErequest('".$fichier."')\">Erase</button></td></tr>";
       }
     }
