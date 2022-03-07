@@ -128,20 +128,22 @@ bool Client::receiveFromClient(std::vector<Server*> servers)
             _receiving_buff[_current_receiving_byte] = 0;
             newline_pos = std::string(_receiving_buff).find("\r\n\r\n");
         }
+        if (r <= 0)
+        {
+            return false;
+        }
         std::cout << "header read" << std::endl;
         if (_current_receiving_byte >= MAX_SIZE_HEADER)
         {
             std::cout << "headers too long" << std::endl;
-            while ((r = read(_socket, _receiving_buff , MAX_SIZE)) > 0); // finir de lire
+            while ((r = read(_socket, _receiving_buff , MAX_SIZE)) > 0);
+            if (r <= 0)
+                return false;
             buildErrorResponse(414, servers.front());
             return true;
         }
 
-        if (r < 0)
-        {
-            std::cout << "headers incomplete yet" << std::endl;
-            return true;
-        }
+        
         _headers_read = true;
         offset_newline = 3;
         request_string = std::string(_receiving_buff, _current_receiving_byte);
@@ -168,6 +170,8 @@ bool Client::receiveFromClient(std::vector<Server*> servers)
             _receiving_buff[_current_receiving_byte] = 0;
             newline_pos = std::string(_receiving_buff + current_last_nl).find("\r\n\r\n");
         }
+        if (r <= 0)
+            return false;
         if ((newline_pos == -1 || newline_pos == std::string::npos))
             _body_read = false;
         else
@@ -177,23 +181,30 @@ bool Client::receiveFromClient(std::vector<Server*> servers)
         }
     }
     else if (_request_in_progress->headerExist("Transfer-Encoding") && !((*_request_in_progress)["Transfer-Encoding"].length() == 0 || (*_request_in_progress)["Transfer-Encoding"] == "identity"))
-        readChunkedRequest(_request_in_progress, newline_pos, offset_newline, max_body_size);
+    {
+        if (!readChunkedRequest(_request_in_progress, newline_pos, offset_newline, max_body_size))
+            return false;
+    }
     else if (_request_in_progress->headerExist("Content-Length") && (content_length = StringToInt((*_request_in_progress)["Content-Length"])) > 0 && (max_body_size == -1 || content_length <= max_body_size) && content_length < MAX_SIZE - MAX_SIZE_HEADER - 4)
     {
         std::cout << "reading body with content-length" << std::endl;
-        while (_current_receiving_byte - headers_length < content_length && (r = recv(_socket, _receiving_buff + _current_receiving_byte, content_length - _current_receiving_byte + headers_length, MSG_DONTWAIT)) > 0)
+        while (_current_receiving_byte - headers_length < content_length && (r = read(_socket, _receiving_buff + _current_receiving_byte, content_length - _current_receiving_byte + headers_length)) > 0)
         {
             _current_receiving_byte += r;
             _receiving_buff[_current_receiving_byte] = 0;
         }
-        _body_read = (r < 0) ? false : true;
+        if (r <= 0)
+            return false;
+        _body_read = (r <= 0) ? false : true;
         _request_in_progress->addToBody(std::string(_receiving_buff, content_length + newline_pos + 4).substr(newline_pos + 4));
     }
     request_string = std::string(_receiving_buff, _current_receiving_byte);
     if (max_body_size != -1 && content_length > max_body_size)
     {
         std::cout << *_request_in_progress << std::endl;
-        while ((r = read(_socket, _receiving_buff , MAX_SIZE)) > 0); // finir de lire
+        while ((r = read(_socket, _receiving_buff , MAX_SIZE)) > 0);
+        if (r <= 0)
+            return false; // finir de lire
         buildErrorResponse(413, server);
         delete _request_in_progress;
     }
@@ -244,7 +255,7 @@ void Client::buildErrorResponse(unsigned int status, Server * server)
 
 
 
-void Client::readChunkedRequest(Request *request, int newline_pos, int offset_newline, int max_body_size)
+bool Client::readChunkedRequest(Request *request, int newline_pos, int offset_newline, int max_body_size)
 {
     int r;
     int current_chunk_size;
@@ -263,6 +274,8 @@ void Client::readChunkedRequest(Request *request, int newline_pos, int offset_ne
                 current_last_nl = std::string(_receiving_buff).find_last_of("\r\n");
             }
             if (r <= 0)
+                return false;
+            if (r == 0)
                 current_last_nl++;
             request_string = std::string(_receiving_buff);
             current_chunk_size = StringHexaToInt(request_string.substr(newline_pos + offset_newline + 1));            
@@ -284,13 +297,15 @@ void Client::readChunkedRequest(Request *request, int newline_pos, int offset_ne
                             _body_read = false;
                         }
                     }
-                    else
+                    else if (r == 0)
                     {
                         _awaiting_trailer = true;
                         _body_read = false;
                     }
+                    else
+                        return false;
                 }
-                return;
+                return true;
             }
             offset_newline = 1;
             while (read_bytes < current_chunk_size + 2 && (r = read(_socket, _receiving_buff + _current_receiving_byte, current_chunk_size + 2 - read_bytes)) > 0)
@@ -299,6 +314,8 @@ void Client::readChunkedRequest(Request *request, int newline_pos, int offset_ne
                 _current_receiving_byte += r;
                 _receiving_buff[_current_receiving_byte] = 0;
             }
+            if (r <= 0)
+                return false;
             request->addToBody(std::string(_receiving_buff).substr(_current_receiving_byte - current_chunk_size - 1, current_chunk_size));
             newline_pos = std::string(_receiving_buff).find_last_of("\r\n");    
         }        

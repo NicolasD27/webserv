@@ -202,13 +202,15 @@ bool        Webserv::run()
             buildFDSets(**it, &read_fds, &write_fds, &except_fds, &highest_socket);
         std::cout << "before select" << std::endl;
         int select_res = select(highest_socket + 1, &read_fds, &write_fds, &except_fds, NULL);
+        std::cout << select_res << std::endl;
         if (select_res <= 0)
             return false;
         else
         {
+            std::cout << "nb servers : " << _servers.size() << std::endl;
             for (iterator server_it = _servers.begin(); server_it != _servers.end(); ++server_it)
             {
-                
+                std::cout << (*server_it)->getPort() << " abc" << std::endl;
                 if (FD_ISSET((*server_it)->getSocket(), &read_fds))
                 {
                     if (!(*server_it)->isListening())
@@ -220,37 +222,42 @@ bool        Webserv::run()
                 std::vector<int> client_to_remove;
                 for (std::vector<Client*>::const_iterator client_it = (*server_it)->getBeginClients(); client_it != (*server_it)->getEndClients(); ++client_it)
                 {
+                    bool read_write = false;
+                    std::cout << (*client_it)->getResponseToBuildSize() << std::endl;
                     if ((*client_it)->getResponseToBuildSize() > 0)
                     {
                         Response *to_switch = NULL;
                         for (std::vector<Response*>::iterator ite = (*client_it)->getBeginResponseToBuild(); ite != (*client_it)->getEndResponseToBuild(); ++ite)
                         {
-                            if (FD_ISSET((*ite)->getRessourceFD(), &read_fds))
+                            if (!read_write && FD_ISSET((*ite)->getRessourceFD(), &read_fds))
                             {
                                 if ((*ite)->getCGIReady())
                                     (*ite)->readCGI();
                                 else
                                     (*ite)->readRessource();
                                 to_switch = *ite;
+                                read_write = true;
                                 
                             }
-                            if (FD_ISSET((*ite)->getRessourceFD(), &write_fds))
+                            if (!read_write && FD_ISSET((*ite)->getRessourceFD(), &write_fds))
                             {
+                                read_write = true;
                                 (*ite)->executeCgi();
-                                
                             }
                         }
                         if (to_switch)
                             (*client_it)->switchToSendQueue(to_switch);
                     }
-                    if ((*client_it)->getSocket() != NO_SOCKET && FD_ISSET((*client_it)->getSocket(), &write_fds))
+                    if (!read_write && (*client_it)->getSocket() != NO_SOCKET && FD_ISSET((*client_it)->getSocket(), &write_fds))
                     {
+                        read_write = true;
                          std::cout << "sending to ..." << (*client_it)->getSocket() << std::endl;
                         (*client_it)->sendToClient();
                         
                     }
-                    if ((*client_it)->getSocket() != NO_SOCKET && FD_ISSET((*client_it)->getSocket(), &read_fds))
+                    if (!read_write && (*client_it)->getSocket() != NO_SOCKET && FD_ISSET((*client_it)->getSocket(), &read_fds))
                     {
+                        read_write = true;
                         std::cout << "receiving from ..." << (*client_it)->getSocket() << std::endl;
                         if (!(*client_it)->receiveFromClient(_servers))
                             client_to_remove.push_back((*client_it)->getSocket());
@@ -292,7 +299,7 @@ void Webserv::buildFDSets(Server const & server, fd_set *read_fds, fd_set *write
         
         for (std::vector<Response*>::iterator ite = (*it)->getBeginResponseToBuild(); ite != (*it)->getEndResponseToBuild(); ++ite)
         {
-            std::cout << "ressource to read : " << (*ite)->getRessourcePath() << std::endl;
+            std::cout << "ressource to read : " << (*ite)->getRessourceFD() << " " << (*ite)->getRessourcePath() << std::endl;
             if ((*ite)->getRessourceFD() > *highest_socket)
                 *highest_socket = (*ite)->getRessourceFD();
             if ((*ite)->getCGIReady())

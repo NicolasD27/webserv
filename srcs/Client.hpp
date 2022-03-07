@@ -51,7 +51,7 @@ private:
     bool                    _awaiting_trailer;
 
     Server * findMatchingServer(std::vector<Server*>, Request & request);
-    void readChunkedRequest(Request *, int, int, int);
+    bool readChunkedRequest(Request *, int, int, int);
     void buildErrorResponse(unsigned int status, Server * server);
     
 public:
