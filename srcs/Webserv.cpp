@@ -252,7 +252,8 @@ bool        Webserv::run()
                     {
                         read_write = true;
                          std::cout << "sending to ..." << (*client_it)->getSocket() << std::endl;
-                        (*client_it)->sendToClient();
+                        if (!(*client_it)->sendToClient())
+                            client_to_remove.push_back((*client_it)->getSocket());
                         
                     }
                     if (!read_write && (*client_it)->getSocket() != NO_SOCKET && FD_ISSET((*client_it)->getSocket(), &read_fds))

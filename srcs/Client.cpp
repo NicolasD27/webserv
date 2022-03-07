@@ -352,13 +352,15 @@ bool Client::sendToClient()
     std::string response_string = response->buildResponseString();
     std::cout << *response << std::endl;
     int r = write(_socket, response_string.c_str() + _current_sending_byte, response_string.length() - _current_sending_byte);
-    if (r == response_string.length() - _current_sending_byte)
+    if  (r <= 0)
+        return false;
+    else if (r == response_string.length() - _current_sending_byte)
     {
         std::cout << "response send" << std::endl;
         delete response;
         _responses_to_send.pop();
     }
-    else if (r >= 0)        
+    else        
         _current_receiving_byte += r;
     return true;
 }
