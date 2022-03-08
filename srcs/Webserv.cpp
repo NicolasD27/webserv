@@ -199,18 +199,14 @@ bool        Webserv::run()
         highest_socket = 0;
         initFDSets(&read_fds, &write_fds, &except_fds);
         for (iterator it = _servers.begin(); it != _servers.end(); ++it)
-            buildFDSets(**it, &read_fds, &write_fds, &except_fds, &highest_socket);
-        std::cout << "before select" << std::endl;
-        int select_res = select(highest_socket + 1, &read_fds, &write_fds, &except_fds, NULL);
-        std::cout << select_res << std::endl;
+            buildFDSets(**it, &read_fds, &write_fds, &except_fds, &highest_socket);        
+        int select_res = select(highest_socket + 1, &read_fds, &write_fds, NULL, NULL);
         if (select_res <= 0)
             return false;
         else
         {
-            std::cout << "nb servers : " << _servers.size() << std::endl;
             for (iterator server_it = _servers.begin(); server_it != _servers.end(); ++server_it)
             {
-                std::cout << (*server_it)->getPort() << " abc" << std::endl;
                 if (FD_ISSET((*server_it)->getSocket(), &read_fds))
                 {
                     if (!(*server_it)->isListening())
@@ -223,7 +219,6 @@ bool        Webserv::run()
                 for (std::vector<Client*>::const_iterator client_it = (*server_it)->getBeginClients(); client_it != (*server_it)->getEndClients(); ++client_it)
                 {
                     bool read_write = false;
-                    std::cout << (*client_it)->getResponseToBuildSize() << std::endl;
                     if ((*client_it)->getResponseToBuildSize() > 0)
                     {
                         Response *to_switch = NULL;
@@ -251,27 +246,18 @@ bool        Webserv::run()
                     if (!read_write && (*client_it)->getSocket() != NO_SOCKET && FD_ISSET((*client_it)->getSocket(), &write_fds))
                     {
                         read_write = true;
-                         std::cout << "sending to ..." << (*client_it)->getSocket() << std::endl;
                         if (!(*client_it)->sendToClient())
                             client_to_remove.push_back((*client_it)->getSocket());
-                        
                     }
                     if (!read_write && (*client_it)->getSocket() != NO_SOCKET && FD_ISSET((*client_it)->getSocket(), &read_fds))
                     {
                         read_write = true;
-                        std::cout << "receiving from ..." << (*client_it)->getSocket() << std::endl;
                         if (!(*client_it)->receiveFromClient(_servers))
                             client_to_remove.push_back((*client_it)->getSocket());
-                            
-                        
                     }
-                    
-
                 }
                 for (std::vector<int>::iterator ite = client_to_remove.begin(); ite != client_to_remove.end(); ++ite)
-                    (*server_it)->removeClient(*ite);
-
-                
+                    (*server_it)->removeClient(*ite);                
             }
         }
     }
@@ -286,7 +272,6 @@ void Webserv::initFDSets(fd_set *read_fds, fd_set *write_fds, fd_set *except_fds
     FD_ZERO(read_fds);
     FD_ZERO(write_fds);
     FD_ZERO(except_fds);
-    // FD_SET(0, read_fds);
 }
 
 void Webserv::buildFDSets(Server const & server, fd_set *read_fds, fd_set *write_fds, fd_set *except_fds, int *highest_socket)
@@ -294,29 +279,23 @@ void Webserv::buildFDSets(Server const & server, fd_set *read_fds, fd_set *write
     if (server.getSocket() > *highest_socket)
         *highest_socket = server.getSocket();
     FD_SET(server.getSocket(), read_fds);
-    FD_SET(server.getSocket(), except_fds);
     for (std::vector<Client*>::const_iterator it = server.getBeginClients(); it != server.getEndClients(); ++it)
     {
         
         for (std::vector<Response*>::iterator ite = (*it)->getBeginResponseToBuild(); ite != (*it)->getEndResponseToBuild(); ++ite)
         {
-            std::cout << "ressource to read : " << (*ite)->getRessourceFD() << " " << (*ite)->getRessourcePath() << std::endl;
             if ((*ite)->getRessourceFD() > *highest_socket)
                 *highest_socket = (*ite)->getRessourceFD();
-            if ((*ite)->getCGIReady())
-                FD_SET((*ite)->getRessourceFD(), read_fds);
-            else if ((*ite)->getRessourceFD() != 0)
+            if ((*ite)->getCGIReady() || (*ite)->getRessourceFD() > 0)
                 FD_SET((*ite)->getRessourceFD(), read_fds);
             else
                 FD_SET((*ite)->getRessourceFD(), write_fds);
         }
-        
         if ((*it)->getSocket() != NO_SOCKET)
         {
             if ((*it)->getSocket() > *highest_socket)
                 *highest_socket = (*it)->getSocket();
             FD_SET((*it)->getSocket(), read_fds);
-            FD_SET((*it)->getSocket(), except_fds);
             if ((*it)->hasResponseToSend())
                 FD_SET((*it)->getSocket(), write_fds);
         }

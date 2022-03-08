@@ -21,6 +21,7 @@ ErrorPages::ErrorPages()
     _errorPage[413] = PAGE413;
     _errorPage[414] = PAGE414;
     _errorPage[500] = PAGE500;
+    _errorPage[501] = PAGE501;
 }
 
 

@@ -66,6 +66,8 @@ Server      &Server::operator=(Server const &cpy)
     return *this;
 }
 
+int Server::getNbClients() const { return _clients.size(); }
+
 int Server::getPort() const { return _port; }
 
 int Server::getSocket() const { return _listen_socket; }
@@ -159,27 +161,18 @@ void Server::parseErrorPages(std::string & value)
     if (error_page.front() == '/')
         error_page = error_page.substr(1);
     _error_pages.insert(std::make_pair(pages_numbers, error_page));
-    // for (std::map<std::vector<unsigned int>, std::string>::iterator it = _error_pages.begin(); it != _error_pages.end(); ++it)
-    //     for (std::vector<unsigned int>::const_iterator ite = it->first.begin(); ite != it->first.end(); ++ite)
-    //         std::cout << *ite << " : " << it->second << std::endl;
 }
 bool Server::setup(std::vector<Server*> servers)
 {
     for (server_iterator it = servers.begin(); it != servers.end(); ++it)
     {
-        if (*it == this)
-            break;
-        if ((*it)->getPort() == _port && (*it)->getHost() == _host )
-        {
-            _listen_socket = (*it)->getSocket();
-            return true;
-        }
+        if (*it != this && (*it)->getPort() == _port && (*it)->getHost() == _host )
+            return false;
     }
     _listen_socket = socket(AF_INET, SOCK_STREAM, 0);
-
     if (_listen_socket < 0)
         return false;
-     int reuse = 1;
+    int reuse = 1;
     if (setsockopt(_listen_socket, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) != 0)
         return false;
      struct sockaddr_in my_addr;
@@ -190,7 +183,6 @@ bool Server::setup(std::vector<Server*> servers)
     
     if (bind(_listen_socket, (struct sockaddr*)&my_addr, sizeof(struct sockaddr)) != 0)
         return false;
-    fcntl(_listen_socket, F_SETFL, O_NONBLOCK);
     return true;
 }
 

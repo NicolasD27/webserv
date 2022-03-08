@@ -40,6 +40,7 @@ Client::~Client()
         delete _responses_to_send.front();
         _responses_to_send.pop();
     }
+    close(_socket);
 }
 
 Client      &Client::operator=(Client const &cpy)
@@ -96,9 +97,8 @@ bool Client::setup(Server * server)
     char client_ipv4[INET_ADDRSTRLEN];
     inet_ntop(AF_INET, &address.sin_addr, client_ipv4, INET_ADDRSTRLEN);
     this->_client_ipv4_str = client_ipv4;
-    printf("Incoming connection from %s:%d to %s:%d\n", this->_client_ipv4_str.c_str(), address.sin_port, server->getHost().c_str(), server->getPort());
     _socket = new_client_sock;
-    fcntl(_socket, F_SETFL, O_NONBLOCK);
+    printf("Incoming connection from %s:%d to %s:%d socket : %d\n", this->_client_ipv4_str.c_str(), address.sin_port, server->getHost().c_str(), server->getPort(), _socket);
     _address = address;
     _current_sending_byte   = 0;
     _current_receiving_byte = 0;
@@ -121,7 +121,6 @@ bool Client::receiveFromClient(std::vector<Server*> servers)
     
     if (!_headers_read)
     {
-        std::cout << "reading header..." << std::endl;
         while ((newline_pos == -1 || newline_pos == std::string::npos) && (r = read(_socket, _receiving_buff + _current_receiving_byte, 1)) > 0 && _current_receiving_byte < MAX_SIZE_HEADER)
         {
             _current_receiving_byte += r;
@@ -129,21 +128,15 @@ bool Client::receiveFromClient(std::vector<Server*> servers)
             newline_pos = std::string(_receiving_buff).find("\r\n\r\n");
         }
         if (r <= 0)
-        {
             return false;
-        }
-        std::cout << "header read" << std::endl;
         if (_current_receiving_byte >= MAX_SIZE_HEADER)
         {
-            std::cout << "headers too long" << std::endl;
             while ((r = read(_socket, _receiving_buff , MAX_SIZE)) > 0);
             if (r <= 0)
                 return false;
             buildErrorResponse(414, servers.front());
             return true;
         }
-
-        
         _headers_read = true;
         offset_newline = 3;
         request_string = std::string(_receiving_buff, _current_receiving_byte);
@@ -154,8 +147,6 @@ bool Client::receiveFromClient(std::vector<Server*> servers)
     }
     else
         newline_pos = _current_receiving_byte - 2;
-    
-    
     Server *server = findMatchingServer(servers, *_request_in_progress);
     int max_body_size = server->getMaxBodySize();
     headers_length = request_string.find("\r\n\r\n") + 4;
@@ -187,7 +178,6 @@ bool Client::receiveFromClient(std::vector<Server*> servers)
     }
     else if (_request_in_progress->headerExist("Content-Length") && (content_length = StringToInt((*_request_in_progress)["Content-Length"])) > 0 && (max_body_size == -1 || content_length <= max_body_size) && content_length < MAX_SIZE - MAX_SIZE_HEADER - 4)
     {
-        std::cout << "reading body with content-length" << std::endl;
         while (_current_receiving_byte - headers_length < content_length && (r = read(_socket, _receiving_buff + _current_receiving_byte, content_length - _current_receiving_byte + headers_length)) > 0)
         {
             _current_receiving_byte += r;
@@ -204,13 +194,12 @@ bool Client::receiveFromClient(std::vector<Server*> servers)
         std::cout << *_request_in_progress << std::endl;
         while ((r = read(_socket, _receiving_buff , MAX_SIZE)) > 0);
         if (r <= 0)
-            return false; // finir de lire
+            return false;
         buildErrorResponse(413, server);
         delete _request_in_progress;
     }
     else if (request_string.length() == 0)
     {
-        std::cout << "removing client : " << _socket  << std::endl;
         delete _request_in_progress;
         _headers_read = false;
         _current_receiving_byte = 0;
@@ -297,11 +286,6 @@ bool Client::readChunkedRequest(Request *request, int newline_pos, int offset_ne
                             _body_read = false;
                         }
                     }
-                    else if (r == 0)
-                    {
-                        _awaiting_trailer = true;
-                        _body_read = false;
-                    }
                     else
                         return false;
                 }
@@ -357,8 +341,11 @@ bool Client::sendToClient()
     else if (r == response_string.length() - _current_sending_byte)
     {
         std::cout << "response send" << std::endl;
+        _current_sending_byte = 0;
         delete response;
         _responses_to_send.pop();
+        if (_responses_to_send.size() == 0 && _responses_to_build.size() == 0)
+            return false;
     }
     else        
         _current_receiving_byte += r;

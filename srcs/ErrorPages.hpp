@@ -22,6 +22,7 @@
 # define PAGE405    "<h1>405 Forbidden</h1><p>this method is not allowed for this ressource</p>"
 # define PAGE413    "<h1>413 Payload too large</h1>"
 # define PAGE414    "<h1>414 URI too long</h1>"
+# define PAGE501    "<h1>501 Not Implemented</h1>"
 # define PAGE500    "<h1>500 Oops! Something went wrong...</h1><p>We seem to be having some technical difficulties. Hang tight.</p>"
 
 class ErrorPages

@@ -18,9 +18,8 @@ StatusCode STATUS_CODES;
 
 ErrorPages  ERROR_PAGES;
 
-Response::Response(unsigned int status, Server const & server) : _status(status), _to_send(true), _cgiReady(false), _cgiHandler(NULL)
+Response::Response(unsigned int status, Server const & server) : _status(status), _to_send(true), _cgiReady(false), _cgiHandler(NULL), _ressource_fd(-1)
 {
-    std::cout << "error response : " << status << std::endl;
     buildErrorResponse(server);
 }
 
@@ -34,7 +33,6 @@ Response::Response(Request const & request, Server const & server):_pt_server(&s
     else if (request.getFormatError())
     {
         _status = 400;
-        std::cout << "building error 400..." << std::endl; 
         buildErrorResponse(server);
     }
     else if (request.getHttpMethod() == "GET")
@@ -47,7 +45,12 @@ Response::Response(Request const & request, Server const & server):_pt_server(&s
     else if (request.getHttpMethod() == "POST")
         buildPostResponse(request, server);
     else if (request.getHttpMethod() == "DELETE")
-        buildDeleteResponse(request, server);   
+        buildDeleteResponse(request, server);
+    else
+    {
+        _status = 501;
+        buildErrorResponse(server);
+    }
 }
 
 Response::Response(Response const & src)
@@ -73,18 +76,12 @@ void Response::buildDeleteResponse(Request const & request, Server const & serve
 {
     if (handleDots(request.getLocation()))
     {
-        std::cout << "dots error" << std::endl;
         _status = 404;
         return;
     }
     findLocation(server, request);
     if (!_location_block)
         _status = 405; // méthode interdite
-    else 
-        _location_block->print();
-    // _cgi_path = server.getCgiPath();
-    // buildRessourcePath(request.getLocation(), block);
-    std::cout << "_RessourcePath = " << _ressource_path << "\t _status = " << _status << std::endl;
     if(_status == 301)
         _status = 404; 
     else if (_status == 0)
@@ -118,18 +115,13 @@ void Response::buildPostResponse(Request const & request, Server const & server)
     
     if (handleDots(request.getLocation()))
     {
-        std::cout << "dots error" << std::endl;
         _status = 404;
         return;
     }
     findLocation(server, request);
     if (!_location_block)
         _status = 405; // méthode interdite
-    else 
-        _location_block->print();
     _cgi_path = server.getCgiPath();
-    // buildRessourcePath(request.getLocation(), block);
-    std::cout << "_RessourcePath = " << _ressource_path << "\t _status = " << _status << std::endl;
     if(_status == 301)
     {
         _headers.insert(std::make_pair("Content-type", "text/html"));
@@ -148,23 +140,16 @@ void Response::buildGetResponse(Request const & request, Server const & server)
 {
     if (handleDots(request.getLocation()))
     {
-        std::cout << "dots error" << std::endl;
         _status = 404;
         return;
     }
     findLocation(server, request);
     if (!_location_block)
         _status = ( _status == 0) ? 405 : _status; // méthode interdite
-    else 
-        _location_block->print();
     _cgi_path = server.getCgiPath();
-    // buildRessourcePath(request.getLocation(), block);
-    std::cout << "_RessourcePath = " << _ressource_path << "\t _status = " << _status << std::endl;
     if (_location_block && _location_block->getRedirectionCode() != 0)
     {
         _status = _location_block->getRedirectionCode();
-        std::cout << "redirection" << std::endl;
-        // _headers.insert(std::make_pair("Content-type", "text/html"));
         _headers.insert(std::make_pair("Location", _location_block->getRedirectionURL()));
     }
     else if(_status == 301)
@@ -242,17 +227,14 @@ bool Response::buildRessourcePath(std::string locRequest, Location const &locati
     {   
         // controle si _ressource_path est un directory
         file_testing = current_directory + "/" + _ressource_path;
-        std::cout << file_testing<<" is a Directory ? ";
         if(pathIsDir(file_testing))
         {
-            std::cout << "Yes\n";
             if (_ressource_path.back() != '/')
                 _ressource_path += "/";
             _status = 301;
         }
         else
         {
-            std::cout << "No\n";
             if(pathIsFile(_ressource_path))
             {
                 buildFileFD();
@@ -263,7 +245,6 @@ bool Response::buildRessourcePath(std::string locRequest, Location const &locati
                 std::vector<std::string> options = findAlternativeMatches(_ressource_path);
                 if (options.size() > 0 && chooseAcceptableFile(options))
                 {
-                    std::cout << "file found !!" << std::endl;
                     buildFileFD();
                     return false;
                 }
@@ -535,18 +516,15 @@ bool Response::findIndex(std::string current_directory, Location const &location
     {
         file_testing = current_directory + "/" +_ressource_path + index.top();
 
-        std::cout << "Testing : "<< file_testing << " ... ";
         std::ifstream ifs(file_testing);
         if(ifs.good())
         {
             _ressource_path += index.top();
             buildFileFD();
-            std::cout << C_GREEN << "Found" << C_RESET << std::endl;
             return true;
         }
         else
         {
-            std::cout << C_RED << " Not Found" << C_RESET << std::endl;
             std::vector<std::string> options = findAlternativeMatches(_ressource_path + index.top());
             if (options.size() > 0 && chooseAcceptableFile(options))
             {
@@ -565,7 +543,6 @@ bool Response::findIndex(std::string current_directory, Location const &location
 
 void Response::buildFileFD()
 {
-    std::cout << "building fd..." << std::endl;
     if (_location_block->hasExtension(_ressource_path)  && _location_block->getCgiPath().length() != 0)
     {
         std::string     script;
@@ -581,10 +558,9 @@ void Response::buildFileFD()
         else
             executeCgi();    
         _to_send = false;
-        //_status = 200;
         return;
     }
-    _ressource_fd = open(_ressource_path.c_str(), O_NONBLOCK);
+    _ressource_fd = open(_ressource_path.c_str(), 0);
     if (_ressource_fd == -1)
     {
         _to_send = true;
@@ -617,11 +593,8 @@ unsigned int Response::buildAutoIndex()
 
     _headers.insert(std::make_pair("Content-type", "text/html"));
     std::string current_directory = getWorkingPath();
-    //std::cout << "current_directory au départ = " << current_directory<<"\n";
-    //current_directory += "/" + _pt_server->getRoot() + "/" + ((_pt_request->getLocation().length() == 1) ? "" : _pt_request->getLocation());
     current_directory += "/" + _ressource_path;
     _body += "<head><meta charset='utf8'></head>";
-    //std::cout << "current_directory = " << current_directory << "\n";
     if ((dir = opendir (current_directory.c_str())) != NULL)
     {
         std::map<std::string, std::string> sorting =  _pt_request->getParams();
@@ -735,12 +708,10 @@ unsigned int Response::buildAutoIndex()
 void Response::executeCgi()
 {
     _body.append(_cgiHandler->executeCgi(&_status));
-    std::cout << "_status après en _cgiHandler->executeCgi() : "<<C_RED<< _status << C_RESET<< std::endl;
 }
 
 void Response::CGIReady(long fd, FILE *CGIfOut)
 {
-    std::cout << "cgi ready" << std::endl;
     _cgiReady = true;
     _CGIfOut = CGIfOut;
     _ressource_fd = fd;
@@ -748,7 +719,6 @@ void Response::CGIReady(long fd, FILE *CGIfOut)
 
 void Response::readCGI()
 {
-    std::cout << "reading CGI output..." << std::endl;
     lseek(_ressource_fd, 0, SEEK_SET);
     char	buffer[1024] = {0};
     int ret = 1;
@@ -770,7 +740,6 @@ unsigned int Response::readRessource(bool isErrorPage)
     std::stringstream buff;
     int read = false;
     
-    std::cout << "ReadRessource ..." << _ressource_path << "...";
     std::ifstream ifs(_ressource_path);
     if(ifs.good() && pathIsFile(_ressource_path))
     {
@@ -797,7 +766,7 @@ unsigned int Response::readRessource(bool isErrorPage)
         else
             _status = 404;
     }
-    std::cout << "_status = " << _status << std::endl;
+    close(_ressource_fd);
     return _status;
 }
 
