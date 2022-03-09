@@ -154,7 +154,8 @@ std::string		CGIHandler::executeCgi(unsigned int *status)
     // {
     //     std::cout << "\t"<< C_YELLOW << it->first << C_RESET<<": "<< C_CYAN << it->second << C_RESET<< std::endl;
     // }
-	write(fdIn, _body.c_str(), _body.size());
+	if (_body.size() > 0)
+		write(fdIn, _body.c_str(), _body.size());
 	lseek(fdIn, 0, SEEK_SET);
 	std::cout << "execution de "<< scriptName[0] << " with " << scriptName[1] << std::endl;
     

@@ -79,6 +79,7 @@ public:
     std::vector<std::string>::iterator                  getBeginServerNames(); 
     std::vector<std::string>::iterator                  getEndServerNames();
     std::map<std::vector<unsigned int>, std::string>    getErrorPages() const;
+    int                                                 getNbClients() const;
 
     bool                                                setup(std::vector<Server*>);
     bool                                                listenSocket();
