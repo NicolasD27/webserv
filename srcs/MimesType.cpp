@@ -1,0 +1,395 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   MimesType.cpp                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/01/10 11:58:58 by clorin            #+#    #+#             */
+/*   Updated: 2022/02/25 09:52:20 by clorin           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "MimesType.hpp"
+
+// std::string     &MimesType::operator[](std::string &key)
+// {
+//     return (_mimeType[key]);
+// }
+
+const std::string     MimesType::getType(std::string type)
+{
+    if(type.length() == 0 || _mimeType.count(type) == 0)
+        return ("application/octet-stream");
+    else
+        return (_mimeType[type]);
+}
+
+MimesType::~MimesType(void)
+{
+    _mimeType.clear();
+}
+
+
+bool MimesType::typeExist(std::string type)
+{
+    if(type.length() == 0 || _mimeType.count(type) == 0)
+        return false;
+    else
+        return true;
+}
+
+MimesType::MimesType()
+{
+    _mimeType["*3gpp"] = "audio/3gpp";
+    _mimeType["*jpm"] = "video/jpm";
+    _mimeType["*mp3"] = "audio/mp3";
+    _mimeType["*rtf"] = "text/rtf";
+    _mimeType["*wav"] = "audio/wave";
+    _mimeType["*xml"] = "text/xml";
+    _mimeType["3g2"] = "video/3gpp2";
+    _mimeType["3gp"] = "video/3gpp";
+    _mimeType["3gpp"] = "video/3gpp";
+    _mimeType["ac"] = "application/pkix-attr-cert";
+    _mimeType["adp"] = "audio/adpcm";
+    _mimeType["ai"] = "application/postscript";
+    _mimeType["apng"] = "image/apng";
+    _mimeType["appcache"] = "text/cache-manifest";
+    _mimeType["asc"] = "application/pgp-signature";
+    _mimeType["atom"] = "application/atom+xml";
+    _mimeType["atomcat"] = "application/atomcat+xml";
+    _mimeType["atomsvc"] = "application/atomsvc+xml";
+    _mimeType["au"] = "audio/basic";
+    _mimeType["aw"] = "application/applixware";
+    _mimeType["bdoc"] = "application/bdoc";
+    _mimeType["bin"] = "application/octet-stream";
+    _mimeType["bmp"] = "image/bmp";
+    _mimeType["bpk"] = "application/octet-stream";
+    _mimeType["buffer"] = "application/octet-stream";
+    _mimeType["ccxml"] = "application/ccxml+xml";
+    _mimeType["cdmia"] = "application/cdmi-capability";
+    _mimeType["cdmic"] = "application/cdmi-container";
+    _mimeType["cdmid"] = "application/cdmi-domain";
+    _mimeType["cdmio"] = "application/cdmi-object";
+    _mimeType["cdmiq"] = "application/cdmi-queue";
+    _mimeType["cer"] = "application/pkix-cert";
+    _mimeType["cgm"] = "image/cgm";
+    _mimeType["class"] = "application/java-vm";
+    _mimeType["coffee"] = "text/coffeescript";
+    _mimeType["conf"] = "text/plain";
+    _mimeType["cpt"] = "application/mac-compactpro";
+    _mimeType["crl"] = "application/pkix-crl";
+    _mimeType["css"] = "text/css";
+    _mimeType["csv"] = "text/csv";
+    _mimeType["cu"] = "application/cu-seeme";
+    _mimeType["davmount"] = "application/davmount+xml";
+    _mimeType["dbk"] = "application/docbook+xml";
+    _mimeType["deb"] = "application/octet-stream";
+    _mimeType["def"] = "text/plain";
+    _mimeType["deploy"] = "application/octet-stream";
+    _mimeType["disposition-notification"] = "message/disposition-notification";
+    _mimeType["dist"] = "application/octet-stream";
+    _mimeType["distz"] = "application/octet-stream";
+    _mimeType["dll"] = "application/octet-stream";
+    _mimeType["dmg"] = "application/octet-stream";
+    _mimeType["dms"] = "application/octet-stream";
+    _mimeType["doc"] = "application/msword";
+    _mimeType["dot"] = "application/msword";
+    _mimeType["drle"] = "image/dicom-rle";
+    _mimeType["dssc"] = "application/dssc+der";
+    _mimeType["dtd"] = "application/xml-dtd";
+    _mimeType["dump"] = "application/octet-stream";
+    _mimeType["ear"] = "application/java-archive";
+    _mimeType["ecma"] = "application/ecmascript";
+    _mimeType["elc"] = "application/octet-stream";
+    _mimeType["emf"] = "image/emf";
+    _mimeType["eml"] = "message/rfc822";
+    _mimeType["emma"] = "application/emma+xml";
+    _mimeType["eps"] = "application/postscript";
+    _mimeType["epub"] = "application/epub+zip";
+    _mimeType["es"] = "application/ecmascript";
+    _mimeType["exe"] = "application/octet-stream";
+    _mimeType["exi"] = "application/exi";
+    _mimeType["exr"] = "image/aces";
+    _mimeType["ez"] = "application/andrew-inset";
+    _mimeType["fits"] = "image/fits";
+    _mimeType["g3"] = "image/g3fax";
+    _mimeType["gbr"] = "application/rpki-ghostbusters";
+    _mimeType["geojson"] = "application/geo+json";
+    _mimeType["gif"] = "image/gif";
+    _mimeType["glb"] = "model/gltf-binary";
+    _mimeType["gltf"] = "model/gltf+json";
+    _mimeType["gml"] = "application/gml+xml";
+    _mimeType["gpx"] = "application/gpx+xml";
+    _mimeType["gram"] = "application/srgs";
+    _mimeType["grxml"] = "application/srgs+xml";
+    _mimeType["gxf"] = "application/gxf";
+    _mimeType["gz"] = "application/gzip";
+    _mimeType["h261"] = "video/h261";
+    _mimeType["h263"] = "video/h263";
+    _mimeType["h264"] = "video/h264";
+    _mimeType["heic"] = "image/heic";
+    _mimeType["heics"] = "image/heic-sequence";
+    _mimeType["heif"] = "image/heif";
+    _mimeType["heifs"] = "image/heif-sequence";
+    _mimeType["hjson"] = "application/hjson";
+    _mimeType["hlp"] = "application/winhlp";
+    _mimeType["hqx"] = "application/mac-binhex40";
+    _mimeType["htm"] = "text/html";
+    _mimeType["html"] = "text/html";
+    _mimeType["ics"] = "text/calendar";
+    _mimeType["ief"] = "image/ief";
+    _mimeType["ifb"] = "text/calendar";
+    _mimeType["iges"] = "model/iges";
+    _mimeType["igs"] = "model/iges";
+    _mimeType["img"] = "application/octet-stream";
+    _mimeType["in"] = "text/plain";
+    _mimeType["ini"] = "text/plain";
+    _mimeType["ink"] = "application/inkml+xml";
+    _mimeType["inkml"] = "application/inkml+xml";
+    _mimeType["ipfix"] = "application/ipfix";
+    _mimeType["iso"] = "application/octet-stream";
+    _mimeType["jade"] = "text/jade";
+    _mimeType["jar"] = "application/java-archive";
+    _mimeType["jls"] = "image/jls";
+    _mimeType["jp2"] = "image/jp2";
+    _mimeType["jpe"] = "image/jpeg";
+    _mimeType["JPG"] = "image/jpeg";
+    _mimeType["jpeg"] = "image/jpeg";
+    _mimeType["JPEG"] = "image/jpeg";
+    _mimeType["jpf"] = "image/jpx";
+    _mimeType["jpg"] = "image/jpeg";
+    _mimeType["jpg2"] = "image/jp2";
+    _mimeType["jpgm"] = "video/jpm";
+    _mimeType["jpgv"] = "video/jpeg";
+    _mimeType["jpm"] = "image/jpm";
+    _mimeType["jpx"] = "image/jpx";
+    _mimeType["js"] = "application/javascript";
+    _mimeType["json"] = "application/json";
+    _mimeType["json5"] = "application/json5";
+    _mimeType["jsonld"] = "application/ld+json";
+    _mimeType["jsonml"] = "application/jsonml+json";
+    _mimeType["jsx"] = "text/jsx";
+    _mimeType["kar"] = "audio/midi";
+    _mimeType["ktx"] = "image/ktx";
+    _mimeType["less"] = "text/less";
+    _mimeType["list"] = "text/plain";
+    _mimeType["litcoffee"] = "text/coffeescript";
+    _mimeType["log"] = "text/plain";
+    _mimeType["lostxml"] = "application/lost+xml";
+    _mimeType["lrf"] = "application/octet-stream";
+    _mimeType["m1v"] = "video/mpeg";
+    _mimeType["m21"] = "application/mp21";
+    _mimeType["m2a"] = "audio/mpeg";
+    _mimeType["m2v"] = "video/mpeg";
+    _mimeType["m3a"] = "audio/mpeg";
+    _mimeType["m4a"] = "audio/mp4";
+    _mimeType["m4p"] = "application/mp4";
+    _mimeType["ma"] = "application/mathematica";
+    _mimeType["mads"] = "application/mads+xml";
+    _mimeType["man"] = "text/troff";
+    _mimeType["manifest"] = "text/cache-manifest";
+    _mimeType["map"] = "application/json";
+    _mimeType["mar"] = "application/octet-stream";
+    _mimeType["markdown"] = "text/markdown";
+    _mimeType["mathml"] = "application/mathml+xml";
+    _mimeType["mb"] = "application/mathematica";
+    _mimeType["mbox"] = "application/mbox";
+    _mimeType["md"] = "text/markdown";
+    _mimeType["me"] = "text/troff";
+    _mimeType["mesh"] = "model/mesh";
+    _mimeType["meta4"] = "application/metalink4+xml";
+    _mimeType["metalink"] = "application/metalink+xml";
+    _mimeType["mets"] = "application/mets+xml";
+    _mimeType["mft"] = "application/rpki-manifest";
+    _mimeType["mid"] = "audio/midi";
+    _mimeType["midi"] = "audio/midi";
+    _mimeType["mime"] = "message/rfc822";
+    _mimeType["mj2"] = "video/mj2";
+    _mimeType["mjp2"] = "video/mj2";
+    _mimeType["mjs"] = "application/javascript";
+    _mimeType["mml"] = "text/mathml";
+    _mimeType["mods"] = "application/mods+xml";
+    _mimeType["mov"] = "video/quicktime";
+    _mimeType["mp2"] = "audio/mpeg";
+    _mimeType["mp21"] = "application/mp21";
+    _mimeType["mp2a"] = "audio/mpeg";
+    _mimeType["mp3"] = "audio/mpeg";
+    _mimeType["mp4"] = "video/mp4";
+    _mimeType["mp4a"] = "audio/mp4";
+    _mimeType["mp4s"] = "application/mp4";
+    _mimeType["mp4v"] = "video/mp4";
+    _mimeType["mpd"] = "application/dash+xml";
+    _mimeType["mpe"] = "video/mpeg";
+    _mimeType["mpeg"] = "video/mpeg";
+    _mimeType["mpg"] = "video/mpeg";
+    _mimeType["mpg4"] = "video/mp4";
+    _mimeType["mpga"] = "audio/mpeg";
+    _mimeType["mrc"] = "application/marc";
+    _mimeType["mrcx"] = "application/marcxml+xml";
+    _mimeType["ms"] = "text/troff";
+    _mimeType["mscml"] = "application/mediaservercontrol+xml";
+    _mimeType["msh"] = "model/mesh";
+    _mimeType["msi"] = "application/octet-stream";
+    _mimeType["msm"] = "application/octet-stream";
+    _mimeType["msp"] = "application/octet-stream";
+    _mimeType["mxf"] = "application/mxf";
+    _mimeType["mxml"] = "application/xv+xml";
+    _mimeType["n3"] = "text/n3";
+    _mimeType["nb"] = "application/mathematica";
+    _mimeType["oda"] = "application/oda";
+    _mimeType["oga"] = "audio/ogg";
+    _mimeType["ogg"] = "audio/ogg";
+    _mimeType["ogv"] = "video/ogg";
+    _mimeType["ogx"] = "application/ogg";
+    _mimeType["omdoc"] = "application/omdoc+xml";
+    _mimeType["onepkg"] = "application/onenote";
+    _mimeType["onetmp"] = "application/onenote";
+    _mimeType["onetoc"] = "application/onenote";
+    _mimeType["onetoc2"] = "application/onenote";
+    _mimeType["opf"] = "application/oebps-package+xml";
+    _mimeType["otf"] = "font/otf";
+    _mimeType["owl"] = "application/rdf+xml";
+    _mimeType["oxps"] = "application/oxps";
+    _mimeType["p10"] = "application/pkcs10";
+    _mimeType["p7c"] = "application/pkcs7-mime";
+    _mimeType["p7m"] = "application/pkcs7-mime";
+    _mimeType["p7s"] = "application/pkcs7-signature";
+    _mimeType["p8"] = "application/pkcs8";
+    _mimeType["pdf"] = "application/pdf";
+    _mimeType["pfr"] = "application/font-tdpfr";
+    _mimeType["pgp"] = "application/pgp-encrypted";
+    _mimeType["pkg"] = "application/octet-stream";
+    _mimeType["pki"] = "application/pkixcmp";
+    _mimeType["pkipath"] = "application/pkix-pkipath";
+    _mimeType["pls"] = "application/pls+xml";
+    _mimeType["png"] = "image/png";
+    _mimeType["prf"] = "application/pics-rules";
+    _mimeType["ps"] = "application/postscript";
+    _mimeType["pskcxml"] = "application/pskc+xml";
+    _mimeType["qt"] = "video/quicktime";
+    _mimeType["raml"] = "application/raml+yaml";
+    _mimeType["rdf"] = "application/rdf+xml";
+    _mimeType["rif"] = "application/reginfo+xml";
+    _mimeType["rl"] = "application/resource-lists+xml";
+    _mimeType["rld"] = "application/resource-lists-diff+xml";
+    _mimeType["rmi"] = "audio/midi";
+    _mimeType["rnc"] = "application/relax-ng-compact-syntax";
+    _mimeType["rng"] = "application/xml";
+    _mimeType["roa"] = "application/rpki-roa";
+    _mimeType["roff"] = "text/troff";
+    _mimeType["rq"] = "application/sparql-query";
+    _mimeType["rs"] = "application/rls-services+xml";
+    _mimeType["rsd"] = "application/rsd+xml";
+    _mimeType["rss"] = "application/rss+xml";
+    _mimeType["rtf"] = "application/rtf";
+    _mimeType["rtx"] = "text/richtext";
+    _mimeType["s3m"] = "audio/s3m";
+    _mimeType["sbml"] = "application/sbml+xml";
+    _mimeType["scq"] = "application/scvp-cv-request";
+    _mimeType["scs"] = "application/scvp-cv-response";
+    _mimeType["sdp"] = "application/sdp";
+    _mimeType["ser"] = "application/java-serialized-object";
+    _mimeType["setpay"] = "application/set-payment-initiation";
+    _mimeType["setreg"] = "application/set-registration-initiation";
+    _mimeType["sgi"] = "image/sgi";
+    _mimeType["sgm"] = "text/sgml";
+    _mimeType["sgml"] = "text/sgml";
+    _mimeType["shex"] = "text/shex";
+    _mimeType["shf"] = "application/shf+xml";
+    _mimeType["shtml"] = "text/html";
+    _mimeType["sig"] = "application/pgp-signature";
+    _mimeType["sil"] = "audio/silk";
+    _mimeType["silo"] = "model/mesh";
+    _mimeType["slim"] = "text/slim";
+    _mimeType["slm"] = "text/slim";
+    _mimeType["smi"] = "application/smil+xml";
+    _mimeType["smil"] = "application/smil+xml";
+    _mimeType["snd"] = "audio/basic";
+    _mimeType["so"] = "application/octet-stream";
+    _mimeType["spp"] = "application/scvp-vp-response";
+    _mimeType["spq"] = "application/scvp-vp-request";
+    _mimeType["spx"] = "audio/ogg";
+    _mimeType["sru"] = "application/sru+xml";
+    _mimeType["srx"] = "application/sparql-results+xml";
+    _mimeType["ssdl"] = "application/ssdl+xml";
+    _mimeType["ssml"] = "application/ssml+xml";
+    _mimeType["stk"] = "application/hyperstudio";
+    _mimeType["styl"] = "text/stylus";
+    _mimeType["stylus"] = "text/stylus";
+    _mimeType["svg"] = "image/svg+xml";
+    _mimeType["svgz"] = "image/svg+xml";
+    _mimeType["t"] = "text/troff";
+    _mimeType["t38"] = "image/t38";
+    _mimeType["tei"] = "application/tei+xml";
+    _mimeType["teicorpus"] = "application/tei+xml";
+    _mimeType["text"] = "text/plain";
+    _mimeType["tfi"] = "application/thraud+xml";
+    _mimeType["tfx"] = "image/tiff-fx";
+    _mimeType["tif"] = "image/tiff";
+    _mimeType["tiff"] = "image/tiff";
+    _mimeType["tr"] = "text/troff";
+    _mimeType["ts"] = "video/mp2t";
+    _mimeType["tsd"] = "application/timestamped-data";
+    _mimeType["tsv"] = "text/tab-separated-values";
+    _mimeType["ttc"] = "font/collection";
+    _mimeType["ttf"] = "font/ttf";
+    _mimeType["ttl"] = "text/turtle";
+    _mimeType["txt"] = "text/plain";
+    _mimeType["u8dsn"] = "message/global-delivery-status";
+    _mimeType["u8hdr"] = "message/global-headers";
+    _mimeType["u8mdn"] = "message/global-disposition-notification";
+    _mimeType["u8msg"] = "message/global";
+    _mimeType["uri"] = "text/uri-list";
+    _mimeType["uris"] = "text/uri-list";
+    _mimeType["urls"] = "text/uri-list";
+    _mimeType["vcard"] = "text/vcard";
+    _mimeType["vrml"] = "model/vrml";
+    _mimeType["vtt"] = "text/vtt";
+    _mimeType["vxml"] = "application/voicexml+xml";
+    _mimeType["war"] = "application/java-archive";
+    _mimeType["wasm"] = "application/wasm";
+    _mimeType["wav"] = "audio/wav";
+    _mimeType["weba"] = "audio/webm";
+    _mimeType["webm"] = "video/webm";
+    _mimeType["webmanifest"] = "application/manifest+json";
+    _mimeType["webp"] = "image/webp";
+    _mimeType["wgt"] = "application/widget";
+    _mimeType["wmf"] = "image/wmf";
+    _mimeType["woff"] = "font/woff";
+    _mimeType["woff2"] = "font/woff2";
+    _mimeType["wrl"] = "model/vrml";
+    _mimeType["wsdl"] = "application/wsdl+xml";
+    _mimeType["wspolicy"] = "application/wspolicy+xml";
+    _mimeType["x3d"] = "model/x3d+xml";
+    _mimeType["x3db"] = "model/x3d+binary";
+    _mimeType["x3dbz"] = "model/x3d+binary";
+    _mimeType["x3dv"] = "model/x3d+vrml";
+    _mimeType["x3dvz"] = "model/x3d+vrml";
+    _mimeType["x3dz"] = "model/x3d+xml";
+    _mimeType["xaml"] = "application/xaml+xml";
+    _mimeType["xdf"] = "application/xcap-diff+xml";
+    _mimeType["xdssc"] = "application/dssc+xml";
+    _mimeType["xenc"] = "application/xenc+xml";
+    _mimeType["xer"] = "application/patch-ops-error+xml";
+    _mimeType["xht"] = "application/xhtml+xml";
+    _mimeType["xhtml"] = "application/xhtml+xml";
+    _mimeType["xhvml"] = "application/xv+xml";
+    _mimeType["xm"] = "audio/xm";
+    _mimeType["xml"] = "application/xml";
+    _mimeType["xop"] = "application/xop+xml";
+    _mimeType["xpl"] = "application/xproc+xml";
+    _mimeType["xsd"] = "application/xml";
+    _mimeType["xsl"] = "application/xml";
+    _mimeType["xslt"] = "application/xslt+xml";
+    _mimeType["xspf"] = "application/xspf+xml";
+    _mimeType["xvm"] = "application/xv+xml";
+    _mimeType["xvml"] = "application/xv+xml";
+    _mimeType["yaml"] = "text/yaml";
+    _mimeType["yang"] = "application/yang";
+    _mimeType["yin"] = "application/yin+xml";
+    _mimeType["yml"] = "text/yaml";
+    _mimeType["zip"] = "application/zip";
+    _mimeType["php"] = "text/html";
+    _mimeType["bla"] = "text/html";
+}
