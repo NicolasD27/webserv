@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 15:32:25 by clorin            #+#    #+#             */
-/*   Updated: 2022/02/21 11:25:59 by clorin           ###   ########.fr       */
+/*   Updated: 2022/03/17 15:52:35 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -237,7 +237,8 @@ bool        Webserv::run()
                             if (!read_write && FD_ISSET((*ite)->getRessourceFD(), &write_fds))
                             {
                                 read_write = true;
-                                (*ite)->executeCgi();
+                                if(!(*ite)->executeCgi())
+                                    to_switch = (*ite);
                             }
                         }
                         if (to_switch)

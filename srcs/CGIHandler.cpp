@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/19 22:40:48 by clorin            #+#    #+#             */
-/*   Updated: 2022/03/03 12:20:08 by clorin           ###   ########.fr       */
+/*   Updated: 2022/03/17 15:57:45 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,13 +149,14 @@ std::string		CGIHandler::executeCgi(unsigned int *status)
 	int		exit_status = 0;
 	*status = 200;
 
-	// std::cout << "Vars dans CGI : \n";
-	// for (std::map<std::string, std::string>::iterator it = _env.begin(); it != _env.end(); ++it)
-    // {
-    //     std::cout << "\t"<< C_YELLOW << it->first << C_RESET<<": "<< C_CYAN << it->second << C_RESET<< std::endl;
-    // }
 	if (_body.size() > 0)
-		write(fdIn, _body.c_str(), _body.size());
+	{
+		if(write(fdIn, _body.c_str(), _body.size()) != _body.size())
+        {
+            *status = 500;
+            return ("");
+        }
+	}
 	lseek(fdIn, 0, SEEK_SET);
 	std::cout << "execution de "<< scriptName[0] << " with " << scriptName[1] << std::endl;
     
@@ -165,7 +166,7 @@ std::string		CGIHandler::executeCgi(unsigned int *status)
 	{
 		std::cerr << "Fork crashed." << std::endl;
 		*status = 500;
-		return ("Status: 500\r\n\r\n");
+		return ("");
 	}
 	else if (pid == 0)
 	{

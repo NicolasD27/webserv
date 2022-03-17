@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/19 22:28:13 by clorin            #+#    #+#             */
-/*   Updated: 2022/03/01 10:13:35 by clorin           ###   ########.fr       */
+/*   Updated: 2022/03/17 15:46:12 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -705,9 +705,15 @@ unsigned int Response::buildAutoIndex()
     return _status;
 }
 
-void Response::executeCgi()
+bool Response::executeCgi()
 {
-    _body.append(_cgiHandler->executeCgi(&_status));
+    _cgiHandler->executeCgi(&_status);
+    if(_status != 200)
+    {
+        buildErrorResponse(*_pt_server);
+        return false;
+    }
+    return true;
 }
 
 void Response::CGIReady(long fd, FILE *CGIfOut)
