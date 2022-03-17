@@ -93,7 +93,7 @@ public:
     std::string                         buildResponseString();
     unsigned int                        readRessource(bool isErrorPage = false);
     void                                readCGI();
-    void                                executeCgi();
+    bool                                executeCgi();
     void                                CGIReady(long fd, FILE *CGIfOut);
     unsigned int                        buildAutoIndex();
     void                                parseExtension();
