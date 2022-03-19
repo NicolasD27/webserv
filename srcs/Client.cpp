@@ -307,14 +307,15 @@ bool Client::readChunkedRequest(Request *request, int newline_pos, int offset_ne
 
 Server * Client::findMatchingServer(std::vector<Server*> servers, Request & request)
 {
+    Server * new_server = NULL;
     if (request.getLocation().substr(0, 7) == "http://")
         request.setLocation(request.getLocation().substr(7 + request["Host"].length()));
-    if (request["Host"].length() == 0)
-        return servers.front();
     for (std::vector<Server*>::iterator it = servers.begin(); it != servers.end(); ++it)
     {
         if ((*it)->getSocket() == _server_socket )
         {
+            if (!new_server)
+                new_server = *it;
             for (std::vector<std::string>::iterator ite = (*it)->getBeginServerNames(); ite != (*it)->getEndServerNames(); ++ite)
             {
                 if (*ite == request["Host"] || *ite + ":" + to_string((*it)->getPort()) == request["Host"])
@@ -325,7 +326,7 @@ Server * Client::findMatchingServer(std::vector<Server*> servers, Request & requ
             }
         }
     }
-    return servers.front();
+    return new_server;
 }
 
 
