@@ -16,8 +16,8 @@ CGIHandler::~CGIHandler()
 {
 	size_t i = 0;
 	while(_envChar[i])
-		free(_envChar[i++]);
-	free (_envChar);
+		delete[] _envChar[i++];
+	delete[] _envChar;
 }
 
 CGIHandler::CGIHandler()

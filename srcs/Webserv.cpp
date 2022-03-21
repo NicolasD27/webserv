@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 15:32:25 by clorin            #+#    #+#             */
-/*   Updated: 2022/03/17 15:52:35 by clorin           ###   ########.fr       */
+/*   Updated: 2022/03/18 17:01:25 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,7 +154,7 @@ bool Webserv::checkHost(std::string const &host) const
         pch = strtok(NULL, ".");
     }
     free(test);
-    free(pch);
+    pch = NULL;
     return (ok && nb == 4);
 }
 
