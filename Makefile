@@ -30,7 +30,7 @@ OBJS	:= ${addprefix ${OBJS_DIR}, ${OBJS}}
 
 ${OBJS_DIR}%.o: ${SRCS_DIR}%.cpp
 		mkdir -p ${@D}
-		$(CC) $(FLAGS) -c $< -o $@
+		$(CC) $(CFLAGS) -c $< -o $@
 
 all:	${NAME}
 

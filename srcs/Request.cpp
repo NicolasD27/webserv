@@ -35,11 +35,11 @@ std::string & Request::operator[](const char *key) {return _headers[key]; }
 
 void Request::parseHeaders(std::string request_string)
 {
-    std::stringstream buff;
+    std::istringstream buff;
     if (request_string == "")
-        buff = std::stringstream(_request_string);
+        buff.str(_request_string);
     else 
-        buff = std::stringstream(request_string);
+        buff.str(request_string);
     std::string line;
     std::string key;
     std::string value;
@@ -91,7 +91,7 @@ void Request::parseMethod(std::string line)
         std::cout << "wrong number of elements in first line : " << line << std::endl;
         _format_error = true;
     }
-    int len = 0;
+    size_t len = 0;
     for (std::vector<std::string>::iterator it = tokens.begin(); it != tokens.end(); ++it)
         len += it->length();
     if (len + 2 != line.length())
@@ -103,7 +103,7 @@ void Request::parseMethod(std::string line)
 
 void Request::handleLocation(std::string location)
 {
-    int sep_pos = location.find('?');
+    size_t sep_pos = location.find('?');
     if (sep_pos != std::string::npos)
     {
         _query_string = location.substr(sep_pos+1);

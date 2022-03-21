@@ -34,7 +34,7 @@ Server::~Server()
 
 void Server::removeClient(int socket)
 {
-    for(std::vector<Client*>::const_iterator it = _clients.begin(); it != _clients.end(); ++it)
+    for(std::vector<Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it)
     {
         if ((*it)->getSocket() == socket)
         {
@@ -106,9 +106,9 @@ void Server::sortLocations()
 
 std::vector<std::string>    Server::getMethods(void) const {return _methods;}
 
-std::vector<Client*>::const_iterator Server::getBeginClients() const { return _clients.cbegin(); }
+std::vector<Client*>::iterator Server::getBeginClients() { return _clients.begin(); }
 
-std::vector<Client*>::const_iterator Server::getEndClients() const { return _clients.cend(); }
+std::vector<Client*>::iterator Server::getEndClients() { return _clients.end(); }
 
 std::map<std::vector<unsigned int>, std::string> Server::getErrorPages() const { return _error_pages;}
 
@@ -158,7 +158,7 @@ void Server::parseErrorPages(std::string & value)
         pages_numbers.push_back(page_number);
         pages_numbers_string = pages_numbers_string.substr(pages_numbers_string.find(",") + 1, pages_numbers_string.length() - pages_numbers_string.find(",") - 1);
     }
-    if (error_page.front() == '/')
+    if (error_page[0] == '/')
         error_page = error_page.substr(1);
     _error_pages.insert(std::make_pair(pages_numbers, error_page));
 }

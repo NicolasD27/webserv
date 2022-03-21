@@ -17,6 +17,7 @@
 Webserv		webserv;
 
 void catchCtrl_C(int dummy) {
+    (void)dummy;
     std::cerr << std::endl << C_RED << "Ctr-C detected "<< C_RESET << "... stopping server ...";
     webserv.stop();
     std::cerr << C_GREEN << "ok" << C_RESET << std::endl;

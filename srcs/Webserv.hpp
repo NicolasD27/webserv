@@ -55,8 +55,8 @@ public:
     bool    run();
     void    shutdownServers();
     void    printServers();
-    void    buildFDSets(Server const & server, fd_set *read_fds, fd_set *write_fds, fd_set *except_fds, int *highest_socket);
-    void    initFDSets(fd_set *read_fds, fd_set *write_fds, fd_set *except_fds);
+    void    buildFDSets(Server & server, fd_set *read_fds, fd_set *write_fds, int *highest_socket);
+    void    initFDSets(fd_set *read_fds, fd_set *write_fds);
 
     void    stop();
     class	BadConfiguration: public std::exception{

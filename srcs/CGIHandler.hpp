@@ -24,14 +24,14 @@ class CGIHandler;
 class CGIHandler
 {
     private:
+        Response    *_response;
         std::string _body;
         std::string _script;
         std::string _file;
-        Response    *_response;
         char        **_envChar;
         std::map<std::string, std::string>  _env;
         void		setEnvChar();
-        CGIHandler(CGIHandler const &cpy){};
+        CGIHandler(CGIHandler const &cpy);
 
     public:
 

@@ -14,11 +14,11 @@
 # define FILE_UTILS_HPP
 
 #include <string>
+#include <cstdio>
 #include <iostream>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <chrono>
 #include <sys/param.h>
 
 typedef struct		s_file

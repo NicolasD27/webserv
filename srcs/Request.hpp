@@ -39,18 +39,18 @@ class Request
 {
 
 private:
-    std::string                         _http_version;
     std::string                         _request_string;
-    std::string                         _query_string;
-    std::string                         _http_method;
-    std::string                         _location;
-    time_t                              _keep_alive_n;
-    std::map<std::string, std::string>  _headers;
     std::string                         _body;
+    time_t                              _keep_alive_n;
+    std::string                         _location;
+    std::string                         _query_string;
+    bool                                _format_error;
+    std::string                         _http_version;
+    std::string                         _http_method;
+    std::map<std::string, std::string>  _headers;
     std::map<std::string, std::string>  _params;
     uint16_t                            _portClient;
     std::string                         _addressClient;
-    bool                                _format_error;
     void                                handleLocation(std::string);
     
 public:

@@ -83,8 +83,8 @@ void            Location::storeLine(std::string const & key, std::string & value
         _autoIndex = (value == "on");
     else if (key == "root")
     {
-        if (value.back() == '/')
-            value.pop_back();
+        if (value[value.length() - 1] == '/')
+            value = value.substr(0, value.length() - 1);
         _root = value;
     }
     else if (key == "upload_dir")

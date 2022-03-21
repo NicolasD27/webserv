@@ -18,7 +18,7 @@ StatusCode STATUS_CODES;
 
 ErrorPages  ERROR_PAGES;
 
-Response::Response(unsigned int status, Server const & server) : _status(status), _to_send(true), _cgiReady(false), _cgiHandler(NULL), _ressource_fd(-1)
+Response::Response(unsigned int status, Server const & server) : _cgiHandler(NULL), _to_send(true), _cgiReady(false), _ressource_fd(-1), _status(status)
 {
     buildErrorResponse(server);
 }
@@ -217,9 +217,9 @@ bool Response::buildRessourcePath(std::string locRequest, Location const &locati
     std::string current_directory = getWorkingPath();
     std::string file_testing;
 
-    _ressource_path = location.getRoot() + "/" + locRequest.substr(location.getPath().length() + ((locRequest.substr(location.getPath().length()).front() == '/') ? 1 : 0));
+    _ressource_path = location.getRoot() + "/" + locRequest.substr(location.getPath().length() + ((locRequest.substr(location.getPath().length())[0] == '/') ? 1 : 0));
     _status = 0;
-    if (locRequest.back() == '/')
+    if (locRequest[locRequest.length() - 1] == '/')
     {
         return findIndex(current_directory, location);
     }
@@ -229,7 +229,7 @@ bool Response::buildRessourcePath(std::string locRequest, Location const &locati
         file_testing = current_directory + "/" + _ressource_path;
         if(pathIsDir(file_testing))
         {
-            if (_ressource_path.back() != '/')
+            if (_ressource_path[_ressource_path.length() - 1] != '/')
                 _ressource_path += "/";
             _status = 301;
         }
@@ -258,11 +258,8 @@ bool Response::buildRessourcePath(std::string locRequest, Location const &locati
 
 bool Response::handleDots(std::string path)
 {
-    int double_dots = 0;
-    int depth = 0;
-    int point_pos = 0;
-    int i;
-    int slash_pos = path.find_first_of('/');
+    size_t point_pos = 0;
+    size_t slash_pos = path.find_first_of('/');
 
     while ((point_pos = path.find_first_of('.', point_pos)) != std::string::npos)
     {
@@ -285,7 +282,7 @@ bool Response::handleDots(std::string path)
 
 std::vector<std::string> Response::findAlternativeMatches(std::string current_path)
 {
-    int last_slash = current_path.find_last_of('/');
+    size_t last_slash = current_path.find_last_of('/');
     std::vector<std::string> options;
     if (last_slash != std::string::npos)
     {
@@ -314,7 +311,6 @@ bool Response::chooseAcceptableFile(std::vector<std::string> options)
 {
     MimesType mime_types;
     int fitness;
-    int best_fitness;
     float best_quality_type = -1;
     float best_fitness_one_type;
     float best_quality_lang = -1;
@@ -325,20 +321,20 @@ bool Response::chooseAcceptableFile(std::vector<std::string> options)
     std::string quality;
     std::string best_type;
     std::string best_lang;
-    std::vector<std::map<std::string, std::string>> type_map = buildTypeMap(options);
+    std::vector<std::map<std::string, std::string> > type_map = buildTypeMap(options);
     
     // std::vector<std::string> parsed_langs = split(_pt_request->getHeaders()["Accept-Language"], ",");
 
-    std::vector<std::map<std::string, std::string>> target_types = parseAcceptableMIMETypes();
-    std::vector<std::map<std::string, std::string>> target_langs = parseAcceptableLanguages();
+    std::vector<std::map<std::string, std::string> > target_types = parseAcceptableMIMETypes();
+    std::vector<std::map<std::string, std::string> > target_langs = parseAcceptableLanguages();
     
     best_match = "";
     
-    for (std::vector<std::map<std::string, std::string>>::iterator it = type_map.begin(); it != type_map.end(); ++it)
+    for (std::vector<std::map<std::string, std::string> >::iterator it = type_map.begin(); it != type_map.end(); ++it)
     {
         best_fitness_one_type = -1;
         best_quality_one_type = -1;
-        for (std::vector<std::map<std::string, std::string>>::iterator ite = target_types.begin(); ite != target_types.end(); ++ite)
+        for (std::vector<std::map<std::string, std::string> >::iterator ite = target_types.begin(); ite != target_types.end(); ++ite)
         {
             fitness = 0;
             if ((it->at("type") == ite->at("type") || ite->at("type") == "*") && (it->at("subtype") == ite->at("subtype") || ite->at("subtype") == "*"))
@@ -354,7 +350,7 @@ bool Response::chooseAcceptableFile(std::vector<std::string> options)
         }
         best_fitness_one_lang = -1;
         best_quality_one_lang = -1;
-        for (std::vector<std::map<std::string, std::string>>::iterator ite = target_langs.begin(); ite != target_langs.end(); ++ite)
+        for (std::vector<std::map<std::string, std::string> >::iterator ite = target_langs.begin(); ite != target_langs.end(); ++ite)
         {
             fitness = 0;
             if (it->at("lang") == ite->at("lang") || ite->at("lang") == "*")
@@ -400,10 +396,10 @@ bool Response::chooseAcceptableFile(std::vector<std::string> options)
 
 }
 
-std::vector<std::map<std::string, std::string>> Response::parseAcceptableMIMETypes()
+std::vector<std::map<std::string, std::string> > Response::parseAcceptableMIMETypes()
 {
     std::string quality;
-    std::vector<std::map<std::string, std::string>> target_types;
+    std::vector<std::map<std::string, std::string> > target_types;
     std::vector<std::string> parsed_types = split(_pt_request->getHeaders()["Accept"], ",");
 
     for (std::vector<std::string>::iterator it = parsed_types.begin(); it != parsed_types.end(); ++it)
@@ -436,10 +432,10 @@ std::vector<std::map<std::string, std::string>> Response::parseAcceptableMIMETyp
     return target_types;
 }
 
-std::vector<std::map<std::string, std::string>> Response::parseAcceptableLanguages()
+std::vector<std::map<std::string, std::string> > Response::parseAcceptableLanguages()
 {
     std::string quality;
-    std::vector<std::map<std::string, std::string>> target_langs;
+    std::vector<std::map<std::string, std::string> > target_langs;
     std::vector<std::string> parsed_langs = split(_pt_request->getHeaders()["Accept-Language"], ",");
 
     for (std::vector<std::string>::iterator it = parsed_langs.begin(); it != parsed_langs.end(); ++it)
@@ -470,9 +466,9 @@ std::vector<std::map<std::string, std::string>> Response::parseAcceptableLanguag
     return target_langs;
 }
 
-std::vector<std::map<std::string, std::string>> Response::buildTypeMap(std::vector<std::string> options)
+std::vector<std::map<std::string, std::string> > Response::buildTypeMap(std::vector<std::string> options)
 {
-    std::vector<std::map<std::string, std::string>> type_map;
+    std::vector<std::map<std::string, std::string> > type_map;
     LanguageCodes language_codes;
     MimesType mime_types;
     int point_pos;
@@ -516,7 +512,7 @@ bool Response::findIndex(std::string current_directory, Location const &location
     {
         file_testing = current_directory + "/" +_ressource_path + index.top();
 
-        std::ifstream ifs(file_testing);
+        std::ifstream ifs(file_testing.c_str());
         if(ifs.good())
         {
             _ressource_path += index.top();
@@ -738,7 +734,7 @@ void Response::readCGI()
     fclose(_CGIfOut);
 }
 
-unsigned int Response::readRessource(bool isErrorPage)
+unsigned int Response::readRessource()
 {
 
     
@@ -746,7 +742,7 @@ unsigned int Response::readRessource(bool isErrorPage)
     std::stringstream buff;
     int read = false;
     
-    std::ifstream ifs(_ressource_path);
+    std::ifstream ifs(_ressource_path.c_str());
     if(ifs.good() && pathIsFile(_ressource_path))
     {
         while (std::getline(ifs, str))
@@ -754,11 +750,12 @@ unsigned int Response::readRessource(bool isErrorPage)
             read = true;
             buff << str << std::endl;
         }
+        
 	    ifs.close();
         if (read)
         {
             _body = buff.str();
-            _body.pop_back();
+            _body = _body.substr(0, _body.length() - 1);
         }
     }
     else if(_status != 200)
@@ -876,7 +873,7 @@ void Response::findLocation(Server const & server, Request const & request)
             {
                 _location_block = *it;
                 if (request.getHttpMethod() == "DELETE")
-                    _ressource_path = _location_block->getRoot() + "/" + _ressource_path.substr(_location_block->getPath().length() + ((_ressource_path.substr(_location_block->getPath().length()).front() == '/') ? 1 : 0));
+                    _ressource_path = _location_block->getRoot() + "/" + _ressource_path.substr(_location_block->getPath().length() + ((_ressource_path.substr(_location_block->getPath().length())[0] == '/') ? 1 : 0));
                 else if (_location_block->getRedirectionCode() != 0)
                     return;
                 else if (buildRessourcePath(_ressource_path, **it))

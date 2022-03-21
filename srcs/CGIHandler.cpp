@@ -145,13 +145,12 @@ std::string		CGIHandler::executeCgi(unsigned int *status)
 	FILE	*fOut = tmpfile();
 	long	fdIn = fileno(fIn);
 	long	fdOut = fileno(fOut);
-	int		ret = 1;
 	int		exit_status = 0;
 	*status = 200;
 
 	if (_body.size() > 0)
 	{
-		if(write(fdIn, _body.c_str(), _body.size()) != _body.size())
+		if(write(fdIn, _body.c_str(), _body.size()) != static_cast<ssize_t>(_body.size()))
         {
             *status = 500;
             return ("");

@@ -83,7 +83,7 @@ bool Webserv::readConf(std::ifstream & buff)
 {
     std::string str;
 	
-    buff.open(_conf_path);
+    buff.open(_conf_path.c_str());
     if (buff.fail())
     {
         std::cout << "File does not exist" << std::endl;
@@ -186,7 +186,6 @@ bool        Webserv::run()
 {
     fd_set read_fds;
     fd_set write_fds;
-    fd_set except_fds;
     int highest_socket;
 
     for (iterator it = _servers.begin(); it != _servers.end(); ++it)
@@ -197,9 +196,9 @@ bool        Webserv::run()
     while (_running)
     {
         highest_socket = 0;
-        initFDSets(&read_fds, &write_fds, &except_fds);
+        initFDSets(&read_fds, &write_fds);
         for (iterator it = _servers.begin(); it != _servers.end(); ++it)
-            buildFDSets(**it, &read_fds, &write_fds, &except_fds, &highest_socket);        
+            buildFDSets(**it, &read_fds, &write_fds, &highest_socket);        
         int select_res = select(highest_socket + 1, &read_fds, &write_fds, NULL, NULL);
         if (select_res <= 0)
             return false;
@@ -216,7 +215,7 @@ bool        Webserv::run()
                     break;
                 }
                 std::vector<int> client_to_remove;
-                for (std::vector<Client*>::const_iterator client_it = (*server_it)->getBeginClients(); client_it != (*server_it)->getEndClients(); ++client_it)
+                for (std::vector<Client*>::iterator client_it = (*server_it)->getBeginClients(); client_it != (*server_it)->getEndClients(); ++client_it)
                 {
                     bool read_write = false;
                     if ((*client_it)->getResponseToBuildSize() > 0)
@@ -268,19 +267,18 @@ bool        Webserv::run()
 
 
 
-void Webserv::initFDSets(fd_set *read_fds, fd_set *write_fds, fd_set *except_fds)
+void Webserv::initFDSets(fd_set *read_fds, fd_set *write_fds)
 {
     FD_ZERO(read_fds);
     FD_ZERO(write_fds);
-    FD_ZERO(except_fds);
 }
 
-void Webserv::buildFDSets(Server const & server, fd_set *read_fds, fd_set *write_fds, fd_set *except_fds, int *highest_socket)
+void Webserv::buildFDSets(Server & server, fd_set *read_fds, fd_set *write_fds, int *highest_socket)
 {
     if (server.getSocket() > *highest_socket)
         *highest_socket = server.getSocket();
     FD_SET(server.getSocket(), read_fds);
-    for (std::vector<Client*>::const_iterator it = server.getBeginClients(); it != server.getEndClients(); ++it)
+    for (std::vector<Client*>::iterator it = server.getBeginClients(); it != server.getEndClients(); ++it)
     {
         
         for (std::vector<Response*>::iterator ite = (*it)->getBeginResponseToBuild(); ite != (*it)->getEndResponseToBuild(); ++ite)

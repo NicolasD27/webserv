@@ -107,21 +107,18 @@ bool Client::setup(Server * server)
 
 bool Client::receiveFromClient(std::vector<Server*> servers)
 {
-    int r = 0;
+    size_t r = 0;
     int content_length = 0;
-    int newline_pos = -1;
-    int prev_newline_pos;
-    int offset_newline = 1;
-    int current_chunk_size;
-    int current_last_nl;
-    int headers_length;
-    Request *request;
+    size_t newline_pos = std::string::npos;
+    size_t offset_newline = 1;
+    size_t current_last_nl;
+    size_t headers_length;
     std::string request_string;
     Response* response;
     
     if (!_headers_read)
     {
-        while ((newline_pos == -1 || newline_pos == std::string::npos) && (r = read(_socket, _receiving_buff + _current_receiving_byte, 1)) > 0 && _current_receiving_byte < MAX_SIZE_HEADER)
+        while ((newline_pos == std::string::npos) && (r = read(_socket, _receiving_buff + _current_receiving_byte, 1)) > 0 && _current_receiving_byte < MAX_SIZE_HEADER)
         {
             _current_receiving_byte += r;
             _receiving_buff[_current_receiving_byte] = 0;
@@ -154,8 +151,8 @@ bool Client::receiveFromClient(std::vector<Server*> servers)
     if (_awaiting_trailer)
     {
         current_last_nl = _current_receiving_byte - 4;
-        newline_pos = -1;
-        while ((newline_pos == -1 || newline_pos == std::string::npos) && (r = read(_socket, _receiving_buff + _current_receiving_byte, 1)) > 0 && _current_receiving_byte < MAX_SIZE - MAX_SIZE_HEADER - 4)
+        newline_pos = std::string::npos;
+        while (newline_pos == std::string::npos && (r = read(_socket, _receiving_buff + _current_receiving_byte, 1)) > 0 && _current_receiving_byte < MAX_SIZE - MAX_SIZE_HEADER - 4)
         {
             _current_receiving_byte += r;
             _receiving_buff[_current_receiving_byte] = 0;
@@ -163,7 +160,7 @@ bool Client::receiveFromClient(std::vector<Server*> servers)
         }
         if (r <= 0)
             return false;
-        if ((newline_pos == -1 || newline_pos == std::string::npos))
+        if (newline_pos == std::string::npos)
             _body_read = false;
         else
         {
@@ -178,7 +175,7 @@ bool Client::receiveFromClient(std::vector<Server*> servers)
     }
     else if (_request_in_progress->headerExist("Content-Length") && (content_length = StringToInt((*_request_in_progress)["Content-Length"])) > 0 && (max_body_size == -1 || content_length <= max_body_size) && content_length < MAX_SIZE - MAX_SIZE_HEADER - 4)
     {
-        while (_current_receiving_byte - headers_length < content_length && (r = read(_socket, _receiving_buff + _current_receiving_byte, content_length - _current_receiving_byte + headers_length)) > 0)
+        while (_current_receiving_byte - headers_length < static_cast<size_t>(content_length) && (r = read(_socket, _receiving_buff + _current_receiving_byte, content_length - _current_receiving_byte + headers_length)) > 0)
         {
             _current_receiving_byte += r;
             _receiving_buff[_current_receiving_byte] = 0;
@@ -211,7 +208,6 @@ bool Client::receiveFromClient(std::vector<Server*> servers)
         _current_receiving_byte = 0;
         _receiving_buff[0] = 0;
         _headers_read = false;
-        
         std::cout << *_request_in_progress << std::endl;
         response = new Response(*_request_in_progress, *server);
         if (response->isToSend())
@@ -336,7 +332,7 @@ bool Client::sendToClient()
     Response* response = _responses_to_send.front();
     std::string response_string = response->buildResponseString();
     std::cout << *response << std::endl;
-    int r = write(_socket, response_string.c_str() + _current_sending_byte, response_string.length() - _current_sending_byte);
+    size_t r = write(_socket, response_string.c_str() + _current_sending_byte, response_string.length() - _current_sending_byte);
     if  (r <= 0)
         return false;
     else if (r == response_string.length() - _current_sending_byte)

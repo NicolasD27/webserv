@@ -107,7 +107,7 @@ std::string urlDecode(std::string const & str)
 {
     std::string ret = "";
 
-    for (int i=0; i < str.length(); i++)
+    for (size_t i=0; i < str.length(); i++)
     {
         if(str[i] == '%')
         {

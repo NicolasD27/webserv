@@ -51,21 +51,21 @@ class Response
 {
 
 private:
-    std::map<std::string, std::string>  _headers;
+    Server    const                     *_pt_server;
+    Request const                       *_pt_request;
+    Location                            *_location_block;
+    CGIHandler                          *_cgiHandler;
+    std::string                         _body;
+    bool                                _to_send;
+    bool                                _cgiReady;
+    long                                _ressource_fd;
+    std::string                         _ressource_path;
     unsigned int                        _status;
+    std::map<std::string, std::string>  _headers;
     // std::string                         _status_string;
     std::string                         _response_string;
-    std::string                         _ressource_path;
-    long                                _ressource_fd;
     FILE                                *_CGIfOut;
-    std::string                         _body;
-    Request const                       *_pt_request;
-    Server    const                     *_pt_server;
-    bool                                _to_send;
-    Location                            *_location_block;
     std::string                         _cgi_path;
-    CGIHandler                          *_cgiHandler;
-    bool                                _cgiReady;
 
     bool                                                buildRessourcePath(std::string, Location const &);
     void                                                buildErrorResponse(Server const & server);
@@ -77,9 +77,9 @@ private:
     bool                                                findIndex(std::string current_directory, Location const &location);
     std::vector<std::string>                            findAlternativeMatches(std::string current_path);
     bool                                                chooseAcceptableFile(std::vector<std::string>);
-    std::vector<std::map<std::string, std::string>>     parseAcceptableMIMETypes();
-    std::vector<std::map<std::string, std::string>>     parseAcceptableLanguages();
-    std::vector<std::map<std::string, std::string>>     buildTypeMap(std::vector<std::string> options);
+    std::vector<std::map<std::string, std::string> >     parseAcceptableMIMETypes();
+    std::vector<std::map<std::string, std::string> >     parseAcceptableLanguages();
+    std::vector<std::map<std::string, std::string> >     buildTypeMap(std::vector<std::string> options);
     void                                                addDate();
     void                                                addLastModifiedDate();
     
@@ -91,7 +91,7 @@ public:
     Response &operator=(Response const &);
 
     std::string                         buildResponseString();
-    unsigned int                        readRessource(bool isErrorPage = false);
+    unsigned int                        readRessource();
     void                                readCGI();
     bool                                executeCgi();
     void                                CGIReady(long fd, FILE *CGIfOut);

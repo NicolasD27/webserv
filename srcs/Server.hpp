@@ -73,8 +73,8 @@ public:
     Client*                                             getClient(int index) const;
     std::vector<Location*>                              getLocations(void) const;
     std::vector<std::string>                            getMethods(void) const;
-    client_const_iterator                               getBeginClients() const;
-    client_const_iterator                               getEndClients() const;
+    client_iterator                                     getBeginClients();
+    client_iterator                                     getEndClients();
     bool                                                getAutoIndex() const;
     std::vector<std::string>::iterator                  getBeginServerNames(); 
     std::vector<std::string>::iterator                  getEndServerNames();
