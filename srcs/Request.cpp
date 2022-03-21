@@ -4,7 +4,7 @@
 const char *HEADERS_IN[] = {"Accept-Language", "Accept", "Keep-Alive", "Authorization", "Via", "Accept-Encoding", "Upgrade", "Expect", "TE", "If-Range", "Range", "Transfer-Encoding", "Content-Type", "Content-Range", "Content-Length", "Referer", "User-Agent", "If-None-Match", "If-Match", "If-Unmodified-Since", "If-Modified-Since", "Connection", "Host", NULL};
 
 
-Request::Request(std::string request_string) : _request_string(request_string), _body(""), _keep_alive_n(0), _location(""), _query_string(""), _format_error(false)
+Request::Request(std::string request_string) : _request_string(request_string), _location(""), _keep_alive_n(0), _query_string(""), _body(""), _format_error(false)
 {
 }
 

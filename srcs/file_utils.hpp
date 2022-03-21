@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/06 09:38:11 by clorin            #+#    #+#             */
-/*   Updated: 2022/02/27 17:07:55 by clorin           ###   ########.fr       */
+/*   Updated: 2022/03/21 16:18:39 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <chrono>
 #include <sys/param.h>
 
 typedef struct		s_file

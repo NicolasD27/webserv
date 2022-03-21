@@ -77,9 +77,9 @@ private:
     bool                                                findIndex(std::string current_directory, Location const &location);
     std::vector<std::string>                            findAlternativeMatches(std::string current_path);
     bool                                                chooseAcceptableFile(std::vector<std::string>);
-    std::vector<std::map<std::string, std::string>>     parseAcceptableMIMETypes();
-    std::vector<std::map<std::string, std::string>>     parseAcceptableLanguages();
-    std::vector<std::map<std::string, std::string>>     buildTypeMap(std::vector<std::string> options);
+    std::vector<std::map<std::string, std::string> >     parseAcceptableMIMETypes();
+    std::vector<std::map<std::string, std::string> >     parseAcceptableLanguages();
+    std::vector<std::map<std::string, std::string> >     buildTypeMap(std::vector<std::string> options);
     void                                                addDate();
     void                                                addLastModifiedDate();
     

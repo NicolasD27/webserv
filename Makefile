@@ -6,7 +6,7 @@
 #    By: clorin <clorin@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2021/12/17 16:20:01 by clorin            #+#    #+#              #
-#    Updated: 2022/01/20 14:51:47 by clorin           ###   ########.fr        #
+#    Updated: 2022/03/21 16:16:12 by clorin           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -30,7 +30,7 @@ OBJS	:= ${addprefix ${OBJS_DIR}, ${OBJS}}
 
 ${OBJS_DIR}%.o: ${SRCS_DIR}%.cpp
 		mkdir -p ${@D}
-		$(CC) $(FLAGS) -c $< -o $@
+		$(CC) $(CFLAGS) -c $< -o $@
 
 all:	${NAME}
 

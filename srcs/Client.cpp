@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 16:33:58 by clorin            #+#    #+#             */
-/*   Updated: 2022/02/11 15:33:11 by clorin           ###   ########.fr       */
+/*   Updated: 2022/03/21 17:02:22 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,18 +110,15 @@ bool Client::receiveFromClient(std::vector<Server*> servers)
     int r = 0;
     int content_length = 0;
     int newline_pos = -1;
-    int prev_newline_pos;
     int offset_newline = 1;
-    int current_chunk_size;
     int current_last_nl;
     int headers_length;
-    Request *request;
     std::string request_string;
     Response* response;
-    
+
     if (!_headers_read)
     {
-        while ((newline_pos == -1 || newline_pos == std::string::npos) && (r = read(_socket, _receiving_buff + _current_receiving_byte, 1)) > 0 && _current_receiving_byte < MAX_SIZE_HEADER)
+        while ((newline_pos == -1 || newline_pos == static_cast<int>(std::string::npos)) && (r = read(_socket, _receiving_buff + _current_receiving_byte, 1)) > 0 && _current_receiving_byte < MAX_SIZE_HEADER)
         {
             _current_receiving_byte += r;
             _receiving_buff[_current_receiving_byte] = 0;
@@ -155,7 +152,7 @@ bool Client::receiveFromClient(std::vector<Server*> servers)
     {
         current_last_nl = _current_receiving_byte - 4;
         newline_pos = -1;
-        while ((newline_pos == -1 || newline_pos == std::string::npos) && (r = read(_socket, _receiving_buff + _current_receiving_byte, 1)) > 0 && _current_receiving_byte < MAX_SIZE - MAX_SIZE_HEADER - 4)
+        while ((newline_pos == -1 || newline_pos == static_cast<int>(std::string::npos)) && (r = read(_socket, _receiving_buff + _current_receiving_byte, 1)) > 0 && _current_receiving_byte < MAX_SIZE - MAX_SIZE_HEADER - 4)
         {
             _current_receiving_byte += r;
             _receiving_buff[_current_receiving_byte] = 0;
@@ -163,7 +160,7 @@ bool Client::receiveFromClient(std::vector<Server*> servers)
         }
         if (r <= 0)
             return false;
-        if ((newline_pos == -1 || newline_pos == std::string::npos))
+        if ((newline_pos == -1 || newline_pos == static_cast<int>(std::string::npos)))
             _body_read = false;
         else
         {
@@ -339,7 +336,7 @@ bool Client::sendToClient()
     int r = write(_socket, response_string.c_str() + _current_sending_byte, response_string.length() - _current_sending_byte);
     if  (r <= 0)
         return false;
-    else if (r == response_string.length() - _current_sending_byte)
+    else if (r == static_cast<int>(response_string.length()) - _current_sending_byte)
     {
         std::cout << "response send" << std::endl;
         _current_sending_byte = 0;
