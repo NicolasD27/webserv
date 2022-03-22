@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 16:33:58 by clorin            #+#    #+#             */
-/*   Updated: 2022/02/11 15:33:11 by clorin           ###   ########.fr       */
+/*   Updated: 2022/03/22 17:11:09 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -332,10 +332,10 @@ bool Client::sendToClient()
     Response* response = _responses_to_send.front();
     std::string response_string = response->buildResponseString();
     std::cout << *response << std::endl;
-    size_t r = write(_socket, response_string.c_str() + _current_sending_byte, response_string.length() - _current_sending_byte);
+    int r = write(_socket, response_string.c_str() + _current_sending_byte, response_string.length() - _current_sending_byte);
     if  (r <= 0)
         return false;
-    else if (r == response_string.length() - _current_sending_byte)
+    else if (r == static_cast<int>(response_string.length()) - _current_sending_byte)
     {
         std::cout << "response send" << std::endl;
         _current_sending_byte = 0;
