@@ -128,9 +128,9 @@ bool Client::receiveFromClient(std::vector<Server*> servers)
             return false;
         if (_current_receiving_byte >= MAX_SIZE_HEADER)
         {
-            while ((r = read(_socket, _receiving_buff , MAX_SIZE)) > 0);
-            if (r <= 0)
-                return false;
+            // while ((r = read(_socket, _receiving_buff , MAX_SIZE)) > 0);
+            // if (r <= 0)
+            //     return false;
             buildErrorResponse(414, servers.front());
             return true;
         }
@@ -189,9 +189,9 @@ bool Client::receiveFromClient(std::vector<Server*> servers)
     if (max_body_size != -1 && content_length > max_body_size)
     {
         std::cout << *_request_in_progress << std::endl;
-        while ((r = read(_socket, _receiving_buff , MAX_SIZE)) > 0);
-        if (r <= 0)
-            return false;
+        // while ((r = read(_socket, _receiving_buff , MAX_SIZE)) > 0);
+        // if (r <= 0)
+        //     return false;
         buildErrorResponse(413, server);
         delete _request_in_progress;
     }
