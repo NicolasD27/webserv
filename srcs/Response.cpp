@@ -181,7 +181,7 @@ void Response::buildErrorResponse(Server const & server)
                     _headers.insert(std::make_pair("Content-type", "text/html"));
                     _to_send = false;
                     _ressource_fd = open(_ressource_path.c_str(), 0);
-                    if (_ressource_fd != -1)
+                    if (_ressource_fd == -1)
                     {
                         _to_send = true;
                         _body = ERROR_PAGES[_status];
@@ -745,6 +745,7 @@ unsigned int Response::readRessource()
     std::ifstream ifs(_ressource_path.c_str());
     if(ifs.good() && pathIsFile(_ressource_path))
     {
+        
         while (std::getline(ifs, str))
         {
             read = true;

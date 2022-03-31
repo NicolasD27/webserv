@@ -6,7 +6,7 @@
 /*   By: clorin <clorin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/17 16:33:58 by clorin            #+#    #+#             */
-/*   Updated: 2022/03/22 17:11:09 by clorin           ###   ########.fr       */
+/*   Updated: 2022/03/27 17:53:00 by clorin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,7 +107,7 @@ bool Client::setup(Server * server)
 
 bool Client::receiveFromClient(std::vector<Server*> servers)
 {
-    size_t r = 0;
+    int r = 0;
     int content_length = 0;
     size_t newline_pos = std::string::npos;
     size_t offset_newline = 1;
@@ -128,9 +128,9 @@ bool Client::receiveFromClient(std::vector<Server*> servers)
             return false;
         if (_current_receiving_byte >= MAX_SIZE_HEADER)
         {
-            while ((r = read(_socket, _receiving_buff , MAX_SIZE)) > 0);
-            if (r <= 0)
-                return false;
+            // while ((r = read(_socket, _receiving_buff , MAX_SIZE)) > 0);
+            // if (r <= 0)
+            //     return false;
             buildErrorResponse(414, servers.front());
             return true;
         }
@@ -189,9 +189,9 @@ bool Client::receiveFromClient(std::vector<Server*> servers)
     if (max_body_size != -1 && content_length > max_body_size)
     {
         std::cout << *_request_in_progress << std::endl;
-        while ((r = read(_socket, _receiving_buff , MAX_SIZE)) > 0);
-        if (r <= 0)
-            return false;
+        // while ((r = read(_socket, _receiving_buff , MAX_SIZE)) > 0);
+        // if (r <= 0)
+        //     return false;
         buildErrorResponse(413, server);
         delete _request_in_progress;
     }
